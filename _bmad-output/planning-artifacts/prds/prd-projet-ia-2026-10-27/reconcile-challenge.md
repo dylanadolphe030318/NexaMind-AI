@@ -1,0 +1,15 @@
+﻿# Réconciliation du PRD avec le challenge
+
+## Bilan
+
+Le PRD couvre solidement le cœur fonctionnel demandé : compte et connexion, tableau de bord, gestion des ressources, recherche textuelle et sémantique, chat RAG avec sources et abstention, historique, contrôle d’accès et démonstration du Vibe Coding. Il ne déforme pas ces besoins centraux. Les principales décisions à confirmer ou compléter sont les suivantes :
+
+1. **RAG réel et base vectorielle — preuve insuffisamment spécifiée.** FR-5 décrit préparation, découpage et création/actualisation de vecteurs, et FR-7 décrit les réponses sourcées. Cependant, le PRD ne rend pas vérifiables le stockage dans une vraie base vectorielle, la génération d’embeddings, la récupération effective des passages et leur injection comme contexte. Ajouter des critères ou renvoyer explicitement à une architecture/démonstration qui prouve ce pipeline de bout en bout, plutôt qu’une recherche simulée.
+2. **Stack fullstack et adéquation technique — hors périmètre explicite.** Le §0 précise que le PRD ne définit ni architecture ni code. Il ne choisit donc pas de stack frontend/backend, de stockage, d’authentification, de fournisseur IA ou de base vectorielle, et n’évalue pas leur adéquation. Ce n’est pas une contradiction du PRD, mais le challenge demande cette évaluation : la fournir dans l’artefact technique ou le dossier de démonstration associé.
+3. **Espace personnel vs espace partagé — hypothèse à valider.** Le §5.1 réduit le MVP à un espace de démonstration partagé et le §7 exclut le multi-organisation complet; l’historique, lui, est privé par utilisateur. Ces choix sont correctement étiquetés comme hypothèses, pas comme exigences du challenge. Confirmer que cela satisfait la gestion personnelle/de workspace demandée, ou préciser l’isolation et la portée des ressources personnelles.
+4. **UX moderne et fluide — couverture trop générale pour être évaluée.** Le §6 mentionne mobile, clavier et libellés, et les critères traitent quelques états vides/erreurs. Aucun critère ne mesure toutefois la fluidité ou la qualité des parcours. Ajouter des critères UX observables (parcours principaux, feedback, navigation, responsive) et une évaluation utilisateur adaptée au MVP.
+5. **Étendue IA et Vibe Coding — choix à expliciter.** Q&A/RAG est prioritaire et seul le résumé est retenu comme fonction secondaire; réécriture, suggestions, rédaction et extraction ne sont pas incluses. Le challenge les présente comme exemples de capacités utiles, non comme une liste nécessairement exhaustive : confirmer qu’un Q&A plus résumé suffit. Le Vibe Coding est mentionné comme observable, mais les mesures portent surtout sur le produit; préciser les preuves attendues du workflow (itérations, tests, corrections) si ce point est évalué.
+
+## Conclusion
+
+Aucune omission majeure du parcours MVP central n’apparaît. Les écarts relèvent surtout de preuves techniques et de critères d’évaluation à compléter, ainsi que d’hypothèses de périmètre à confirmer; ne pas transformer ces hypothèses en exigences sans validation.
