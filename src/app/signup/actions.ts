@@ -2,7 +2,10 @@
 
 import { isAuthRetryableFetchError } from "@supabase/supabase-js";
 
-import { createClient } from "@/lib/supabase/server";
+import {
+  createClient,
+  SupabaseConfigurationError,
+} from "@/lib/supabase/server";
 import type { SignUpState } from "./form-state";
 
 const genericError =
@@ -46,9 +49,8 @@ export async function signUp(
     };
   }
 
-  const supabase = await createClient();
-
   try {
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
@@ -77,6 +79,18 @@ export async function signUp(
         status: "error",
         message:
           "Le service d’inscription est temporairement indisponible. Réessayez dans quelques instants.",
+      };
+    }
+
+    if (error instanceof SupabaseConfigurationError) {
+      console.error(
+        "Configuration Supabase manquante pour l’inscription.",
+        error,
+      );
+      return {
+        status: "error",
+        message:
+          "Le service d’inscription n’est pas configuré. Contactez l’assistance.",
       };
     }
 
