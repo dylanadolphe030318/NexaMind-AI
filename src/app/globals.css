@@ -507,6 +507,20 @@ a:focus-visible {
   line-height: 1.65;
 }
 
+.member-identity {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.member-identity strong {
+  color: var(--ink);
+}
+
 .auth-form {
   display: grid;
   gap: 20px;

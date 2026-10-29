@@ -44,6 +44,21 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 4. Dans **Authentication → Providers**, vérifiez que le fournisseur **Email** est activé.
 5. Redémarrez le serveur local après toute modification de `.env.local`.
 
+### Vérifier les politiques RLS avec des sessions réelles
+
+Créez deux comptes membre de test distincts dans Supabase et ajoutez leurs identifiants à `.env.local` (ne les commitez pas) :
+
+```env
+RLS_TEST_MEMBER_A_EMAIL=<e-mail-du-membre-a>
+RLS_TEST_MEMBER_A_PASSWORD=<mot-de-passe-du-membre-a>
+RLS_TEST_MEMBER_B_EMAIL=<e-mail-du-membre-b>
+RLS_TEST_MEMBER_B_PASSWORD=<mot-de-passe-du-membre-b>
+```
+
+Si la confirmation d'adresse e-mail est activée dans Supabase, confirmez les deux comptes avant de lancer les tests.
+
+Puis lancez `npm run test:integration`. Ces tests se connectent avec la clé publishable et les sessions de ces deux comptes ; ils vérifient qu'un visiteur ne lit aucune table protégée, qu'un membre lit son propre profil et son espace, et qu'il ne lit pas le profil d'un autre membre. Aucune clé `service_role` n'est utilisée.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
