@@ -22,3 +22,10 @@ En tant que visiteur, je veux voir une page d'accueil claire afin de comprendre 
 ## Limites de la story
 
 Cette story couvre la page publique et ses liens d'accès. La création de compte, la connexion et le tableau de bord sont traités dans les stories suivantes.
+
+## Review Triage Log
+
+| Finding | Verdict | Evidence and route |
+|---|---|---|
+| Vérification du responsive limitée aux tests automatisés | false | Le navigateur a été vérifié sur la page en direct à 375 px et 1280 px ; `scrollWidth` ne dépasse pas `innerWidth` aux deux tailles. La story exige le comportement, pas un test automatisé dédié. |
+| Les liens d'inscription et de connexion aboutissent à des routes absentes | medium | `src/app/page.tsx` pointe vers `/signup` et `/login`, mais aucun fichier de route correspondant n'existe dans `src/app`. Les parcours d'inscription et de connexion sont réservés aux stories suivantes ; différé hors de cette story. |
