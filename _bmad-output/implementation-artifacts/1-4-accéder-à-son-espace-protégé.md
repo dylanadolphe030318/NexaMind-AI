@@ -3,7 +3,7 @@ story: 1-4-accéder-à-son-espace-protégé
 title: Accéder à son espace protégé
 epic: 1
 sprint: 1
-status: in-review
+status: done
 baseline_commit: 60548053e1134213152766db9c6edfd125284b26
 ---
 
@@ -50,3 +50,9 @@ Cette première version couvre l'accueil protégé et l'identité du membre. Les
 | Aucun test automatisé ne vérifie la déconnexion depuis le tableau de bord. | low | rejeté | carried : la vérification avec une session réelle nécessite les comptes de test absents ; la nouvelle action affiche une erreur si Supabase refuse la déconnexion. |
 | L'action redirige vers la connexion même si `auth.signOut()` renvoie une erreur. | medium | patch | L'action redirige maintenant vers le tableau de bord avec un message de reprise au lieu de laisser croire que la session est fermée. |
 | La section de déploiement README ne décrit pas le choix Vercel. | false | rejeté | Le déploiement n'est pas dans la portée de la story 1.4 ; les instructions générales du README ne modifient pas l'accès protégé. |
+| Une erreur de déconnexion peut être masquée si Supabase efface la session avant de retourner l'erreur. | medium | patch | `auth.signOut()` peut retirer la session sur une erreur distante ; le message est désormais présenté sur la page de connexion plutôt que sur le tableau de bord protégé. |
+| Le test d'isolation n'imposait pas que les deux comptes d'essai aient le rôle membre ni ne vérifiait les deux sens. | medium | patch | Le test confirme le rôle `membre` pour A et B et vérifie que chacun ne peut pas lire le profil de l'autre. |
+| La lecture de `searchParams` sur la page de connexion bloque le pré-rendu statique Next.js. | medium | patch | `npm run build` reproduisait le blocage de route ; `instant = false` autorise le rendu dynamique requis pour le message de déconnexion. |
+| Le tableau de bord ne reprend pas la navigation persistante décrite dans le contexte de l’Epic 1. | false | rejeté | Le contexte de l’Epic n’est pas listé dans le frontmatter de cette story ; l’implémentation suit uniquement ses critères et le lien de marque ainsi que la déconnexion sont présents. |
+| Le test anonyme pourrait réussir sans exposer de ligne si les tables étaient vides. | false | rejeté | Les tests exigent deux sessions dont les profils existent et lisent l’espace initial créé par migration ; une réponse vide due à l’absence de données ferait échouer les assertions de membre. |
+| Le garde contre les clés Supabase privilégiées n’a pas de test unitaire isolé. | false | rejeté | Le test d’intégration refuse une clé `sb_secret_` ou un JWT `service_role` avant la création du client ; il n’utilise donc pas de clé privilégiée pour contourner RLS. |

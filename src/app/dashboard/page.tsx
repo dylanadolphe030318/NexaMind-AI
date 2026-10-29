@@ -12,12 +12,7 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ signOutError?: string }>;
-}) {
-  const { signOutError } = await searchParams;
+export default async function DashboardPage() {
   const supabase = await createClient();
   const {
     data: { user },
@@ -54,12 +49,6 @@ export default async function DashboardPage({
         <p className="member-identity">
           Connecté en tant que <strong>{user.email ?? "Membre"}</strong>
         </p>
-
-        {signOutError === "1" ? (
-          <p aria-live="polite" className="form-message form-message-error">
-            La déconnexion a échoué. Veuillez réessayer.
-          </p>
-        ) : null}
 
         <form action={signOut} className="auth-form">
           <button className="button auth-submit" type="submit">

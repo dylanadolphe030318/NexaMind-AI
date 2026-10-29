@@ -117,13 +117,14 @@ test(
       await t.test("un membre lit son profil et son espace", async () => {
         const { data: ownProfile, error: ownProfileError } = await memberA
           .from("profiles")
-          .select("id, workspace_id")
+          .select("id, workspace_id, role")
           .eq("id", sessionA.user.id)
           .maybeSingle();
 
         assert.ifError(ownProfileError);
         assert.ok(ownProfile, "le profil du membre doit exister");
         assert.equal(ownProfile?.id, sessionA.user.id);
+        assert.equal(ownProfile?.role, "membre");
 
         const { data: ownWorkspace, error: workspaceError } = await memberA
           .from("workspaces")
@@ -139,12 +140,13 @@ test(
         const { data: memberBProfile, error: memberBProfileError } =
           await memberB
             .from("profiles")
-            .select("id")
+            .select("id, role")
             .eq("id", sessionB.user.id)
             .maybeSingle();
 
         assert.ifError(memberBProfileError);
         assert.equal(memberBProfile?.id, sessionB.user.id);
+        assert.equal(memberBProfile?.role, "membre");
 
         const { data: otherProfile, error } = await memberA
           .from("profiles")
@@ -154,6 +156,26 @@ test(
 
         assert.ifError(error);
         assert.equal(otherProfile, null);
+
+        const { data: memberAProfile, error: memberAProfileError } =
+          await memberA
+            .from("profiles")
+            .select("id")
+            .eq("id", sessionA.user.id)
+            .maybeSingle();
+
+        assert.ifError(memberAProfileError);
+        assert.equal(memberAProfile?.id, sessionA.user.id);
+
+        const { data: otherProfileFromB, error: otherProfileFromBError } =
+          await memberB
+            .from("profiles")
+            .select("id")
+            .eq("id", sessionA.user.id)
+            .maybeSingle();
+
+        assert.ifError(otherProfileFromBError);
+        assert.equal(otherProfileFromB, null);
       });
     } finally {
       await Promise.all([

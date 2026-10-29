@@ -8,7 +8,15 @@ export const metadata: Metadata = {
   description: "Se connecter à son compte membre NexaMind AI.",
 };
 
-export default function LoginPage() {
+export const instant = false;
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ signOutError?: string }>;
+}) {
+  const { signOutError } = await searchParams;
+
   return (
     <main className="auth-page">
       <section aria-labelledby="login-title" className="auth-card">
@@ -33,6 +41,13 @@ export default function LoginPage() {
         <p className="auth-intro">
           Retrouvez votre espace de travail NexaMind AI.
         </p>
+
+        {signOutError === "1" ? (
+          <p aria-live="polite" className="form-message form-message-error">
+            Une erreur est survenue pendant la déconnexion. Vérifiez votre
+            session avant de continuer.
+          </p>
+        ) : null}
 
         <LoginForm />
 
