@@ -3,7 +3,7 @@ story: 1-4-accéder-à-son-espace-protégé
 title: Accéder à son espace protégé
 epic: 1
 sprint: 1
-status: done
+status: in-review
 baseline_commit: 60548053e1134213152766db9c6edfd125284b26
 ---
 
@@ -56,3 +56,8 @@ Cette première version couvre l'accueil protégé et l'identité du membre. Les
 | Le tableau de bord ne reprend pas la navigation persistante décrite dans le contexte de l’Epic 1. | false | rejeté | Le contexte de l’Epic n’est pas listé dans le frontmatter de cette story ; l’implémentation suit uniquement ses critères et le lien de marque ainsi que la déconnexion sont présents. |
 | Le test anonyme pourrait réussir sans exposer de ligne si les tables étaient vides. | false | rejeté | Les tests exigent deux sessions dont les profils existent et lisent l’espace initial créé par migration ; une réponse vide due à l’absence de données ferait échouer les assertions de membre. |
 | Le garde contre les clés Supabase privilégiées n’a pas de test unitaire isolé. | false | rejeté | Le test d’intégration refuse une clé `sb_secret_` ou un JWT `service_role` avant la création du client ; il n’utilise donc pas de clé privilégiée pour contourner RLS. |
+| Le README ne précise pas les prérequis de profils et d’espace pour les deux comptes d’essai. | false | rejeté | La migration crée l’espace par défaut et le déclencheur crée le profil lors de l’inscription Auth ; le README précise de confirmer les comptes si nécessaire. |
+| Le test ne vérifie pas l’accès de B à son espace ni le refus d’un espace appartenant à un autre membre. | false | rejeté | Cette version utilise un espace unique partagé ; le test vérifie l’accès autorisé à cet espace et l’isolation des profils dans les deux sens. |
+| Aucun test automatisé ne vérifie la redirection anonyme de `/dashboard`. | low | rejeté | carried : le contrôle manuel déjà consigné confirme le statut `307` vers `/login` sans cookie ; l’ajout d’un harnais de test route nécessite davantage qu’une correction triviale. |
+| Aucun test automatisé n’affirme l’identité rendue par le tableau de bord. | low | rejeté | carried : le composant rend l’e-mail retourné par `auth.getUser()` ; aucun harnais de test composant n’est configuré. |
+| Aucun test automatisé ne vérifie la déconnexion depuis le tableau de bord. | low | rejeté | carried : la vérification avec une session réelle nécessite les comptes de test absents ; la nouvelle action affiche une erreur si Supabase refuse la déconnexion. |
