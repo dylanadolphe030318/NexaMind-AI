@@ -1,0 +1,78 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when its first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates the next story after the previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; the status view surfaces open ones
+generated: 10-29-2026 12:17
+last_updated: 10-29-2026 12:48
+project: projet-IA
+project_key: NOKEY
+tracking_system: file-system
+story_location: _bmad-output\implementation-artifacts
+development_status:
+  epic-1: in-progress
+  1-1-voir-la-page-d-accueil-de-nexamind: review
+  1-2-créer-un-compte-membre: ready-for-dev
+  1-3-se-connecter-et-se-déconnecter: ready-for-dev
+  1-4-accéder-à-son-espace-protégé: ready-for-dev
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-gérer-les-catégories: backlog
+  2-2-parcourir-et-ouvrir-une-ressource: backlog
+  2-3-ajouter-une-ressource-textuelle: backlog
+  2-4-modifier-une-ressource-autorisée: backlog
+  2-5-filtrer-les-ressources-par-catégorie: backlog
+  2-6-supprimer-une-ressource-autorisée: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-rechercher-des-ressources-par-mots-clés: backlog
+  3-2-retrouver-ses-recherches-récentes: backlog
+  3-3-relancer-une-recherche-enregistrée: backlog
+  3-4-supprimer-une-recherche-de-son-historique: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-découper-une-ressource-en-passages: backlog
+  4-2-créer-et-enregistrer-les-embeddings: backlog
+  4-3-suivre-l-état-de-préparation-d-une-ressource: backlog
+  4-4-retrouver-les-passages-pertinents-par-le-sens: backlog
+  4-5-afficher-les-extraits-des-passages-retrouvés: backlog
+  4-6-limiter-la-recherche-aux-ressources-accessibles: backlog
+  4-7-générer-une-réponse-à-partir-des-passages-retrouvés: backlog
+  4-8-afficher-les-sources-de-la-réponse: backlog
+  4-9-signaler-l-absence-de-réponse-et-les-erreurs: backlog
+  4-10-consulter-la-liste-de-ses-conversations: backlog
+  4-11-rouvrir-une-conversation: backlog
+  4-12-continuer-une-conversation-précédente: backlog
+  4-13-supprimer-une-conversation-de-son-historique: backlog
+  4-14-relier-les-affirmations-aux-sources: backlog
+  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
+  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
+  epic-4-retrospective: optional
