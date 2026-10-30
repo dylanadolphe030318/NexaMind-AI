@@ -23,6 +23,25 @@ revoke all on function private.is_workspace_responsable(uuid)
 grant execute on function private.is_workspace_responsable(uuid)
   to authenticated;
 
+-- Remplace une ancienne table créée à la main, uniquement si elle est vide
+-- et ne suit pas la structure du projet (pas de colonne workspace_id).
+do $$
+begin
+  if to_regclass('public.categories') is not null
+     and not exists (
+       select 1 from information_schema.columns
+       where table_schema = 'public'
+         and table_name = 'categories'
+         and column_name = 'workspace_id'
+     ) then
+    if exists (select 1 from public.categories limit 1) then
+      raise exception 'public.categories contient des lignes et une structure inattendue : migration arrêtée.';
+    end if;
+    drop table public.categories;
+  end if;
+end
+$$;
+
 create table if not exists public.categories (
   id uuid primary key default gen_random_uuid(),
   workspace_id uuid not null references public.workspaces (id) on delete restrict,
