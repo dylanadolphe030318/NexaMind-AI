@@ -26,6 +26,12 @@ export default async function ResourcesPage() {
           Les ressources partag&eacute;es par l&apos;&eacute;quipe.
         </p>
 
+        <p>
+          <Link className="button button-small" href="/resources/new">
+            Ajouter une ressource
+          </Link>
+        </p>
+
         <section aria-label="Liste des ressources" className="category-list-section">
           {data.resources === null ? (
             <p className="auth-message auth-message-error" role="alert">
@@ -52,7 +58,10 @@ export default async function ResourcesPage() {
             <div className="category-empty" role="status">
               <p>Aucune ressource n&apos;est disponible pour le moment.</p>
               <p>
-                L&apos;ajout de ressources est r&eacute;serv&eacute; aux personnes autoris&eacute;es.
+                <Link className="resource-link" href="/resources/new">
+                  Ajoutez la premi&egrave;re ressource
+                </Link>{" "}
+                en saisissant son titre et son texte.
               </p>
             </div>
           )}

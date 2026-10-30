@@ -549,10 +549,44 @@ a:focus-visible {
   font: inherit;
 }
 
-.auth-field input:focus-visible {
+.auth-field textarea,
+.auth-field select {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid #d8d1df;
+  border-radius: 9px;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+}
+
+.auth-field textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.auth-field select {
+  min-height: 48px;
+  padding-block: 0;
+}
+
+.auth-field input:focus-visible,
+.auth-field textarea:focus-visible,
+.auth-field select:focus-visible {
   outline: 3px solid rgb(101 58 145 / 35%);
   outline-offset: 2px;
   border-color: var(--purple);
+}
+
+.auth-field [aria-invalid="true"] {
+  border-color: #782546;
+}
+
+.field-error {
+  margin: 0;
+  color: #782546;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .auth-hint {

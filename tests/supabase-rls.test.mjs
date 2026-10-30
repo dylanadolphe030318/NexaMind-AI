@@ -274,14 +274,10 @@ test(
         assert.ifError(readError);
         assert.ok(Array.isArray(readable), "la liste peut etre vide mais doit etre lisible");
 
-        const { data: category } = await memberA
-          .from("categories")
-          .select("id")
-          .limit(1)
-          .maybeSingle();
+        // Sans catégorie du workspace, l'insertion est refusée par la RLS.
         const { error: insertError } = await memberA.from("resources").insert({
           workspace_id: memberProfile.workspace_id,
-          category_id: category?.id ?? randomUUID(),
+          category_id: randomUUID(),
           owner_id: sessionA.user.id,
           title: "RLS-interdit-" + randomUUID(),
           body: "interdit",
@@ -301,6 +297,60 @@ test(
           .eq("workspace_id", memberProfile.workspace_id)
           .select("id");
         assert.ok(deleteError || (deleted?.length ?? 0) === 0);
+      });
+
+      await t.test("resources : un membre cree une ressource a son nom, pas au nom d'un autre", async () => {
+        const { data: profileA, error: profileAError } = await memberA
+          .from("profiles")
+          .select("workspace_id")
+          .eq("id", sessionA.user.id)
+          .maybeSingle();
+        assert.ifError(profileAError);
+        assert.ok(profileA, "le profil du membre doit exister");
+
+        const { data: category, error: categoryError } = await memberA
+          .from("categories")
+          .select("id")
+          .eq("workspace_id", profileA.workspace_id)
+          .limit(1)
+          .maybeSingle();
+        assert.ifError(categoryError);
+        assert.ok(category, "une categorie du workspace doit exister (creee par le responsable)");
+
+        // Les membres ne peuvent pas supprimer : le titre porte un marqueur de test.
+        const marker = "RLS-TEST-2.3-" + randomUUID();
+        const { data: created, error: createError } = await memberA
+          .from("resources")
+          .insert({
+            workspace_id: profileA.workspace_id,
+            category_id: category.id,
+            owner_id: sessionA.user.id,
+            title: marker,
+            body: "ressource de test RLS",
+          })
+          .select("id, owner_id, title")
+          .single();
+        assert.ifError(createError);
+        assert.equal(created.owner_id, sessionA.user.id);
+        assert.equal(created.title, marker);
+
+        const { error: otherOwnerError } = await memberA.from("resources").insert({
+          workspace_id: profileA.workspace_id,
+          category_id: category.id,
+          owner_id: sessionB.user.id,
+          title: "RLS-TEST-2.3-autre-" + randomUUID(),
+          body: "interdit",
+        });
+        assert.equal(otherOwnerError?.code, "42501");
+
+        const { error: otherWorkspaceError } = await memberA.from("resources").insert({
+          workspace_id: randomUUID(),
+          category_id: category.id,
+          owner_id: sessionA.user.id,
+          title: "RLS-TEST-2.3-workspace-" + randomUUID(),
+          body: "interdit",
+        });
+        assert.equal(otherWorkspaceError?.code, "42501");
       });
 
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {

@@ -3,7 +3,8 @@ story: 2-3-ajouter-une-ressource-textuelle
 title: Ajouter une ressource textuelle
 epic: 2
 sprint: 2
-status: ready-for-dev
+status: in-progress
+baseline_commit: c5aac5f04c9d3f2965e4f85e3b47a4d0d56cdf76
 ---
 
 # Story 2.3 : Ajouter une ressource textuelle
