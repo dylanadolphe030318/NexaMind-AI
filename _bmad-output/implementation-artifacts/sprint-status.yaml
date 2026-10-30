@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 10-29-2026 20:31
+last_updated: 10-30-2026 13:14
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -40,7 +40,7 @@ development_status:
   1-2-créer-un-compte-membre: done
   1-3-se-connecter-et-se-déconnecter: done
   1-4-accéder-à-son-espace-protégé: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-gérer-les-catégories: backlog
@@ -76,3 +76,25 @@ development_status:
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
   epic-4-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-pr-parer-un-compte-membre-et-un-compte-r"
+    epic: 1
+    action: "Pr?parer un compte membre et un compte responsable de test avant le sprint
+      2, ?tapes dans le README, sans mot de passe en capture"
+    owner: "Dylan + d?veloppeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
+  - id: "epic-1-retro-item-2-cr-er-le-responsable-initial-promotion-m"
+    epic: 1
+    action: "Cr?er le responsable initial (promotion manuelle via SQL Editor Supabase)
+      avant la story 2.1"
+    owner: "Dylan"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
+  - id: "epic-1-retro-item-3-un-commit-par-story-avec-son-num-ro-stat"
+    epic: 1
+    action: "Un commit par story avec son num?ro, statut done apr?s tests, puis git
+      push autoris? par Dylan en fin de sprint"
+    owner: "d?veloppeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
