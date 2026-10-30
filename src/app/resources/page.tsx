@@ -47,10 +47,15 @@ export default async function ResourcesPage() {
                       {resource.title}
                     </Link>
                   </p>
-                  <p className="resource-meta">
-                    Cat&eacute;gorie : {resource.categoryName ?? "Non class\u00e9e"} &middot; Mise &agrave; jour le{" "}
-                    {formatResourceDate(resource.updatedAt)}
-                  </p>
+                  <div className="resource-meta-row">
+                    <span className="resource-badge">
+                      <span className="resource-badge-label">Cat&eacute;gorie</span>{" "}
+                      {resource.categoryName ?? "Non class\u00e9e"}
+                    </span>
+                    <span className="resource-meta">
+                      Mise &agrave; jour le {formatResourceDate(resource.updatedAt)}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>

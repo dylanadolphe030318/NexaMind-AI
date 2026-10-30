@@ -704,6 +704,28 @@ a:focus-visible {
   font-size: 0.92rem;
 }
 
+.resource-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.resource-badge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: #f3edf8;
+  color: var(--purple-deep);
+  font-size: 0.88rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.resource-badge-label {
+  font-weight: 400;
+}
+
 .resource-body {
   margin-top: 22px;
   white-space: pre-wrap;
