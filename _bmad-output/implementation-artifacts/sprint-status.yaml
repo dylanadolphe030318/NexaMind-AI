@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 10-30-2026 13:35
+last_updated: 10-30-2026 19:33
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -82,19 +82,40 @@ action_items:
     action: "Préparer un compte membre et un compte responsable de test avant le sprint
       2, étapes dans le README, sans mot de passe en capture"
     owner: "Dylan + développeur"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
   - id: "epic-1-retro-item-2-cr-er-le-responsable-initial-promotion-m"
     epic: 1
     action: "Créer le responsable initial (promotion manuelle via SQL Editor Supabase)
       avant la story 2.1"
     owner: "Dylan"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
   - id: "epic-1-retro-item-3-un-commit-par-story-avec-son-num-ro-stat"
     epic: 1
     action: "Un commit par story avec son numéro, statut done après tests, puis git
       push autorisé par Dylan en fin de sprint"
     owner: "développeur"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
+  - id: "epic-2-retro-item-4-tests-rls-qui-nettoient-derri-re-eux-apr"
+    epic: 2
+    action: "Tests RLS qui nettoient derrière eux après la story 2.6 ; garder les
+      3 comptes de test pendant tout le sprint"
+    owner: "développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-30.md"
+  - id: "epic-2-retro-item-5-mise-en-forme-de-la-liste-des-ressources"
+    epic: 2
+    action: "Mise en forme de la liste des ressources (catégorie en étiquette, date
+      en texte secondaire) via correction de trajectoire, sans modifier la story 2.5"
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-30.md"
+  - id: "epic-2-retro-item-6-r-gle-de-fin-de-story-limites-de-saisie"
+    epic: 2
+    action: "Règle de fin de story : limites de saisie imposées en base et accents
+      vérifiés dans le navigateur"
+    owner: "développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-30.md"
