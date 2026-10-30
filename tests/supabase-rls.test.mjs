@@ -248,6 +248,61 @@ test(
         assert.equal(renamedCategory?.name, renamedCategoryName);
       });
 
+      await t.test("resources : lecture anonyme refusee, lecture membre possible, aucune ecriture", async () => {
+        const { data: anonData, error: anonError } = await anonymousClient
+          .from("resources")
+          .select("id")
+          .limit(1);
+        if (anonError) {
+          assert.equal(anonError.code, "42501");
+        } else {
+          assert.equal(anonData?.length ?? 0, 0);
+        }
+
+        const { data: memberProfile, error: profileError } = await memberA
+          .from("profiles")
+          .select("workspace_id")
+          .eq("id", sessionA.user.id)
+          .maybeSingle();
+        assert.ifError(profileError);
+        assert.ok(memberProfile, "le profil du membre doit exister");
+
+        const { data: readable, error: readError } = await memberA
+          .from("resources")
+          .select("id, title, body, updated_at, categories(name)")
+          .eq("workspace_id", memberProfile.workspace_id);
+        assert.ifError(readError);
+        assert.ok(Array.isArray(readable), "la liste peut etre vide mais doit etre lisible");
+
+        const { data: category } = await memberA
+          .from("categories")
+          .select("id")
+          .limit(1)
+          .maybeSingle();
+        const { error: insertError } = await memberA.from("resources").insert({
+          workspace_id: memberProfile.workspace_id,
+          category_id: category?.id ?? randomUUID(),
+          owner_id: sessionA.user.id,
+          title: "RLS-interdit-" + randomUUID(),
+          body: "interdit",
+        });
+        assert.equal(insertError?.code, "42501");
+
+        const { data: updated, error: updateError } = await memberA
+          .from("resources")
+          .update({ title: "interdit" })
+          .eq("workspace_id", memberProfile.workspace_id)
+          .select("id");
+        assert.ok(updateError || (updated?.length ?? 0) === 0);
+
+        const { data: deleted, error: deleteError } = await memberA
+          .from("resources")
+          .delete()
+          .eq("workspace_id", memberProfile.workspace_id)
+          .select("id");
+        assert.ok(deleteError || (deleted?.length ?? 0) === 0);
+      });
+
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {
         const { data: memberBProfile, error: memberBProfileError } =
           await memberB

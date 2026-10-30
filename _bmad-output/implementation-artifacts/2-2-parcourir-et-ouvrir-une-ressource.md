@@ -3,7 +3,8 @@ story: 2-2-parcourir-et-ouvrir-une-ressource
 title: Parcourir et ouvrir une ressource
 epic: 2
 sprint: 2
-status: ready-for-dev
+status: in-progress
+baseline_commit: 10e2d0a74de45288a6259b52ea8abeaa91fbb008
 ---
 
 # Story 2.2 : Parcourir et ouvrir une ressource

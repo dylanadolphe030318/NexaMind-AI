@@ -652,6 +652,35 @@ a:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.resource-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-link:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.resource-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.resource-body {
+  margin-top: 22px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.category-empty p {
+  margin: 0 0 6px;
+}
+
 .category-empty {
   margin: 0;
   padding: 18px;

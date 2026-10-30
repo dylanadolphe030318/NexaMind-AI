@@ -54,6 +54,10 @@ export default async function DashboardPage() {
           Voir les cat&eacute;gories disponibles
         </Link>
 
+        <Link className="button button-small dashboard-categories-link" href="/resources">
+          Parcourir les ressources
+        </Link>
+
         <form action={signOut} className="auth-form">
           <button className="button auth-submit" type="submit">
             Se déconnecter
