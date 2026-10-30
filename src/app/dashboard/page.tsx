@@ -50,6 +50,10 @@ export default async function DashboardPage() {
           Connecté en tant que <strong>{user.email ?? "Membre"}</strong>
         </p>
 
+        <Link className="button button-small dashboard-categories-link" href="/categories">
+          Voir les cat&eacute;gories disponibles
+        </Link>
+
         <form action={signOut} className="auth-form">
           <button className="button auth-submit" type="submit">
             Se déconnecter

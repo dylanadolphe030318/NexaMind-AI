@@ -3,7 +3,8 @@ story: 2-1-gérer-les-catégories
 title: Gérer les catégories
 epic: 2
 sprint: 2
-status: ready-for-dev
+status: in-progress
+baseline_commit: bd1bb2aefad93b4518a0f234a3c27da53bd616c2
 ---
 
 # Story 2.1 : Gérer les catégories

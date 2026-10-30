@@ -40,24 +40,38 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
    ```
 
    N’utilisez jamais une clé `service_role` dans le navigateur ou dans ce fichier.
-3. Ouvrez **SQL Editor → New query**, copiez le contenu de `supabase/migrations/20261029133000_create_member_profiles.sql`, puis cliquez sur **Run**. Cette migration crée l’espace de travail, les profils membres et leurs politiques RLS. Ne créez pas ces tables manuellement dans Table Editor.
-4. Dans **Authentication → Providers**, vérifiez que le fournisseur **Email** est activé.
-5. Redémarrez le serveur local après toute modification de `.env.local`.
+3. Dans SQL Editor, appliquez dans l’ordre les fichiers SQL de supabase/migrations : 20261029133000_create_member_profiles.sql puis 20261030140000_create_categories.sql. Ils créent l’espace de travail, les profils et les catégories avec leurs politiques RLS. Ne créez pas ces tables manuellement dans Table Editor.
+4. Dans Authentication -> Providers, vérifiez que le fournisseur Email est activé.
+5. Pour créer le responsable initial, inscrivez d’abord son compte comme membre puis, dans SQL Editor, remplacez l’adresse ci-dessous et exécutez cette promotion manuelle :
+
+   ```sql
+   update public.profiles as profile
+   set role = 'responsable'
+   from auth.users as auth_user
+   where profile.id = auth_user.id
+     and auth_user.email = '<adresse-du-responsable>'
+     and profile.role = 'membre';
+   ```
+
+   Vérifiez que le profil correspondant a le rôle responsable. Les rôles ne se modifient jamais depuis l’application.
+6. Redémarrez le serveur local après toute modification de .env.local.
 
 ### Vérifier les politiques RLS avec des sessions réelles
 
-Créez deux comptes membre de test distincts dans Supabase et ajoutez leurs identifiants à `.env.local` (ne les commitez pas) :
+Créez deux comptes membre de test distincts dans Supabase, puis ajoutez leurs identifiants à `.env.local` (ne les commitez pas). Les variables du responsable sont facultatives : sans les deux, le sous-test AC4 correspondant sera ignoré avec un message explicite :
 
 ```env
 RLS_TEST_MEMBER_A_EMAIL=<e-mail-du-membre-a>
 RLS_TEST_MEMBER_A_PASSWORD=<mot-de-passe-du-membre-a>
 RLS_TEST_MEMBER_B_EMAIL=<e-mail-du-membre-b>
 RLS_TEST_MEMBER_B_PASSWORD=<mot-de-passe-du-membre-b>
+RLS_TEST_MANAGER_EMAIL=<e-mail-du-responsable>
+RLS_TEST_MANAGER_PASSWORD=<mot-de-passe-du-responsable>
 ```
 
-Si la confirmation d'adresse e-mail est activée dans Supabase, confirmez les deux comptes avant de lancer les tests.
+Si la confirmation d'adresse e-mail est activée dans Supabase, confirmez les comptes de test utilisés avant de lancer les tests.
 
-Puis lancez `npm run test:integration`. Ces tests se connectent avec la clé publishable et les sessions de ces deux comptes ; ils vérifient qu'un visiteur ne lit aucune table protégée, qu'un membre lit son propre profil et son espace, et qu'il ne lit pas le profil d'un autre membre. Aucune clé `service_role` n'est utilisée.
+Après application de la migration des catégories, lancez `npm run test:integration`. Ces tests utilisent la clé publishable et les sessions de deux membres et du responsable : ils vérifient l’accès aux profils, aux catégories ainsi que les autorisations de création et de renommage. Aucune clé `service_role` n’est utilisée.
 
 ## Deploy on Vercel
 
