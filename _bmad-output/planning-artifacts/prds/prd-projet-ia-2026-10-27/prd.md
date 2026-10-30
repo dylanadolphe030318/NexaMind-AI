@@ -2,7 +2,7 @@
 title: "NexaMind AI"
 status: final
 created: 2026-10-27
-updated: 2026-10-27
+updated: 2026-10-29
 ---
 
 # PRD : NexaMind AI
@@ -172,9 +172,9 @@ L’application distingue les actions du responsable et du membre et n’utilise
 
 Les éléments ci-dessous sont nécessaires à un produit crédible, mais leurs seuils ne sont pas définis dans le challenge ; les valeurs chiffrées marquées comme hypothèses devront être validées.
 
-- **[ASSUMPTION]** Le fournisseur IA, la base vectorielle et le budget ou plafond de requêtes restent à choisir avant l’architecture.
+- Le budget et les quotas d’utilisation des services IA restent à définir avant tout usage réel ; les choix techniques sont consignés dans l’architecture.
 - Les mots de passe et sessions sont gérés par un mécanisme d’authentification sécurisé ; aucun secret privilégié n’est exposé au navigateur.
-- Les ressources, recherches et conversations sont accessibles seulement aux personnes autorisées, y compris au moment de la recherche vectorielle et de l’appel à l’IA.
+- Les ressources, recherches et conversations sont accessibles seulement aux personnes autorisées, y compris au moment de la recherche vectorielle et de l’appel à l’IA. Les contrôles d’accès en base doivent être vérifiés par des tests exécutés avec les sessions des rôles concernés, et pas seulement par l’interface.
 - **[ASSUMPTION]** Avec un compte de test, une seule personne connectée et 20 ressources indexées dans l’environnement de démonstration, 9 recherches sur 10 affichent leurs résultats en moins de 3 secondes et 9 questions sur 10 affichent la réponse finale en moins de 15 secondes. Le chronomètre part de l’envoi de la requête ; les erreurs et délais du fournisseur IA comptent comme des échecs.
 - **[ASSUMPTION]** Le produit est utilisable sur ordinateur et écran mobile ; les fonctions essentielles sont réalisables au clavier et les champs disposent de libellés lisibles.
 - Les erreurs d’authentification, d’ajout de ressource, de recherche et de génération sont présentées sans afficher de secrets ni de détails techniques inutiles.
@@ -229,9 +229,9 @@ Les seuils sont des hypothèses de démonstration et non des engagements de prod
 
 ## 9. Questions ouvertes
 
-Cette question doit être résolue avant l’architecture :
+Les choix techniques IA et base vectorielle sont consignés dans l’architecture. Le budget et les plafonds d’utilisation restent à définir avant d’autoriser un usage réel du fournisseur IA.
 
-1. **Stack IA et budget :** quel fournisseur IA et quelle base vectorielle faut-il retenir, et quel budget ou plafond de requêtes leur attribuer ?
+1. **Budget et quotas IA :** quel plafond de dépenses et quelles limites d’utilisation appliquer au MVP ?
 
 ## 10. Index des hypothèses
 
@@ -244,5 +244,5 @@ Cette question doit être résolue avant l’architecture :
 - §5.3 FR-7 — états de chargement, erreur compréhensible et relance.
 - §6 — seuils de latence, test sur un compte et 20 ressources, compatibilité mobile/clavier, données fictives ou autorisées.
 - §7.1 et §7.2 — jeu de questions et de ressources pour évaluer l’UX et le RAG ; exclusion des fonctions IA autres que la question-réponse RAG.
-- §9 — fournisseur IA, base vectorielle et budget à sélectionner avant l’architecture.
+- §6 et §9 — budget et quotas d’utilisation IA à définir avant un usage réel du fournisseur.
 - §8 SM-1 à SM-8 — échantillons, seuils, protocole d’évaluation UX/RAG et preuves attendues pour la démonstration du challenge.

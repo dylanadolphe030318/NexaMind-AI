@@ -7,7 +7,7 @@ paradigm: Modular layered web application [ASSUMPTION]
 scope: MVP NexaMind AI
 status: final
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-10-29
 binds:
   - FR-1
   - FR-2
@@ -24,6 +24,8 @@ sources:
   - ../../ux-designs/ux-projet-ia-2026-10-28/DESIGN.md
   - https://nextjs.org/docs/app/getting-started/installation
   - https://nextjs.org/docs/app/guides/self-hosting
+  - https://vercel.com/docs/frameworks/full-stack/nextjs
+  - https://vercel.com/docs/functions/runtimes/node-js
   - https://supabase.com/docs/guides/auth/server-side/nextjs
   - https://supabase.com/docs/guides/database/postgres/row-level-security
   - https://supabase.com/docs/guides/database/extensions/pgvector
@@ -74,21 +76,21 @@ companions: []
 
 - **Binds:** FR-5, FR-6, FR-7, FR-9
 - **Prevents:** L’assistant ne cite pas un contenu qui n’a pas été retrouvé ni accessible au membre.
-- **Rule:** Le serveur découpe le texte d’une ressource, fait calculer ses embeddings, puis conserve textes, liens et vecteurs dans Supabase PostgreSQL avec l’extension pgvector. **[ASSUMPTION]** Un service de recherche unique combine la recherche plein texte PostgreSQL et la recherche sémantique ; le réglage de classement est différé et testé sur le jeu de requêtes du MVP. Les deux chemins ne retournent que des ressources `ready` autorisées par RLS ; les tests de pertinence s’exécutent avec RLS active et ne contournent jamais les droits pour compléter les résultats. À la réouverture d’une recherche enregistrée, le serveur relance la requête sur les ressources actuellement disponibles et remplace les anciens résultats par les résultats recalculés. Pour une question, le serveur calcule l’embedding de la requête, transmet les passages retenus au modèle, vérifie que les références de source retournées appartiennent à ces passages, puis conserve la question, la réponse et les sources affichées dans la conversation. Une conversation rouverte accepte une nouvelle question ajoutée au même historique, en tenant compte du contexte des échanges précédents ; chaque question possède un identifiant stable réutilisé lors d’une tentative explicite, afin d’éviter les réponses dupliquées. Le contenu envoyé à un fournisseur externe est limité aux données fictives ou explicitement autorisées ; **[ASSUMPTION]** la personne qui ajoute une ressource est responsable de vérifier cette autorisation pour l’usage avec le fournisseur choisi, et sa révocation entraîne la suppression ou le retrait de l’index de la ressource. Cette règle est appliquée à l’ingestion et aux questions ; elle ne crée pas de parcours de consentement supplémentaire dans le MVP. Les règles de traitement et de conservation du fournisseur doivent être vérifiées avant son choix. En cas d’échec de génération, la question est conservée et l’utilisateur peut relancer explicitement. Sans contexte suffisant, l’assistant indique que les ressources ne permettent pas de répondre et propose de réessayer plus tard, sans relance automatique. Les validations PRD sont conservées : scénario à un utilisateur et 20 ressources, 9 recherches sur 10 en moins de 3 secondes, 9 réponses IA sur 10 en moins de 15 secondes (délai fournisseur inclus), au moins 8 requêtes sur 10 avec une ressource attendue dans les trois premiers résultats, au moins 8 réponses sur 10 sourcées et factuellement appuyées, et abstention pour les 3 questions sans réponse.
+- **Rule:** Le serveur découpe le texte d’une ressource, fait calculer ses embeddings, puis conserve textes, liens et vecteurs dans Supabase PostgreSQL avec l’extension pgvector. **[ASSUMPTION]** Un service de recherche unique combine la recherche plein texte PostgreSQL et la recherche sémantique ; le réglage de classement est différé et testé sur le jeu de requêtes du MVP. Les deux chemins ne retournent que des ressources `ready` autorisées par RLS ; les tests de pertinence s’exécutent avec RLS active et ne contournent jamais les droits pour compléter les résultats. À la réouverture d’une recherche enregistrée, le serveur relance la requête sur les ressources actuellement disponibles et remplace les anciens résultats par les résultats recalculés. Pour une question, le serveur calcule l’embedding de la requête, transmet les passages retenus au modèle, vérifie que les références de source retournées appartiennent à ces passages, puis conserve la question, la réponse et les sources affichées dans la conversation. Une conversation rouverte accepte une nouvelle question ajoutée au même historique, en tenant compte du contexte des échanges précédents ; chaque question possède un identifiant stable réutilisé lors d’une tentative explicite, afin d’éviter les réponses dupliquées. Le contenu envoyé à un fournisseur externe est limité aux données fictives ou explicitement autorisées ; **[ASSUMPTION]** la personne qui ajoute une ressource est responsable de vérifier cette autorisation pour l’usage avec le fournisseur choisi, et sa révocation entraîne la suppression ou le retrait de l’index de la ressource. Cette règle est appliquée à l’ingestion et aux questions ; elle ne crée pas de parcours de consentement supplémentaire dans le MVP. Les règles de traitement et de conservation du fournisseur doivent être vérifiées avant tout envoi de contenu réel au fournisseur. En cas d’échec de génération, la question est conservée et l’utilisateur peut relancer explicitement. Sans contexte suffisant, l’assistant indique que les ressources ne permettent pas de répondre et propose de réessayer plus tard, sans relance automatique. Les validations PRD sont conservées : scénario à un utilisateur et 20 ressources, 9 recherches sur 10 en moins de 3 secondes, 9 réponses IA sur 10 en moins de 15 secondes (délai fournisseur inclus), au moins 8 requêtes sur 10 avec une ressource attendue dans les trois premiers résultats, au moins 8 réponses sur 10 sourcées et factuellement appuyées, et abstention pour les 3 questions sans réponse.
 - **En clair :** l’assistant cherche seulement dans les ressources accessibles et montre d’où vient sa réponse ; sans source suffisante, il ne devine pas.
 
-### AD-6 — GitHub héberge le code source ; le serveur Next.js reste à choisir
+### AD-6 — Vercel héberge Next.js ; GitHub héberge le code source
 
 - **Binds:** Déploiement de l’application et de ses routes serveur
 - **Prevents:** L’application ne dépend pas d’un hébergement statique incompatible avec l’authentification SSR et les appels IA côté serveur.
-- **Rule:** Le dépôt GitHub est la source versionnée du code et des migrations. Le runtime de production doit utiliser Node.js 22 ou supérieur pour satisfaire les dépendances Supabase retenues. **[ASSUMPTION]** « Hébergement prévu : GitHub » désigne le dépôt, pas un hébergement d’exécution ; le serveur nécessaire à Next.js reste à choisir. GitHub Pages publie des fichiers statiques et ne convient pas aux routes serveur Next.js requises par cette architecture.
-- **En clair :** GitHub garde le code ; le site a aussi besoin d’un serveur d’exécution, qui reste à choisir.
+- **Rule:** Le dépôt GitHub est la source versionnée du code et des migrations. Vercel est la cible choisie pour exécuter Next.js côté serveur ; le runtime doit utiliser Node.js 22 ou supérieur pour satisfaire les dépendances Supabase retenues. Les secrets sont configurés dans l’environnement protégé de Vercel et ne sont jamais intégrés au dépôt ni aux bundles navigateur. La documentation officielle Vercel confirme la prise en charge native de Next.js et de Node.js pour ses fonctions.
+- **En clair :** GitHub conserve le code ; Vercel exécute l’application Next.js.
 
 ### AD-7 — Le fournisseur IA est paramétré hors du code
 
 - **Binds:** FR-5, FR-7
 - **Prevents:** Le fournisseur et les modèles ne sont pas dispersés ou exposés dans les composants de l’application.
-- **Rule:** Le MVP appelle l’API OpenAI depuis le serveur : `gpt-6-luna` pour les réponses et `text-embedding-3-small` pour des vecteurs de 1536 dimensions. Les identifiants sont fournis par des variables d’environnement côté serveur ; le budget, les quotas et les règles de traitement des données doivent être vérifiés avant la réalisation. Seules des données fictives ou explicitement autorisées sont transmises à un fournisseur externe.
+- **Rule:** Le MVP appelle l’API OpenAI depuis le serveur : `gpt-6-luna` pour les réponses et `text-embedding-3-small` pour des vecteurs de 1536 dimensions. Les identifiants sont fournis par des variables d’environnement côté serveur ; le budget et les quotas doivent être définis avant tout usage réel et les règles de traitement du fournisseur vérifiées avant tout envoi de contenu réel. Seules des données fictives ou explicitement autorisées sont transmises à un fournisseur externe.
 - **En clair :** OpenAI et ces modèles sont les choix retenus ; le budget et les quotas restent à définir.
 
 ## Consistency Conventions
@@ -179,9 +181,10 @@ supabase/
 
 ### Déploiement et exploitation
 
-- Le serveur de production doit pouvoir exécuter Next.js côté serveur ; un export statique ne suffit pas pour l’authentification SSR, les Server Actions et les appels IA.
+- Vercel exécute Next.js côté serveur ; un export statique ne suffit pas pour l’authentification SSR, les Server Actions et les appels IA.
+- Le runtime Vercel doit utiliser Node.js 22 ou supérieur ; les variables d’environnement et secrets sont définis dans les environnements Vercel appropriés et ne sont pas suivis dans Git.
 - Les changements de schéma et de politiques sont versionnés dans `supabase/migrations/` et appliqués avant le code qui en dépend.
-- **[ASSUMPTION]** Les secrets OpenAI et Supabase restent configurés dans les variables protégées de l’environnement d’exécution ; ils ne sont ni poussés sur GitHub ni intégrés aux bundles navigateur.
+- Les secrets OpenAI et Supabase sont configurés dans les variables protégées de Vercel ; ils ne sont ni poussés sur GitHub ni intégrés aux bundles navigateur.
 - Supabase Cron purge régulièrement les données d’historique après leur date d’expiration ; les requêtes RLS excluent déjà les lignes expirées.
 - **Deferred:** La surveillance, la journalisation opérationnelle, la sauvegarde/restauration et la séparation des environnements ne sont pas définies pour le MVP ; elles devront être décidées avant un usage de production ou de données réelles sensibles.
 
@@ -210,7 +213,6 @@ supabase/
 ## Deferred
 
 - Définir le budget et les quotas d’usage avant la réalisation.
-- Choisir le serveur nécessaire à Next.js ; confirmer si GitHub signifie dépôt source ou si un environnement d’exécution est déjà prévu.
 - Déterminer le format, la taille et la stratégie de découpage des passages, le seuil de recherche vectorielle et le réglage de classement après essais sur les contenus du MVP, avec RLS active.
 - **[ASSUMPTION]** Le MVP accepte uniquement du texte saisi ou collé et n’intègre pas de fichiers. L’usage de Supabase Storage dépendra de la portée retenue pour les contenus.
 - Les noms finaux des champs, index et contraintes SQL seront fixés par les migrations d’implémentation ; le spine ne définit que les relations et invariants d’accès.

@@ -1,5 +1,6 @@
 ---
 status: draft
+updated: 2026-10-29
 stepsCompleted:
   - step-01-validate-prerequisites
   - step-02-design-epics
@@ -7,6 +8,7 @@ stepsCompleted:
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-projet-ia-2026-10-27/prd.md
   - _bmad-output/planning-artifacts/architecture/architecture-projet-ia-2026-10-28/architecture-resume.NexMindAImd.md
+  - _bmad-output/planning-artifacts/architecture/architecture-projet-ia-2026-10-28/ARCHITECTURE-SPINE.md
   - _bmad-output/planning-artifacts/ux-designs/ux-projet-ia-2026-10-28/DESIGN.md
   - _bmad-output/planning-artifacts/ux-designs/ux-projet-ia-2026-10-28/EXPERIENCE.md
 ---
@@ -35,7 +37,7 @@ Ce document transforme le PRD, les documents UX et l’architecture de NexaMind 
 ### Exigences non fonctionnelles
 
 - **NFR1 — Protection de l’authentification :** l’authentification et les sessions sont gérées de façon sécurisée.
-- **NFR2 — Qualité de protection des données :** les contrôles d’accès et de confidentialité décrits en FR10 sont appliqués à la base de données, à la recherche vectorielle et à l’appel IA. Seules des données fictives ou explicitement autorisées sont transmises à un fournisseur externe.
+- **NFR2 — Qualité de protection des données :** les contrôles d’accès et de confidentialité décrits en FR10 sont appliqués à la base de données, à la recherche vectorielle et à l’appel IA. Ils sont vérifiés par des tests exécutés avec les sessions des rôles concernés, y compris pour les accès directs aux données ; ces tests ne contournent pas les politiques avec une clé privilégiée. Seules des données fictives ou explicitement autorisées sont transmises à un fournisseur externe.
 - **NFR3 — Messages d’erreur :** les erreurs d’authentification, de ressource, de recherche et de génération sont compréhensibles et ne montrent pas de secrets ni de détails techniques inutiles.
 - **NFR4 — Conservation :** recherches et conversations expirent après 30 jours ; le propriétaire peut les supprimer.
 - **NFR5 — Temps de réponse :** **[ASSUMPTION]** avec un compte de test et 20 ressources indexées, 9 recherches sur 10 répondent en moins de 3 secondes et 9 questions sur 10 en moins de 15 secondes.
@@ -47,11 +49,12 @@ Ce document transforme le PRD, les documents UX et l’architecture de NexaMind 
 - Construire l’application avec Next.js ; Next.js affiche les pages, traite les demandes côté serveur, applique les règles métier et appelle le fournisseur IA.
 - Utiliser Supabase pour l’authentification, les sessions, les données et le contrôle des accès ; utiliser PostgreSQL avec stockage vectoriel pour les passages et la recherche sémantique.
 - Contrôler les droits côté base de données et côté serveur ; ne jamais dépendre uniquement du masquage d’un bouton dans l’interface.
+- Exécuter les tests d’autorisation avec RLS activée et des sessions réelles de visiteur, membre et responsable ; ne pas utiliser une clé de service pour contourner les règles d’accès dans les tests.
 - Garder les clés et appels IA côté serveur ; ne transmettre à l’IA que les données autorisées.
 - Prévoir les données nécessaires aux profils et rôles, à l’espace commun, aux catégories, aux ressources, passages et vecteurs, recherches, conversations, messages et sources.
 - Une conversation rouverte peut être poursuivie en tenant compte de son contexte ; son historique reste privé. L’expiration de 30 jours est calculée depuis la dernière activité réelle.
 - **[ASSUMPTION]** Les ressources sont du texte saisi ou collé ; aucun stockage de fichiers n’est nécessaire dans le MVP.
-- Points de décision encore ouverts dans les sources : hébergement de Next.js, fournisseur IA et budget/quotas, réglages de découpage et de recherche. La surveillance, les journaux, les sauvegardes et la séparation des environnements sont à définir avant une mise en production.
+- Vercel est la cible choisie pour héberger Next.js, avec un runtime Node.js 22 ou supérieur. Le budget et les quotas IA, les réglages de découpage et de recherche restent à définir. La surveillance, les journaux, les sauvegardes et la séparation des environnements sont à définir avant une mise en production.
 
 ### Exigences UX et visuelles
 
@@ -168,6 +171,8 @@ afin de retrouver un point de départ personnel dans l’application.
 
 **Étant donné** que je consulte le tableau de bord, **quand** je cherche à fermer ma session, **alors** une action clairement nommée me permet de me déconnecter.
 
+**Étant donné** qu’un visiteur ou un membre tente de lire directement des données protégées dans Supabase sans autorisation, **quand** les tests d’intégration interrogent la base avec sa session réelle, **alors** les politiques RLS refusent l’accès ou ne retournent que les lignes permises, sans utiliser une clé de service privilégiée pour contourner ces règles.
+
 ## Epic 2 : Organiser les ressources partagées
 
 Les membres peuvent consulter les ressources partagées, gérer leurs propres ressources textuelles et les classer ; le responsable peut gérer toutes les ressources et les catégories.
@@ -185,6 +190,8 @@ afin que les ressources de l’équipe soient classées de manière cohérente.
 **Étant donné** que je suis responsable, **quand** je renomme une catégorie, **alors** son nouveau nom est affiché partout où cette catégorie est proposée.
 
 **Étant donné** que je suis membre, **quand** je consulte les catégories disponibles, **alors** je peux les voir et les choisir, mais pas les créer ni les renommer.
+
+**Étant donné** qu’un membre tente directement dans Supabase de créer ou renommer une catégorie, **quand** l’opération est exécutée avec sa session membre, **alors** la politique RLS la refuse ; la même opération réussit avec la session du responsable.
 
 ### Story 2.2 : Parcourir et ouvrir une ressource
 
@@ -228,6 +235,8 @@ afin de garder les informations de l’équipe à jour.
 
 **Étant donné** que je suis membre et qu’une ressource appartient à quelqu’un d’autre, **quand** je tente de la modifier, y compris par son adresse directe, **alors** aucun changement n’est enregistré.
 
+**Étant donné** qu’un membre tente directement dans Supabase de modifier la ressource d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS refuse la modification et les données restent inchangées ; le propriétaire et le responsable peuvent modifier les ressources qui leur sont permises.
+
 ### Story 2.5 : Filtrer les ressources par catégorie
 
 En tant que membre,
@@ -255,6 +264,8 @@ afin de retirer les informations qui ne sont plus utiles.
 **Étant donné** que je suis membre propriétaire ou responsable, **quand** je confirme la suppression, **alors** la ressource n’apparaît plus dans les écrans de liste ou de détail déjà disponibles ; si j’annule, elle reste disponible.
 
 **Étant donné** que je suis membre et qu’une ressource appartient à quelqu’un d’autre, **quand** je tente de la supprimer, **alors** aucun changement n’est enregistré ; après suppression autorisée, la ressource n’apparaît plus dans la liste et son écran de détail n’est plus accessible.
+
+**Étant donné** qu’un membre tente directement dans Supabase de supprimer une ressource d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS la refuse et la ressource reste présente.
 
 ## Epic 3 : Retrouver les ressources et ses recherches
 
@@ -288,6 +299,8 @@ afin de retrouver les requêtes que j’ai déjà faites.
 
 **Étant donné** que je consulte l’historique, **quand** je suis connecté, **alors** je ne vois que mes recherches et un autre membre ne peut pas ouvrir mon historique, même avec une adresse directe.
 
+**Étant donné** qu’un membre interroge directement dans Supabase l’historique d’un autre membre, **quand** la requête est exécutée avec sa session, **alors** RLS ne retourne aucune recherche appartenant à cet autre membre.
+
 **Étant donné** que je n’ai encore aucune recherche enregistrée, **quand** j’ouvre l’historique, **alors** un état vide clair s’affiche.
 
 ### Story 3.3 : Relancer une recherche enregistrée
@@ -318,6 +331,8 @@ afin de ne conserver que les recherches qui me sont utiles.
 
 **Étant donné** qu’une recherche appartient à un autre membre, **quand** je tente de la supprimer, **alors** l’action est refusée.
 
+**Étant donné** qu’un membre tente directement dans Supabase de supprimer la recherche d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS la refuse et la recherche reste disponible pour son propriétaire.
+
 ## Epic 4 : Questionner les connaissances avec une IA et des sources
 
 Les membres peuvent interroger les ressources autorisées ; l’application prépare les textes, retrouve les passages utiles et fournit une réponse vérifiable avec ses sources, ou indique que les ressources ne suffisent pas. Les conversations restent privées et peuvent être reprises.
@@ -345,8 +360,6 @@ afin qu’ils puissent être comparés au sens d’une recherche.
 **Étant donné** que les passages d’une ressource existent, **quand** le calcul des embeddings se termine, **alors** chaque passage possède un embedding associé.
 
 **Étant donné** que le calcul est terminé, **quand** le stockage est vérifié, **alors** les embeddings et leurs liens aux passages sont conservés durablement dans Supabase/PostgreSQL.
-
-**[ASSUMPTION]** Le fournisseur d’embeddings sera choisi avant la réalisation de cette story.
 
 ### Story 4.3 : Suivre l’état de préparation d’une ressource
 
@@ -392,11 +405,13 @@ afin de vérifier rapidement si le résultat est utile.
 
 En tant que membre,
 je veux que la recherche sémantique respecte mes droits d’accès,
-afin de ne jamais voir les contenus d’un autre espace autorisés.
+afin de ne jamais voir des contenus qui ne me sont pas accessibles.
 
 **Critères d’acceptation :**
 
 **Étant donné** que je suis connecté comme membre, **quand** j’effectue une recherche sémantique, **alors** les résultats ne contiennent que les ressources auxquelles j’ai accès.
+
+**Étant donné** qu’une ressource n’est pas accessible au membre, **quand** les tests exécutent la recherche sémantique avec sa session Supabase et RLS active, **alors** aucun passage de cette ressource n’est retourné ni transmis au modèle ; le test n’utilise pas de clé de service pour contourner RLS.
 
 **Étant donné** qu’une recherche sémantique échoue, **quand** je consulte l’écran de recherche, **alors** un message compréhensible s’affiche et ma requête peut être relancée.
 
@@ -450,6 +465,8 @@ afin de retrouver les échanges que j’ai eus.
 
 **Étant donné** que je consulte la liste des conversations, **quand** elle s’affiche, **alors** je ne vois que mes conversations ; un autre membre ne peut pas consulter cette liste, y compris par une adresse directe.
 
+**Étant donné** qu’un membre interroge directement dans Supabase la liste des conversations, **quand** la requête est exécutée avec sa session, **alors** RLS ne retourne que ses propres conversations, y compris lorsque la personne connectée est responsable.
+
 **Étant donné** qu’une conversation n’a pas eu d’activité depuis 30 jours, **quand** je consulte mon historique, **alors** elle n’est plus disponible. **[ASSUMPTION]**
 
 ### Story 4.11 : Rouvrir une conversation
@@ -463,6 +480,8 @@ afin de relire ses messages et ses sources.
 **Étant donné** qu’une conversation m’appartient et est encore disponible, **quand** je l’ouvre, **alors** ses messages et les sources enregistrées s’affichent.
 
 **Étant donné** qu’une conversation appartient à un autre membre, **quand** je tente de l’ouvrir, y compris par une adresse directe, **alors** l’accès est refusé et son contenu n’est pas révélé.
+
+**Étant donné** qu’un membre tente directement dans Supabase de lire les messages ou sources d’une conversation d’un autre membre, **quand** la requête est exécutée avec sa session, **alors** RLS ne retourne aucune de ces données.
 
 **Étant donné** que la conversation a expiré ou qu’une de ses sources n’est plus disponible, **quand** je l’ouvre, **alors** l’application indique clairement ce qui ne peut plus être consulté.
 
@@ -493,6 +512,8 @@ afin de retirer de mon historique les échanges que je ne souhaite plus conserve
 **Étant donné** que je confirme la suppression, **quand** l’action est terminée, **alors** la conversation disparaît de mon historique et ne peut plus être rouverte ; si j’annule, elle reste disponible.
 
 **Étant donné** qu’une conversation appartient à un autre membre, **quand** je tente de la supprimer, **alors** l’action est refusée.
+
+**Étant donné** qu’un membre tente directement dans Supabase de supprimer la conversation d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS la refuse et la conversation reste disponible pour son propriétaire.
 
 ### Story 4.14 : Relier les affirmations aux sources
 
