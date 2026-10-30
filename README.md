@@ -40,7 +40,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
    ```
 
    N’utilisez jamais une clé `service_role` dans le navigateur ou dans ce fichier.
-3. Dans SQL Editor, appliquez dans l’ordre les fichiers SQL de supabase/migrations : 20261029133000_create_member_profiles.sql puis 20261030140000_create_categories.sql puis 20261030160000_create_resources.sql puis 20261030170000_resources_insert_policy.sql. Ils créent l’espace de travail, les profils, les catégories et les ressources avec leurs politiques RLS ; la dernière migration autorise un membre à créer ses propres ressources (story 2.3). Ne créez pas ces tables manuellement dans Table Editor.
+3. Dans SQL Editor, appliquez dans l’ordre les fichiers SQL de supabase/migrations : 20261029133000_create_member_profiles.sql puis 20261030140000_create_categories.sql puis 20261030160000_create_resources.sql puis 20261030170000_resources_insert_policy.sql puis 20261030180000_resources_update_policy.sql. Ils créent l’espace de travail, les profils, les catégories et les ressources avec leurs politiques RLS ; l’avant-dernière migration autorise un membre à créer ses propres ressources (story 2.3) et la dernière autorise le propriétaire ou un responsable à les modifier, avec mise à jour automatique de la date (story 2.4). Ne créez pas ces tables manuellement dans Table Editor.
 4. Dans Authentication -> Providers, vérifiez que le fournisseur Email est activé.
 5. Pour créer le responsable initial, inscrivez d’abord son compte comme membre puis, dans SQL Editor, remplacez l’adresse ci-dessous et exécutez cette promotion manuelle :
 

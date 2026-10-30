@@ -2,21 +2,69 @@
 
 import { useActionState } from "react";
 
-import { createResource } from "./resource-actions";
+import { createResource, updateResource } from "./resource-actions";
 import {
   initialResourceFormState,
   type ResourceFormState,
+  type ResourceValues,
 } from "./resource-validation";
+
+type ResourceAction = (
+  previousState: ResourceFormState,
+  formData: FormData,
+) => Promise<ResourceFormState>;
 
 export function CreateResourceForm({
   categories,
 }: {
   categories: { id: string; name: string }[];
 }) {
+  return (
+    <ResourceForm
+      action={createResource}
+      categories={categories}
+      initialValues={initialResourceFormState.values}
+      submitLabel="Enregistrer la ressource"
+    />
+  );
+}
+
+export function EditResourceForm({
+  resourceId,
+  categories,
+  initialValues,
+}: {
+  resourceId: string;
+  categories: { id: string; name: string }[];
+  initialValues: ResourceValues;
+}) {
+  return (
+    <ResourceForm
+      action={(previousState, formData) =>
+        updateResource(resourceId, previousState, formData)
+      }
+      categories={categories}
+      initialValues={initialValues}
+      submitLabel="Enregistrer les modifications"
+    />
+  );
+}
+
+function ResourceForm({
+  action,
+  categories,
+  initialValues,
+  submitLabel,
+}: {
+  action: ResourceAction;
+  categories: { id: string; name: string }[];
+  initialValues: ResourceValues;
+  submitLabel: string;
+}) {
   const [state, formAction, pending] = useActionState(
     (previousState: ResourceFormState, formData: FormData) =>
-      createResource(previousState, formData),
-    initialResourceFormState,
+      action(previousState, formData),
+    { ...initialResourceFormState, values: initialValues },
   );
   const { errors, values } = state;
 
@@ -90,7 +138,7 @@ export function CreateResourceForm({
       </div>
 
       <button className="button auth-submit" disabled={pending} type="submit">
-        {pending ? "Enregistrement..." : "Enregistrer la ressource"}
+        {pending ? "Enregistrement..." : submitLabel}
       </button>
     </form>
   );

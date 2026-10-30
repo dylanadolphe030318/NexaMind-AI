@@ -284,12 +284,7 @@ test(
         });
         assert.equal(insertError?.code, "42501");
 
-        const { data: updated, error: updateError } = await memberA
-          .from("resources")
-          .update({ title: "interdit" })
-          .eq("workspace_id", memberProfile.workspace_id)
-          .select("id");
-        assert.ok(updateError || (updated?.length ?? 0) === 0);
+        // La modification est couverte par les tests de la story 2.4 (RLS-TEST-2.4-).
 
         const { data: deleted, error: deleteError } = await memberA
           .from("resources")
@@ -351,6 +346,118 @@ test(
           body: "interdit",
         });
         assert.equal(otherWorkspaceError?.code, "42501");
+      });
+
+      async function createTestResource(client, userId, label) {
+        const { data: profile, error: profileError } = await client
+          .from("profiles")
+          .select("workspace_id")
+          .eq("id", userId)
+          .maybeSingle();
+        assert.ifError(profileError);
+        assert.ok(profile, "le profil doit exister");
+        const { data: category, error: categoryError } = await client
+          .from("categories")
+          .select("id")
+          .eq("workspace_id", profile.workspace_id)
+          .limit(1)
+          .maybeSingle();
+        assert.ifError(categoryError);
+        assert.ok(category, "une categorie du workspace doit exister");
+        const title = `RLS-TEST-2.4-${label}-${randomUUID()}`;
+        const { data: created, error } = await client
+          .from("resources")
+          .insert({
+            workspace_id: profile.workspace_id,
+            category_id: category.id,
+            owner_id: userId,
+            title,
+            body: "ressource de test RLS 2.4",
+          })
+          .select("id, title, body, owner_id, updated_at")
+          .single();
+        assert.ifError(error);
+        return created;
+      }
+
+      await t.test("resources : le proprietaire modifie sa ressource, updated_at augmente", async () => {
+        const created = await createTestResource(memberA, sessionA.user.id, "proprietaire");
+        await new Promise((resolve) => setTimeout(resolve, 20));
+
+        const newTitle = created.title + "-modifie";
+        const { data: updated, error } = await memberA
+          .from("resources")
+          .update({ title: newTitle, body: "texte modifie" })
+          .eq("id", created.id)
+          .select("id, title, body, owner_id, updated_at");
+        assert.ifError(error);
+        assert.equal(updated?.length, 1);
+        assert.equal(updated[0].title, newTitle);
+        assert.equal(updated[0].body, "texte modifie");
+        assert.equal(updated[0].owner_id, sessionA.user.id);
+        assert.ok(
+          new Date(updated[0].updated_at) > new Date(created.updated_at),
+          "updated_at doit augmenter",
+        );
+
+        const { error: ownerChangeError } = await memberA
+          .from("resources")
+          .update({ owner_id: sessionB.user.id })
+          .eq("id", created.id);
+        assert.ok(ownerChangeError, "owner_id ne doit pas etre modifiable");
+      });
+
+      await t.test("resources : un autre membre ne peut pas modifier la ressource", async () => {
+        const created = await createTestResource(memberA, sessionA.user.id, "refus");
+
+        const { data: updated, error } = await memberB
+          .from("resources")
+          .update({ title: "RLS-TEST-2.4-pirate", body: "pirate" })
+          .eq("id", created.id)
+          .select("id");
+        assert.ok(error || (updated?.length ?? 0) === 0, "aucune ligne ne doit etre modifiee");
+
+        const { data: after, error: readError } = await memberA
+          .from("resources")
+          .select("title, body, updated_at")
+          .eq("id", created.id)
+          .single();
+        assert.ifError(readError);
+        assert.equal(after.title, created.title);
+        assert.equal(after.body, created.body);
+        assert.equal(after.updated_at, created.updated_at);
+      });
+
+      await t.test("resources : le responsable modifie la ressource d'un membre", async (managerTest) => {
+        if (!managerEmail || !managerPassword) {
+          managerTest.skip("RLS_TEST_MANAGER_EMAIL et RLS_TEST_MANAGER_PASSWORD absents : test responsable 2.4 ignore.");
+          return;
+        }
+
+        const created = await createTestResource(memberA, sessionA.user.id, "responsable");
+        const managerClient = createClient(supabaseUrl, publishableKey, clientOptions);
+        try {
+          const { data: managerSession, error: loginError } =
+            await managerClient.auth.signInWithPassword({
+              email: managerEmail,
+              password: managerPassword,
+            });
+          assert.ifError(loginError);
+          assert.ok(managerSession.user, "le responsable doit avoir une session");
+
+          const newTitle = created.title + "-par-responsable";
+          const { data: updated, error } = await managerClient
+            .from("resources")
+            .update({ title: newTitle })
+            .eq("id", created.id)
+            .select("id, title, owner_id");
+          assert.ifError(error);
+          assert.equal(updated?.length, 1);
+          assert.equal(updated[0].title, newTitle);
+          assert.equal(updated[0].owner_id, sessionA.user.id);
+        } finally {
+          await managerClient.auth.signOut();
+        }
       });
 
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {

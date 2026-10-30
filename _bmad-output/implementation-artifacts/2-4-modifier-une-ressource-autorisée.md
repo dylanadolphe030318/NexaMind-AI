@@ -3,7 +3,8 @@ story: 2-4-modifier-une-ressource-autorisée
 title: Modifier une ressource autorisée
 epic: 2
 sprint: 2
-status: ready-for-dev
+status: in-progress
+baseline_commit: b1526742f719d0fb9751065d89c43daae0a869b2
 ---
 
 # Story 2.4 : Modifier une ressource autorisée

@@ -46,6 +46,13 @@ export default async function ResourceDetailPage({
               {formatResourceDate(result.resource.updatedAt)}
             </p>
             <div className="resource-body">{result.resource.body}</div>
+            {result.canEdit ? (
+              <p>
+                <Link className="button" href={`/resources/${id}/edit`}>
+                  Modifier
+                </Link>
+              </p>
+            ) : null}
           </>
         )}
 
