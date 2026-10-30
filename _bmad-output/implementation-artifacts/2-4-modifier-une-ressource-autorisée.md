@@ -29,3 +29,10 @@ Modification uniquement : pas de suppression (story 2.6), pas de réindexation (
 - L'accès par adresse directe d'une ressource d'autrui doit refuser l'édition côté serveur, sans s'appuyer uniquement sur le masquage du bouton.
 - Étendre `tests/supabase-rls.test.mjs` avec trois cas : propriétaire autorisé, autre membre refusé (données inchangées), responsable autorisé. Dépend d'un compte responsable de test.
 - Dépend des stories 2.1 à 2.3.
+
+## Vérifications dans le navigateur (à faire par Dylan)
+
+- [ ] Modifier le titre d'une de ses ressources : le changement est visible et la date de mise à jour change.
+- [ ] Avec le compte responsable : modifier la ressource d'un autre membre, cela fonctionne.
+- [ ] Avec un compte membre : ouvrir l'adresse de modification de la ressource d'un autre, aucun changement n'est enregistré.
+- [ ] Refus RLS pour un autre membre, accès propriétaire et responsable : vérifiés par `npm run test:integration`.

@@ -28,3 +28,11 @@ Saisie texte uniquement : pas d'import de fichier, pas d'indexation ni d'IA (Epi
 - Validation côté serveur avec messages par champ, formulaire conservant les valeurs saisies. Entrée vérifiée, sans fuite d'erreur technique à l'écran.
 - Étendre `tests/supabase-rls.test.mjs` : un membre ne peut pas créer une ressource au nom d'un autre membre.
 - Dépend des stories 2.1 et 2.2.
+
+## Vérifications dans le navigateur (à faire par Dylan)
+
+- [ ] Saisir un titre, coller un texte, choisir une catégorie, enregistrer : la ressource apparaît dans la liste et le détail.
+- [ ] Laisser un champ vide : un message nomme le champ à corriger et les autres valeurs restent.
+- [ ] Aucun bouton d'import de fichier n'est proposé.
+- [ ] Déconnecté : le formulaire renvoie vers `/login`.
+- [ ] Création au nom d'un autre membre refusée : vérifiée par `npm run test:integration`.

@@ -29,3 +29,11 @@ Création et renommage uniquement : pas de suppression de catégorie, pas de res
 - Mutations par Server Actions ; lecture par Server Components. Code métier dans `src/features/resources`.
 - Dépendance : un compte responsable doit exister pour tester (action ouverte « Créer le responsable initial » du sprint-status). Le test d'intégration RLS étend `tests/supabase-rls.test.mjs` avec les comptes de test membre et responsable (sans clé de service).
 - Ne pas modifier le rôle d'un profil depuis l'application.
+
+## Vérifications dans le navigateur (à faire par Dylan)
+
+- [ ] Avec le compte responsable : créer une catégorie, elle apparaît dans la liste.
+- [ ] Renommer cette catégorie : le nouveau nom s'affiche partout où elle est proposée.
+- [ ] Avec un compte membre : les catégories sont visibles, sans bouton pour en créer ou en renommer.
+- [ ] Déconnecté : la page de gestion renvoie vers `/login`.
+- [ ] Refus RLS (création et renommage par un membre) : vérifié par `npm run test:integration`.

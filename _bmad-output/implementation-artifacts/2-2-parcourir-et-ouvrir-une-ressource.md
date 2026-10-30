@@ -29,3 +29,11 @@ Lecture seule : pas de création, modification, suppression ni filtre (stories 2
 - Contrainte de test : la création arrive en story 2.3. Pour vérifier la liste non vide, la fiche de test indique comment insérer une ressource d'essai depuis le SQL Editor de Supabase. Cette action est à confirmer avec Dylan avant de commencer.
 - Accessibilité : liste et détail utilisables au clavier, focus visible, état vide annoncé clairement.
 - Dépend de la story 2.1 (table `categories`).
+
+## Vérifications dans le navigateur (à faire par Dylan)
+
+- [ ] Liste vide : un message explique qu'il n'y a pas encore de ressource ; un membre simple ne voit pas de bouton « Ajouter ».
+- [ ] Après l'insertion d'une ressource d'essai depuis Supabase (étapes à fournir par le développeur) : la liste montre son titre, sa catégorie et sa date de mise à jour.
+- [ ] Détail : le titre, le texte complet, la catégorie et la date s'affichent.
+- [ ] Déconnecté : la liste renvoie vers `/login`.
+- [ ] Clavier : ouvrir une ressource avec Tab puis Entrée, focus visible.
