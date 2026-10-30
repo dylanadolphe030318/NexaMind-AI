@@ -79,22 +79,22 @@ development_status:
 action_items:
   - id: "epic-1-retro-item-1-pr-parer-un-compte-membre-et-un-compte-r"
     epic: 1
-    action: "Pr?parer un compte membre et un compte responsable de test avant le sprint
-      2, ?tapes dans le README, sans mot de passe en capture"
-    owner: "Dylan + d?veloppeur"
+    action: "Préparer un compte membre et un compte responsable de test avant le sprint
+      2, étapes dans le README, sans mot de passe en capture"
+    owner: "Dylan + développeur"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
   - id: "epic-1-retro-item-2-cr-er-le-responsable-initial-promotion-m"
     epic: 1
-    action: "Cr?er le responsable initial (promotion manuelle via SQL Editor Supabase)
+    action: "Créer le responsable initial (promotion manuelle via SQL Editor Supabase)
       avant la story 2.1"
     owner: "Dylan"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
   - id: "epic-1-retro-item-3-un-commit-par-story-avec-son-num-ro-stat"
     epic: 1
-    action: "Un commit par story avec son num?ro, statut done apr?s tests, puis git
-      push autoris? par Dylan en fin de sprint"
-    owner: "d?veloppeur"
+    action: "Un commit par story avec son numéro, statut done après tests, puis git
+      push autorisé par Dylan en fin de sprint"
+    owner: "développeur"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-30.md"
