@@ -35,7 +35,7 @@ export function CreateCategoryForm() {
         />
       </div>
       <button className="button auth-submit" disabled={pending} type="submit">
-        {pending ? "Cr&eacute;ation..." : "Cr&eacute;er la cat&eacute;gorie"}
+        {pending ? "Cr\u00e9ation..." : "Cr\u00e9er la cat\u00e9gorie"}
       </button>
       {state.status !== "idle" ? (
         <p
