@@ -3,7 +3,7 @@ story: 1-4-accéder-à-son-espace-protégé
 title: Accéder à son espace protégé
 epic: 1
 sprint: 1
-status: in-review
+status: done
 baseline_commit: 60548053e1134213152766db9c6edfd125284b26
 ---
 
