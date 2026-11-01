@@ -74,7 +74,7 @@ Ce document transforme le PRD, les documents UX et l’architecture de NexaMind 
 ### Carte de couverture des exigences
 
 FR1 : Epic 1 — créer un compte membre, se connecter et se déconnecter.
-FR2 : Epic 1 — arriver sur un tableau de bord donnant accès aux fonctions principales.
+FR2 : Epic 1 — arriver sur un tableau de bord donnant accès aux fonctions principales et indiquant son rôle (story 1.5).
 FR3 : Epic 2 — créer, modifier et supprimer des ressources selon son rôle.
 FR4 : Epic 2 — consulter, filtrer et classer les ressources dans des catégories.
 FR5 : Epic 4 — préparer les ressources pour la recherche sémantique avec une indexation persistante.
@@ -172,6 +172,22 @@ afin de retrouver un point de départ personnel dans l’application.
 **Étant donné** que je consulte le tableau de bord, **quand** je cherche à fermer ma session, **alors** une action clairement nommée me permet de me déconnecter.
 
 **Étant donné** qu’un visiteur ou un membre tente de lire directement des données protégées dans Supabase sans autorisation, **quand** les tests d’intégration interrogent la base avec sa session réelle, **alors** les politiques RLS refusent l’accès ou ne retournent que les lignes permises, sans utiliser une clé de service privilégiée pour contourner ces règles.
+
+### Story 1.5 : Voir son rôle dans l’espace membre
+
+Ajoutée par la proposition de changement du 2026-11-01 (rétrospective du sprint 3).
+
+En tant que membre connecté,
+je veux voir mon rôle (Membre ou Responsable) sur mon tableau de bord,
+afin de savoir ce que je peux faire sans consulter Supabase.
+
+**Critères d’acceptation :**
+
+**Étant donné** que je suis connecté, **quand** le tableau de bord s’affiche, **alors** j’y lis mon rôle écrit en toutes lettres (« Membre » ou « Responsable »), à côté de mon identité.
+
+**Étant donné** que mon rôle a été changé dans la base pendant que je suis connecté, **quand** je recharge le tableau de bord ou j’ouvre la page des catégories, **alors** mon nouveau rôle et les actions qui lui correspondent sont pris en compte sans me déconnecter.
+
+**Étant donné** que le rôle s’affiche, **quand** je le consulte, **alors** il vient du profil lu côté serveur avec ma session et je ne peux pas le modifier depuis l’application.
 
 ## Epic 2 : Organiser les ressources partagées
 
@@ -577,8 +593,8 @@ afin de m’assurer que les réponses sont sourcées et que l’assistant s’ab
 ### Sprint 4 — Retrouver ses recherches sans IA
 
 **Objectif :** offrir un historique personnel de recherches que le membre peut consulter, relancer et nettoyer.
-**Stories :** 3.2, 3.3, 3.4 (3 stories).
-**Résultat démontrable :** un membre consulte ses recherches datées, en relance une et en supprime une autre ; un second membre ne peut pas accéder à cet historique.
+**Stories :** 1.5, 3.2, 3.3, 3.4 (4 stories). La story 1.5 (rôle visible) a été ajoutée par la rétrospective du sprint 3.
+**Résultat démontrable :** un membre voit son rôle sur son tableau de bord ; il consulte ses recherches datées, en relance une et en supprime une autre ; un second membre ne peut pas accéder à cet historique.
 **Type :** standard.
 
 ### Sprint 5 — Préparer les données pour l’IA

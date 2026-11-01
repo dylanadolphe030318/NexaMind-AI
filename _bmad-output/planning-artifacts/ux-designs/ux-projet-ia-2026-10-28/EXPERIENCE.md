@@ -30,7 +30,7 @@ Application web utilisable sur ordinateur et mobile. « Les deux » est interpr�
 | Écran ou vue | Accessible depuis | Rôle |
 |---|---|---|
 | Créer un compte / Se connecter | Visiteur | Créer un compte membre ou ouvrir une session |
-| Tableau de bord | Après connexion, navigation principale | Accéder aux ressources, à la recherche et à l’assistant |
+| Tableau de bord | Après connexion, navigation principale | Accéder aux ressources, à la recherche et à l’assistant ; indique l’identité et le rôle (« Membre » ou « Responsable », écrit en toutes lettres) de la personne connectée |
 | Ressources | Navigation principale ou tableau de bord | Parcourir, filtrer par catégorie et ouvrir les ressources partagées |
 | Détail d’une ressource | Liste ou résultat de recherche | Lire le contenu, sa catégorie et sa date de mise à jour |
 | Ajouter / modifier une ressource | Ressources ; action autorisée selon le rôle | Saisir un titre, un texte et une catégorie |

@@ -79,6 +79,7 @@ Un membre connecté peut accéder à un tableau de bord qui donne accès à la r
 **Critères vérifiables :**
 - Après connexion, le tableau de bord est affiché et propose les accès aux fonctions principales.
 - Le tableau de bord affiche les ressources récentes ou des indications utiles, et un état clair si l’espace est vide. **[ASSUMPTION]**
+- Le tableau de bord indique le rôle du membre connecté (Membre ou Responsable) en toutes lettres. *(Ajouté le 2026-11-01, rétrospective du sprint 3.)*
 
 ### 5.2 Gestion des ressources
 
@@ -164,7 +165,7 @@ L’application distingue les actions du responsable et du membre et n’utilise
 
 **Critères vérifiables :**
 - Une inscription autonome donne uniquement le rôle membre ; seul le compte responsable initial peut gérer l’espace.
-- Un membre peut créer, modifier et supprimer ses propres ressources, mais ne peut pas modifier ou supprimer celles d’un autre membre ; le responsable peut modifier et supprimer toute ressource.
+- Un changement de rôle est pris en compte au chargement suivant des pages, sans obliger le membre à se déconnecter. *(Ajouté le 2026-11-01, rétrospective du sprint 3.)*- Un membre peut créer, modifier et supprimer ses propres ressources, mais ne peut pas modifier ou supprimer celles d’un autre membre ; le responsable peut modifier et supprimer toute ressource.
 - Chaque membre retrouve les mêmes ressources partagées dans les listes, recherches et sources de l’assistant.
 - Un membre ne peut pas ouvrir l’historique d’un autre membre, même en utilisant directement son adresse.
 
