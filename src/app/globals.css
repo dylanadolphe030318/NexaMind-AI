@@ -757,6 +757,23 @@ a:focus-visible {
   outline-offset: 3px;
 }
 
+.resource-search-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+  justify-items: start;
+}
+
+.resource-search-form .auth-field {
+  width: 100%;
+}
+
+.resource-excerpt {
+  margin: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
 .resource-meta-row {
   display: flex;
   flex-wrap: wrap;

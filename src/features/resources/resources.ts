@@ -71,6 +71,64 @@ export async function getResourceListData(categoryId?: string): Promise<{
   };
 }
 
+export type SearchResult = {
+  id: string;
+  title: string;
+  excerpt: string;
+  updatedAt: string;
+};
+
+export const SEARCH_MAX_LENGTH = 100;
+const SEARCH_RESULT_LIMIT = 50;
+
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
+function buildExcerpt(body: string, term: string): string {
+  const flat = body.replace(/\s+/g, " ").trim();
+  const index = flat.toLowerCase().indexOf(term.toLowerCase());
+  const start = Math.max(0, index > 40 ? index - 40 : 0);
+  const slice = flat.slice(start, start + 160);
+  return `${start > 0 ? "\u2026" : ""}${slice}${start + 160 < flat.length ? "\u2026" : ""}`;
+}
+
+/** null = pas de session ; results null = erreur de lecture. La RLS limite aux ressources accessibles. */
+export async function searchResources(term: string): Promise<{
+  results: SearchResult[] | null;
+} | null> {
+  const { supabase, user } = await hasSession();
+  if (!user) {
+    return null;
+  }
+
+  const pattern = `%${escapeLike(term)}%`;
+  const columns = "id, title, body, updated_at";
+  const [byTitle, byBody] = await Promise.all([
+    supabase.from("resources").select(columns).ilike("title", pattern).limit(SEARCH_RESULT_LIMIT),
+    supabase.from("resources").select(columns).ilike("body", pattern).limit(SEARCH_RESULT_LIMIT),
+  ]);
+  if (byTitle.error || byBody.error) {
+    return { results: null };
+  }
+
+  const unique = new Map<string, { id: string; title: string; body: string | null; updated_at: string }>();
+  for (const row of [...(byTitle.data ?? []), ...(byBody.data ?? [])]) {
+    unique.set(row.id, row);
+  }
+
+  const results = [...unique.values()]
+    .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
+    .slice(0, SEARCH_RESULT_LIMIT)
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      excerpt: buildExcerpt(row.body ?? "", term),
+      updatedAt: row.updated_at,
+    }));
+  return { results };
+}
+
 export type ResourceDetailResult =
   | { status: "unauthenticated" }
   | { status: "not-found" }

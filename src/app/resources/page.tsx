@@ -43,6 +43,9 @@ export default async function ResourcesPage({
         <p>
           <Link className="button button-small" href="/resources/new">
             Ajouter une ressource
+          </Link>{" "}
+          <Link className="button button-small button-secondary" href="/resources/search">
+            Rechercher
           </Link>
         </p>
 
