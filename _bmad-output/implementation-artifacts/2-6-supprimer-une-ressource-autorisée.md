@@ -3,7 +3,7 @@ story: 2-6-supprimer-une-ressource-autorisée
 title: Supprimer une ressource autorisée
 epic: 2
 sprint: 3
-status: ready-for-dev
+status: done
 ---
 
 # Story 2.6 : Supprimer une ressource autorisée

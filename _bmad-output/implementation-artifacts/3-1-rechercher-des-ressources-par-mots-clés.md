@@ -3,7 +3,7 @@ story: 3-1-rechercher-des-ressources-par-mots-clés
 title: Rechercher des ressources par mots-clés
 epic: 3
 sprint: 3
-status: ready-for-dev
+status: done
 ---
 
 # Story 3.1 : Rechercher des ressources par mots-clés

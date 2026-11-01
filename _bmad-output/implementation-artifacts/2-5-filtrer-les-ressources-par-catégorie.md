@@ -3,7 +3,7 @@ story: 2-5-filtrer-les-ressources-par-catégorie
 title: Filtrer les ressources par catégorie
 epic: 2
 sprint: 3
-status: ready-for-dev
+status: done
 ---
 
 # Story 2.5 : Filtrer les ressources par catégorie
