@@ -11,23 +11,13 @@ export type SearchHistoryEntry = {
 
 const HISTORY_LIMIT = 20;
 
-/** Enregistre la requête pour la personne connectée, sauf si c'est la même que sa dernière recherche. Silencieux en cas d'échec. */
+/** Enregistre la requête pour la personne connectée. Silencieux en cas d'échec : la recherche s'affiche quand même. */
 export async function recordSearch(query: string): Promise<void> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return;
-  }
-
-  const { data: last, error: lastError } = await supabase
-    .from("searches")
-    .select("query")
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  if (lastError || last?.query === query) {
     return;
   }
 

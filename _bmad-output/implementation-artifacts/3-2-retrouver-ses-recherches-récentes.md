@@ -33,7 +33,7 @@ Historique de recherches par mots-clés uniquement (aucune IA, pas de `search_re
 ## Notes pour le développement
 
 - Migration à créer (appliquée par Dylan dans le SQL Editor, `supabase/migrations/2026110…_create_searches.sql`) : table `searches` (`id uuid`, `owner_id` → `profiles(id)` `on delete cascade`, `query text` limité à 100 caractères comme la recherche, `created_at`, `expires_at` par défaut 30 jours après la création). RLS activée : lecture, ajout et suppression réservés au propriétaire (`owner_id = auth.uid()`), lecture excluant les lignes dont `expires_at` est dépassé (architecture AD-3, AD-4). Pas de modification (`update`).
-- Enregistrement : la page `/resources/search` enregistre la requête valide (non vide) côté serveur avec la session de la personne ; ne pas enregistrer deux fois de suite la même requête (rafraîchissement de la page). Un échec d'enregistrement ne doit pas empêcher d'afficher les résultats.
+- Enregistrement : la page `/resources/search` enregistre chaque recherche lancée côté serveur avec la session de la personne ; deux recherches identiques sont deux entrées distinctes, chacune avec sa date. Un échec d'enregistrement ne doit pas empêcher d'afficher les résultats.
 - Page `/resources/searches` (historique), 20 dernières recherches, la plus récente en premier. Lecture avec la session ; l'adresse directe d'un autre membre n'existe pas (pas d'identifiant de membre dans l'URL).
 - Tests d'intégration : un membre ne voit pas les recherches d'un autre (critère 3) ; ajouter à `tests/supabase-rls.test.mjs` avec nettoyage dans le `finally`.
 - Mettre à jour le README (ordre des migrations).
@@ -44,5 +44,5 @@ Historique de recherches par mots-clés uniquement (aucune IA, pas de `search_re
 - [ ] Lancer une recherche puis ouvrir « Mes recherches récentes » : la requête apparaît avec sa date.
 - [ ] Se connecter avec un autre membre : il ne voit pas cette recherche.
 - [ ] Un nouveau membre sans recherche voit l'état vide et le lien de recherche.
-- [ ] Rafraîchir la page de résultats : la requête n'est pas enregistrée en double.
+- [ ] Lancer deux fois le même mot : deux entrées distinctes, chacune avec sa date.
 - [ ] Les accents s'affichent correctement.

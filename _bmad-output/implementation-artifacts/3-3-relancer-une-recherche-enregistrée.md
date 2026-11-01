@@ -26,7 +26,7 @@ Aucune IA. Les résultats sont recalculés à chaque réouverture, jamais conser
 
 - Chaque requête de l'historique devient un lien vers `/resources/search?q=<requête>`.
 - Résultats : même page et mêmes textes que la story 3.1 (« Aucun résultat… » neutre, champ modifiable).
-- Relancer depuis l'historique ne crée pas de doublon immédiat si la requête est identique à la dernière enregistrée (règle de la story 3.2) ; une relance après une autre recherche est enregistrée comme une nouvelle recherche récente.
+- Relancer une recherche depuis l'historique l'enregistre comme une nouvelle recherche récente (chaque recherche lancée est une entrée distincte, règle de la story 3.2).
 
 ## Notes pour le développement
 
