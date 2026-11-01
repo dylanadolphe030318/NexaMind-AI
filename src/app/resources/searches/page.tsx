@@ -41,7 +41,15 @@ export default async function RecentSearchesPage() {
             <ul className="category-list">
               {outcome.entries.map((entry) => (
                 <li className="category-entry" key={entry.id}>
-                  <p className="category-name">{entry.query}</p>
+                  <p className="category-name">
+                    <Link
+                      className="resource-link"
+                      href={`/resources/search?q=${encodeURIComponent(entry.query)}`}
+                      prefetch={false}
+                    >
+                      {entry.query}
+                    </Link>
+                  </p>
                   <p className="resource-meta">
                     Recherche du {formatResourceDate(entry.createdAt)}
                   </p>
