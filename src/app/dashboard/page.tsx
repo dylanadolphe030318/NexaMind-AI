@@ -74,6 +74,10 @@ export default async function DashboardPage() {
           Parcourir les ressources
         </Link>
 
+        <Link className="button button-small dashboard-categories-link" href="/resources/searches">
+          Mes recherches r&eacute;centes
+        </Link>
+
         <form action={signOut} className="auth-form">
           <button className="button auth-submit" type="submit">
             Se déconnecter

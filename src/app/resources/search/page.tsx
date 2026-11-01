@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { formatResourceDate } from "@/features/resources/resource-format";
 import { SEARCH_MAX_LENGTH, searchResources } from "@/features/resources/resources";
+import { recordSearch } from "@/features/resources/searches";
 
 export const metadata: Metadata = {
   title: "Rechercher - NexaMind AI",
@@ -25,6 +26,9 @@ export default async function SearchResourcesPage({
   const outcome = raw && !tooLong ? await searchResources(raw) : null;
   if (raw && !tooLong && !outcome) {
     redirect("/login");
+  }
+  if (outcome?.results) {
+    await recordSearch(raw);
   }
 
   return (
@@ -82,6 +86,10 @@ export default async function SearchResourcesPage({
             </>
           ) : null}
         </section>
+
+        <Link className="auth-back" href="/resources/searches">
+          Mes recherches r&eacute;centes
+        </Link>
 
         <Link className="auth-back" href="/resources">
           Retour aux ressources

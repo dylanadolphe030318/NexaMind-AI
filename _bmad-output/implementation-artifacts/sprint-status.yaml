@@ -54,7 +54,7 @@ development_status:
 
   epic-3: in-progress
   3-1-rechercher-des-ressources-par-mots-clés: done
-  3-2-retrouver-ses-recherches-récentes: ready-for-dev
+  3-2-retrouver-ses-recherches-récentes: review
   3-3-relancer-une-recherche-enregistrée: ready-for-dev
   3-4-supprimer-une-recherche-de-son-historique: ready-for-dev
   epic-3-retrospective: optional

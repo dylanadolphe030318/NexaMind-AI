@@ -519,6 +519,38 @@ test(
         }
       });
 
+      await t.test("searches : l'historique est privé à son propriétaire", async () => {
+        const query = `RLS-TEST-${randomUUID()}`;
+        const { data: created, error: insertError } = await memberA
+          .from("searches")
+          .insert({ owner_id: sessionA.user.id, query })
+          .select("id");
+        assert.ifError(insertError);
+        assert.equal(created?.length, 1);
+
+        const { data: ownRows, error: ownError } = await memberA
+          .from("searches")
+          .select("id")
+          .eq("query", query);
+        assert.ifError(ownError);
+        assert.equal(ownRows?.length, 1);
+
+        const { data: otherRows, error: otherError } = await memberB
+          .from("searches")
+          .select("id")
+          .eq("query", query);
+        assert.ifError(otherError);
+        assert.equal(otherRows?.length, 0);
+
+        const { data: anonymousRows } = await anonymousClient.from("searches").select("id");
+        assert.equal(anonymousRows?.length ?? 0, 0);
+
+        const { error: forgedError } = await memberB
+          .from("searches")
+          .insert({ owner_id: sessionA.user.id, query: `RLS-TEST-${randomUUID()}` });
+        assert.ok(forgedError, "un membre ne doit pas écrire dans l'historique d'un autre");
+      });
+
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {
         const { data: memberBProfile, error: memberBProfileError } =
           await memberB
@@ -563,6 +595,8 @@ test(
     } finally {
       // Nettoyage : le membre A supprime les ressources de test qu'il possède.
       await memberA.from("resources").delete().like("title", "RLS-TEST-%");
+      await memberA.from("searches").delete().like("query", "RLS-TEST-%");
+      await memberB.from("searches").delete().like("query", "RLS-TEST-%");
       await Promise.all([
         anonymousClient.auth.signOut(),
         memberA.auth.signOut(),
