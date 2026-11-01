@@ -104,9 +104,20 @@ export async function searchResources(term: string): Promise<{
 
   const pattern = `%${escapeLike(term)}%`;
   const columns = "id, title, body, updated_at";
+  const recent = { ascending: false };
   const [byTitle, byBody] = await Promise.all([
-    supabase.from("resources").select(columns).ilike("title", pattern).limit(SEARCH_RESULT_LIMIT),
-    supabase.from("resources").select(columns).ilike("body", pattern).limit(SEARCH_RESULT_LIMIT),
+    supabase
+      .from("resources")
+      .select(columns)
+      .ilike("title", pattern)
+      .order("updated_at", recent)
+      .limit(SEARCH_RESULT_LIMIT),
+    supabase
+      .from("resources")
+      .select(columns)
+      .ilike("body", pattern)
+      .order("updated_at", recent)
+      .limit(SEARCH_RESULT_LIMIT),
   ]);
   if (byTitle.error || byBody.error) {
     return { results: null };
