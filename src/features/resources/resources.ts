@@ -34,24 +34,34 @@ async function hasSession() {
 }
 
 /** null = pas de session ; resources null = erreur de lecture. */
-export async function getResourceListData(): Promise<{
+export async function getResourceListData(categoryId?: string): Promise<{
   resources: ResourceSummary[] | null;
+  categories: { id: string; name: string }[];
 } | null> {
   const { supabase, user } = await hasSession();
   if (!user) {
     return null;
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("resources")
     .select("id, title, updated_at, categories(name)")
     .order("updated_at", { ascending: false });
+  if (categoryId) {
+    query = query.eq("category_id", categoryId);
+  }
+
+  const [{ data, error }, { data: categories }] = await Promise.all([
+    query,
+    supabase.from("categories").select("id, name").order("name"),
+  ]);
 
   if (error) {
-    return { resources: null };
+    return { resources: null, categories: categories ?? [] };
   }
 
   return {
+    categories: categories ?? [],
     resources: ((data ?? []) as Row[]).map((row) => ({
       id: row.id,
       title: row.title,
