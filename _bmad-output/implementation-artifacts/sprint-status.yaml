@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-01-2026 16:05
+last_updated: 11-01-2026 16:15
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -49,7 +49,7 @@ development_status:
   2-4-modifier-une-ressource-autorisée: done
   2-5-filtrer-les-ressources-par-catégorie: done
   2-6-supprimer-une-ressource-autorisée: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   epic-3: in-progress
   3-1-rechercher-des-ressources-par-mots-clés: done
@@ -103,7 +103,7 @@ action_items:
     action: "Tests RLS qui nettoient derrière eux après la story 2.6 ; garder les
       3 comptes de test pendant tout le sprint"
     owner: "développeur"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-30.md"
   - id: "epic-2-retro-item-5-mise-en-forme-de-la-liste-des-ressources"
     epic: 2
@@ -119,3 +119,24 @@ action_items:
     owner: "développeur"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-30.md"
+  - id: "epic-2-retro-item-7-afficher-le-rôle-membre-ou-responsable-s"
+    epic: 2
+    action: "Afficher le rôle (Membre ou Responsable) sur le tableau de bord, par
+      correction de trajectoire"
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-11-01.md"
+  - id: "epic-2-retro-item-8-rôle-à-jour-sans-se-déconnecter-reprodui"
+    epic: 2
+    action: "Rôle à jour sans se déconnecter : reproduire, trouver la cause, corriger,
+      par correction de trajectoire"
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-11-01.md"
+  - id: "epic-2-retro-item-9-textes-d-écran-accents-et-ton-listés-dan"
+    epic: 2
+    action: "Textes d'écran (accents et ton) listés dans chaque fiche de story avant
+      le développement ; rattachée à la règle de fin de story du sprint 2"
+    owner: "développeur"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-11-01.md"
