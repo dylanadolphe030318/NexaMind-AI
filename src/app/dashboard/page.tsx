@@ -22,6 +22,19 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Le rôle est relu à chaque chargement : il n'est jamais copié dans la session.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const roleLabel =
+    profile?.role === "responsable"
+      ? "Responsable"
+      : profile?.role === "membre"
+        ? "Membre"
+        : "non disponible";
+
   return (
     <main className="auth-page">
       <section aria-labelledby="dashboard-title" className="auth-card">
@@ -48,6 +61,9 @@ export default async function DashboardPage() {
         </p>
         <p className="member-identity">
           Connecté en tant que <strong>{user.email ?? "Membre"}</strong>
+        </p>
+        <p className="member-identity">
+          Votre r&ocirc;le : <strong>{roleLabel}</strong>
         </p>
 
         <Link className="button button-small dashboard-categories-link" href="/categories">
