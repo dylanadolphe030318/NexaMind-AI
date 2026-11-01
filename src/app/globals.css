@@ -642,6 +642,12 @@ a:focus-visible {
   background: #f3fbf6;
 }
 
+.auth-message-info {
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: #f8f5fb;
+}
+
 .auth-alternative {
   margin: 25px 0 0;
   color: var(--muted);

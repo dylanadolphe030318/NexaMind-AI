@@ -44,7 +44,7 @@ export default async function SearchResourcesPage({
 
         <section aria-label="R&eacute;sultats de la recherche" className="category-list-section">
           {submitted && !raw ? (
-            <p className="auth-message auth-message-error" role="alert">
+            <p className="auth-message auth-message-info" role="status">
               Saisissez au moins un mot pour lancer la recherche.
             </p>
           ) : tooLong ? (
