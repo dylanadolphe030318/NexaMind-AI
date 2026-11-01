@@ -15,9 +15,9 @@ export const instant = false;
 export default async function ResourcesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ category?: string | string[] }>;
+  searchParams: Promise<{ category?: string | string[]; deleted?: string | string[] }>;
 }) {
-  const { category } = await searchParams;
+  const { category, deleted } = await searchParams;
   const requested = typeof category === "string" && isUuid(category) ? category : undefined;
   const data = await getResourceListData(requested);
   if (!data) {
@@ -33,6 +33,12 @@ export default async function ResourcesPage({
         <p className="auth-intro">
           Les ressources partag&eacute;es par l&apos;&eacute;quipe.
         </p>
+
+        {deleted === "1" ? (
+          <p className="auth-message auth-message-success" role="status">
+            La ressource a &eacute;t&eacute; supprim&eacute;e.
+          </p>
+        ) : null}
 
         <p>
           <Link className="button button-small" href="/resources/new">

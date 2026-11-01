@@ -460,6 +460,71 @@ test(
         }
       });
 
+      await t.test("resources : le proprietaire supprime sa ressource", async () => {
+        const created = await createTestResource(memberA, sessionA.user.id, "suppression");
+        const { data: deleted, error } = await memberA
+          .from("resources")
+          .delete()
+          .eq("id", created.id)
+          .select("id");
+        assert.ifError(error);
+        assert.equal(deleted?.length, 1);
+
+        const { data: after, error: readError } = await memberA
+          .from("resources")
+          .select("id")
+          .eq("id", created.id)
+          .maybeSingle();
+        assert.ifError(readError);
+        assert.equal(after, null);
+      });
+
+      await t.test("resources : un autre membre ne peut pas supprimer la ressource", async () => {
+        const created = await createTestResource(memberA, sessionA.user.id, "suppression-refus");
+
+        const { data: deleted, error } = await memberB
+          .from("resources")
+          .delete()
+          .eq("id", created.id)
+          .select("id");
+        assert.ok(error || (deleted?.length ?? 0) === 0, "aucune ligne ne doit etre supprimee");
+
+        const { data: after, error: readError } = await memberA
+          .from("resources")
+          .select("id, title")
+          .eq("id", created.id)
+          .maybeSingle();
+        assert.ifError(readError);
+        assert.equal(after?.title, created.title);
+      });
+
+      await t.test("resources : le responsable supprime la ressource d'un membre", async (managerTest) => {
+        if (!managerEmail || !managerPassword) {
+          managerTest.skip("RLS_TEST_MANAGER_EMAIL et RLS_TEST_MANAGER_PASSWORD absents : test responsable 2.6 ignore.");
+          return;
+        }
+
+        const created = await createTestResource(memberA, sessionA.user.id, "suppression-responsable");
+        const managerClient = createClient(supabaseUrl, publishableKey, clientOptions);
+        try {
+          const { error: loginError } = await managerClient.auth.signInWithPassword({
+            email: managerEmail,
+            password: managerPassword,
+          });
+          assert.ifError(loginError);
+
+          const { data: deleted, error } = await managerClient
+            .from("resources")
+            .delete()
+            .eq("id", created.id)
+            .select("id");
+          assert.ifError(error);
+          assert.equal(deleted?.length, 1);
+        } finally {
+          await managerClient.auth.signOut();
+        }
+      });
+
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {
         const { data: memberBProfile, error: memberBProfileError } =
           await memberB
@@ -502,6 +567,8 @@ test(
         assert.equal(otherProfileFromB, null);
       });
     } finally {
+      // Nettoyage : le membre A supprime les ressources de test qu'il possède.
+      await memberA.from("resources").delete().like("title", "RLS-TEST-%");
       await Promise.all([
         anonymousClient.auth.signOut(),
         memberA.auth.signOut(),

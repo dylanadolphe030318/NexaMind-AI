@@ -112,6 +112,47 @@ export async function updateResource(
   redirect(`/resources/${resourceId}`);
 }
 
+export async function deleteResource(resourceId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+  if (!isUuid(resourceId)) {
+    notFound();
+  }
+
+  // Contrôle serveur : seule une personne autorisée peut supprimer ; la RLS reste juge aussi.
+  const editable = await getResourceForEdit(resourceId);
+  if (editable.status === "unauthenticated") {
+    redirect("/login");
+  }
+  if (editable.status === "not-found" || editable.status === "forbidden") {
+    notFound();
+  }
+  if (editable.status === "error") {
+    redirect(`/resources/${resourceId}/delete?error=1`);
+  }
+
+  const { data: deleted, error } = await supabase
+    .from("resources")
+    .delete()
+    .eq("id", resourceId)
+    .select("id");
+  if (error) {
+    redirect(`/resources/${resourceId}/delete?error=1`);
+  }
+  if (!deleted?.length) {
+    // RLS a refusé (0 ligne) : rien n'a été supprimé.
+    notFound();
+  }
+
+  revalidatePath("/resources");
+  redirect("/resources?deleted=1");
+}
+
 export async function createResource(
   _previousState: ResourceFormState,
   formData: FormData,

@@ -153,6 +153,23 @@ a:focus-visible {
   font-size: 0.85rem;
 }
 
+.button-secondary {
+  color: var(--purple-deep);
+  background: #fff;
+  box-shadow: none;
+}
+
+.button-secondary:hover {
+  color: #fff;
+}
+
+.resource-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
 .hero {
   flex: 1;
   display: grid;

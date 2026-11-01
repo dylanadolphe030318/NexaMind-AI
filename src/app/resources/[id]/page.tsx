@@ -50,6 +50,9 @@ export default async function ResourceDetailPage({
               <p>
                 <Link className="button" href={`/resources/${id}/edit`}>
                   Modifier
+                </Link>{" "}
+                <Link className="button button-secondary" href={`/resources/${id}/delete`}>
+                  Supprimer
                 </Link>
               </p>
             ) : null}
