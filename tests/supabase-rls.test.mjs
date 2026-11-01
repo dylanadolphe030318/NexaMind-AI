@@ -188,7 +188,7 @@ test(
         assert.equal(memberProfile?.workspace_id, managerProfile.workspace_id);
 
         const categoryName = "RLS-" + randomUUID();
-        const renamedCategoryName = categoryName + "-renommee";
+        const renamedCategoryName = categoryName + "-renomm\u00e9e";
         const { data: createdCategory, error: createError } = await manager
           .from("categories")
           .insert({
