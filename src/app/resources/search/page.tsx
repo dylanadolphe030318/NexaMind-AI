@@ -27,7 +27,7 @@ export default async function SearchResourcesPage({
   if (raw && !tooLong && !outcome) {
     redirect("/login");
   }
-  if (outcome?.results) {
+  if (outcome?.results || (submitted && !raw)) {
     await recordSearch(raw);
   }
 

@@ -58,13 +58,13 @@ export default async function RecentSearchesPage({
                       href={`/resources/search?q=${encodeURIComponent(entry.query)}`}
                       prefetch={false}
                     >
-                      {entry.query}
+                      {entry.query || "(recherche vide)"}
                     </Link>
                   </p>
                   <p className="resource-meta">
                     Recherche du {formatResourceDate(entry.createdAt)} &middot;{" "}
                     <Link
-                      aria-label={`Supprimer la recherche ${entry.query}`}
+                      aria-label={`Supprimer la recherche ${entry.query || "vide"}`}
                       className="resource-link"
                       href={`/resources/searches/${entry.id}/delete`}
                       prefetch={false}

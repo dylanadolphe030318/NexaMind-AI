@@ -50,7 +50,7 @@ export default async function DeleteSearchPage({
             ) : null}
             <p>
               Voulez-vous vraiment supprimer la recherche{" "}
-              <strong>&laquo;&nbsp;{result.search.query}&nbsp;&raquo;</strong>&nbsp;?
+              <strong>&laquo;&nbsp;{result.search.query || "recherche vide"}&nbsp;&raquo;</strong>&nbsp;?
             </p>
             <form action={deleteSearch.bind(null, result.search.id)} className="resource-delete-actions">
               <button className="button" type="submit">
