@@ -284,14 +284,8 @@ test(
         });
         assert.equal(insertError?.code, "42501");
 
-        // La modification est couverte par les tests de la story 2.4 (RLS-TEST-2.4-).
-
-        const { data: deleted, error: deleteError } = await memberA
-          .from("resources")
-          .delete()
-          .eq("workspace_id", memberProfile.workspace_id)
-          .select("id");
-        assert.ok(deleteError || (deleted?.length ?? 0) === 0);
+        // La modification est couverte par les tests de la story 2.4 (RLS-TEST-2.4-),
+        // la suppression par ceux de la story 2.6 (RLS-TEST-2.4-suppression-*).
       });
 
       await t.test("resources : un membre cree une ressource a son nom, pas au nom d'un autre", async () => {
