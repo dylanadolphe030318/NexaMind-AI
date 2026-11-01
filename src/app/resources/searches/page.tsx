@@ -12,7 +12,12 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
-export default async function RecentSearchesPage() {
+export default async function RecentSearchesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string | string[] }>;
+}) {
+  const { deleted } = await searchParams;
   const outcome = await getRecentSearches();
   if (!outcome) {
     redirect("/login");
@@ -22,6 +27,12 @@ export default async function RecentSearchesPage() {
     <main className="auth-page category-page">
       <section aria-labelledby="searches-title" className="auth-card category-card">
         <h1 id="searches-title">Mes recherches r&eacute;centes</h1>
+
+        {deleted === "1" ? (
+          <p className="auth-message auth-message-success" role="status">
+            La recherche a &eacute;t&eacute; supprim&eacute;e.
+          </p>
+        ) : null}
 
         <section aria-label="Historique des recherches" className="category-list-section">
           {outcome.entries === null ? (
@@ -51,7 +62,15 @@ export default async function RecentSearchesPage() {
                     </Link>
                   </p>
                   <p className="resource-meta">
-                    Recherche du {formatResourceDate(entry.createdAt)}
+                    Recherche du {formatResourceDate(entry.createdAt)} &middot;{" "}
+                    <Link
+                      aria-label={`Supprimer la recherche ${entry.query}`}
+                      className="resource-link"
+                      href={`/resources/searches/${entry.id}/delete`}
+                      prefetch={false}
+                    >
+                      Supprimer
+                    </Link>
                   </p>
                 </li>
               ))}

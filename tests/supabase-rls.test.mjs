@@ -551,6 +551,36 @@ test(
         assert.ok(forgedError, "un membre ne doit pas écrire dans l'historique d'un autre");
       });
 
+      await t.test("searches : un membre ne supprime pas la recherche d'un autre", async () => {
+        const query = `RLS-TEST-${randomUUID()}`;
+        const { data: created, error: insertError } = await memberA
+          .from("searches")
+          .insert({ owner_id: sessionA.user.id, query })
+          .select("id");
+        assert.ifError(insertError);
+        const searchId = created?.[0]?.id;
+        assert.ok(searchId);
+
+        const { data: foreignDelete, error: foreignError } = await memberB
+          .from("searches")
+          .delete()
+          .eq("id", searchId)
+          .select("id");
+        assert.ifError(foreignError);
+        assert.equal(foreignDelete?.length, 0);
+
+        const { data: stillThere } = await memberA.from("searches").select("id").eq("id", searchId);
+        assert.equal(stillThere?.length, 1);
+
+        const { data: ownDelete, error: ownError } = await memberA
+          .from("searches")
+          .delete()
+          .eq("id", searchId)
+          .select("id");
+        assert.ifError(ownError);
+        assert.equal(ownDelete?.length, 1);
+      });
+
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {
         const { data: memberBProfile, error: memberBProfileError } =
           await memberB
