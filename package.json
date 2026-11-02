@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:integration": "node --env-file=.env.local --test tests/supabase-rls.test.mjs"
+    "test:unit": "node --test tests/chunking.test.mjs",
+    "test:integration": "node --env-file=.env.local --test tests/supabase-rls.test.mjs tests/indexing-rls.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

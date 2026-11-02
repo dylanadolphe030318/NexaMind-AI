@@ -61,7 +61,7 @@ development_status:
   epic-3-retrospective: done
 
   epic-4: backlog
-  4-1-découper-une-ressource-en-passages: ready-for-dev
+  4-1-découper-une-ressource-en-passages: in-progress
   4-2-créer-et-enregistrer-les-embeddings: ready-for-dev
   4-3-suivre-l-état-de-préparation-d-une-ressource: ready-for-dev
   4-4-retrouver-les-passages-pertinents-par-le-sens: backlog

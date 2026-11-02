@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "./resource-format";
 import { getResourceForEdit } from "./resources";
+import { indexResource } from "./indexing";
 import {
   parseResourceForm,
   type ResourceFormState,
@@ -88,23 +89,49 @@ export async function updateResource(
     );
   }
 
-  // owner_id et workspace_id ne sont jamais modifi\u00e9s ; updated_at est fix\u00e9 par un trigger.
-  const { data: updated, error } = await supabase
-    .from("resources")
-    .update({
-      title: parsed.values.title,
-      body: parsed.values.body,
-      category_id: category.id,
-    })
-    .eq("id", resourceId)
-    .select("id");
+  const bodyChanged = parsed.values.body !== editable.resource.body;
+  let newRevision: number | null = null;
 
-  if (error) {
-    return failure("La ressource n\u2019a pas pu \u00eatre enregistr\u00e9e. R\u00e9essayez.");
+  if (bodyChanged) {
+    // Début d'une révision : texte mis à jour et anciens passages retirés, de façon atomique.
+    const { data: revision, error: revisionError } = await supabase.rpc(
+      "begin_resource_revision",
+      {
+        p_resource_id: resourceId,
+        p_title: parsed.values.title,
+        p_body: parsed.values.body,
+        p_category_id: category.id,
+      },
+    );
+    if (revisionError) {
+      return failure("La ressource n\u2019a pas pu \u00eatre enregistr\u00e9e. R\u00e9essayez.");
+    }
+    if (typeof revision !== "number") {
+      notFound();
+    }
+    newRevision = revision;
+  } else {
+    // owner_id et workspace_id ne sont jamais modifi\u00e9s ; updated_at est fix\u00e9 par un trigger.
+    const { data: updated, error } = await supabase
+      .from("resources")
+      .update({
+        title: parsed.values.title,
+        category_id: category.id,
+      })
+      .eq("id", resourceId)
+      .select("id");
+
+    if (error) {
+      return failure("La ressource n\u2019a pas pu \u00eatre enregistr\u00e9e. R\u00e9essayez.");
+    }
+    if (!updated?.length) {
+      // RLS a refus\u00e9 (0 ligne) : aucun changement enregistr\u00e9.
+      notFound();
+    }
   }
-  if (!updated?.length) {
-    // RLS a refus\u00e9 (0 ligne) : aucun changement enregistr\u00e9.
-    notFound();
+
+  if (newRevision !== null) {
+    await indexResource(supabase, resourceId, newRevision, parsed.values.body);
   }
 
   revalidatePath("/resources");
@@ -224,12 +251,14 @@ export async function createResource(
       title: parsed.values.title,
       body: parsed.values.body,
     })
-    .select("id")
+    .select("id, revision")
     .single();
 
   if (error || !created) {
     return failure("La ressource n\u2019a pas pu \u00eatre enregistr\u00e9e. R\u00e9essayez.");
   }
+
+  await indexResource(supabase, created.id, created.revision, parsed.values.body);
 
   revalidatePath("/resources");
   redirect(`/resources/${created.id}`);
