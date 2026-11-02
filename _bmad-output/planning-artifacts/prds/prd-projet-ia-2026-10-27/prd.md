@@ -104,7 +104,7 @@ Un membre peut parcourir les ressources, voir leur catégorie et leur date de mi
 - Une ressource apparaît dans la catégorie qui lui a été attribuée.
 - Un filtre de catégorie ne montre que les ressources de cette catégorie et peut être réinitialisé.
 - Le responsable peut créer une catégorie et modifier son nom ; les membres peuvent choisir parmi les catégories disponibles.
-- Un espace sans ressource affiche un état vide et une action adaptée au rôle de l’utilisateur. **[ASSUMPTION]**
+- Sur la page des catégories, chaque nom est lisible et distinct de l’action de renommage, qui n’est proposée qu’au responsable et ne s’ouvre que pour une catégorie à la fois. *(Précisé le 2026-11-02, rétrospective du sprint 4.)*- Un espace sans ressource affiche un état vide et une action adaptée au rôle de l’utilisateur. **[ASSUMPTION]**
 
 #### FR-5 : Mettre les ressources à jour dans l’index
 
@@ -182,6 +182,7 @@ Les éléments ci-dessous sont nécessaires à un produit crédible, mais leurs 
 - **[ASSUMPTION]** Seules des données fictives ou autorisées pour la démonstration sont utilisées.
 - Les conversations et recherches sont conservées 30 jours.
 - Le propriétaire peut supprimer ses conversations et recherches.
+- Toute règle de comportement que le PRD ne tranche pas (doublons, saisie vide, limites, tri) est écrite dans la fiche de la story et validée par le demandeur avant le développement ; elle n’est jamais décidée seule par le développeur. *(Ajouté le 2026-11-02, rétrospective du sprint 4.)*
 
 ## 7. Limites du MVP
 

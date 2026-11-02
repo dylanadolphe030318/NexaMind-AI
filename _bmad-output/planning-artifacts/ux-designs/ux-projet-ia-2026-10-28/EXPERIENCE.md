@@ -65,6 +65,7 @@ Les éléments ci-dessous décrivent le comportement. Leur apparence est décrit
 | Bouton secondaire | Déclenche une action secondaire, comme annuler ou revenir ; ne remplace pas un libellé par une icône seule. **[ASSUMPTION]** |
 | Formulaire de ressource | Le titre et le texte sont éditables ; une indication de validation est associée au champ concerné. **[ASSUMPTION]** |
 | Sélecteur de catégorie | Propose les catégories existantes à tous les membres ; les actions de création et de renommage sont réservées au responsable. |
+| Liste de catégories | Affiche chaque nom une seule fois, en évidence ; pour le responsable, une action « Renommer » discrète par ligne ouvre une seule zone de renommage à la fois, qui rappelle la catégorie concernée et propose Enregistrer ou Annuler. *(Précisé le 2026-11-02, rétrospective du sprint 4.)* |
 | Carte de ressource | Affiche le titre, la catégorie et la date ; l’action d’ouverture mène au détail. Les actions de modification et de suppression ne sont proposées que si le rôle le permet. |
 | Ligne de ressource | Variante compacte de la carte dans les listes ; conserve le titre et la catégorie et mène au détail à l’activation. **[ASSUMPTION]** |
 | Résultat de recherche | Présente le titre et un extrait ; l’ouverture mène à la ressource. |

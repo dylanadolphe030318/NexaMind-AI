@@ -101,6 +101,8 @@ companions: []
 | Identifiants et dates | UUID pour les relations entre comptes, ressources et historiques ; dates en `timestamptz` ; durée de conservation des recherches et conversations : 30 jours. |
 | Mutation et erreurs | Toutes les mutations produit partent d’une Server Action avec validation côté serveur ; les changements de révision et la publication des passages sont des opérations PostgreSQL atomiques appelées sous la session de l’utilisateur. Les migrations, l’administration initiale et la purge planifiée sont des opérations système séparées. Erreur retournée explicitement à l’interface, sans succès simulé. |
 | Authentification et secrets | Session Supabase en cookies SSR ; RLS activée sur chaque table exposée ; clés de fournisseur conservées côté serveur et dans les secrets de l’environnement d’exécution. |
+| Décisions de comportement | Chaque fiche de story contient une rubrique « Décisions de comportement » (doublons, saisie vide, limites, tri, états vides) validée par le demandeur avant le développement ; le code n’introduit aucune règle qui n’y figure pas. *(Ajouté le 2026-11-02, rétrospective du sprint 4.)* |
+| Présentation des listes éditables | Un nom affiché n’est jamais répété par son action de modification : une seule zone d’édition ouverte à la fois, libellée avec l’élément concerné ; les actions réservées au responsable ne sont pas rendues pour un membre. *(Ajouté le 2026-11-02.)* |
 | Configuration | Aucun secret dans le dépôt ; `.env.local` reste local et ignoré par Git. Exécutions personnalisées non mises en cache publiquement. |
 
 ## Stack

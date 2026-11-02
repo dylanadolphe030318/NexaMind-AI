@@ -283,6 +283,24 @@ afin de retirer les informations qui ne sont plus utiles.
 
 **Étant donné** qu’un membre tente directement dans Supabase de supprimer une ressource d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS la refuse et la ressource reste présente.
 
+### Story 2.7 : Lire et renommer clairement les catégories
+
+*(Ajoutée le 2026-11-02 par la rétrospective du sprint 4.)*
+
+En tant que responsable,
+je veux une page des catégories où chaque nom se distingue de l’action de renommage,
+afin de renommer une catégorie sans me tromper de ligne ni de bouton.
+
+**Critères d’acceptation :**
+
+**Étant donné** que j’ouvre la page des catégories, **quand** la liste s’affiche, **alors** chaque catégorie présente son nom en évidence, une seule fois, et l’action de renommage est visuellement distincte du nom.
+
+**Étant donné** que je suis responsable, **quand** je choisis de renommer une catégorie, **alors** une seule zone de renommage est ouverte à la fois, elle indique clairement la catégorie concernée et propose d’enregistrer ou d’annuler.
+
+**Étant donné** que je suis membre, **quand** j’ouvre la page des catégories, **alors** je vois les noms sans aucune action de renommage.
+
+**Étant donné** que je renomme une catégorie, **quand** j’enregistre, **alors** le comportement de la story 2.1 est inchangé (nouveau nom affiché partout, refus RLS pour un membre) ; aucune règle d’accès ni migration n’est modifiée.
+
 ## Epic 3 : Retrouver les ressources et ses recherches
 
 Les membres peuvent rechercher des ressources par mots-clés, ouvrir un résultat et retrouver leurs recherches récentes. Cette version reste utile sans assistant IA.
@@ -600,7 +618,7 @@ afin de m’assurer que les réponses sont sourcées et que l’assistant s’ab
 ### Sprint 5 — Préparer les données pour l’IA
 
 **Objectif :** transformer le texte des ressources en passages et embeddings conservés, avec un état de préparation visible et une suppression correcte de l’index.
-**Stories :** 4.1, 4.2, 4.3 (3 stories).
+**Stories :** 2.7, 4.1, 4.2, 4.3 (4 stories). La story 2.7 (catégories lisibles, mise en forme de la page existante) a été ajoutée par la rétrospective du sprint 4 ; elle se fait en premier.
 **Résultat démontrable :** une ressource est découpée et indexée durablement ; son état et ses erreurs sont visibles, l’indexation peut être relancée, et une recherche ne retourne plus les passages d’une ressource supprimée.
 **Type :** IA.
 
