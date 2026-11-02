@@ -56,9 +56,13 @@ export function CreateCategoryForm() {
 export function RenameCategoryForm({
   categoryId,
   categoryName,
+  onCancel,
+  onSaved,
 }: {
   categoryId: string;
   categoryName: string;
+  onCancel: () => void;
+  onSaved: (message: string) => void;
 }) {
   const [name, setName] = useState(categoryName);
   const renameAction = renameCategory.bind(null, categoryId);
@@ -66,7 +70,7 @@ export function RenameCategoryForm({
     async (previousState: CategoryActionState, formData: FormData) => {
       const nextState = await renameAction(previousState, formData);
       if (nextState.status === "success") {
-        setName((formData.get("name") as string).trim());
+        onSaved(nextState.message);
       }
       return nextState;
     },
@@ -77,9 +81,12 @@ export function RenameCategoryForm({
   return (
     <form action={formAction} className="category-rename-form">
       <div className="auth-field">
-        <label htmlFor={inputId}>Renommer {categoryName}</label>
+        <label htmlFor={inputId}>
+          Renommer la cat&eacute;gorie &laquo;&nbsp;{categoryName}&nbsp;&raquo;
+        </label>
         <input
           autoComplete="off"
+          autoFocus
           id={inputId}
           name="name"
           onChange={(event) => setName(event.target.value)}
@@ -87,10 +94,20 @@ export function RenameCategoryForm({
           value={name}
         />
       </div>
-      <button className="button button-small" disabled={pending} type="submit">
-        {pending ? "Enregistrement..." : "Renommer"}
-      </button>
-      {state.status !== "idle" ? (
+      <div className="category-rename-actions">
+        <button className="button button-small" disabled={pending} type="submit">
+          {pending ? "Enregistrement..." : "Enregistrer"}
+        </button>
+        <button
+          className="button button-small button-secondary"
+          disabled={pending}
+          onClick={onCancel}
+          type="button"
+        >
+          Annuler
+        </button>
+      </div>
+      {state.status === "error" ? (
         <p
           className={
             state.status === "error"

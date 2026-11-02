@@ -13,37 +13,64 @@ export function CategoryList({
   canManage: boolean;
 }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
   const selectedCategory = categories.find(
     (category) => category.id === selectedCategoryId,
   );
 
   return (
     <>
+      {savedMessage ? (
+        <p className="auth-message auth-message-success" role="status">
+          {savedMessage}
+        </p>
+      ) : null}
       <fieldset className="category-choice">
         <legend>Choisissez une cat&eacute;gorie</legend>
         <ul className="category-list">
           {categories.map((category) => {
             const inputId = "choose-category-" + category.id;
+            const isEditing = canManage && editingCategoryId === category.id;
 
             return (
               <li className="category-entry" key={category.id}>
-                <div className="category-option">
-                  <input
-                    checked={selectedCategoryId === category.id}
-                    id={inputId}
-                    name="selected-category"
-                    onChange={() => setSelectedCategoryId(category.id)}
-                    type="radio"
-                    value={category.id}
-                  />
-                  <label className="category-name" htmlFor={inputId}>
-                    {category.name}
-                  </label>
+                <div className="category-row">
+                  <div className="category-option">
+                    <input
+                      checked={selectedCategoryId === category.id}
+                      id={inputId}
+                      name="selected-category"
+                      onChange={() => setSelectedCategoryId(category.id)}
+                      type="radio"
+                      value={category.id}
+                    />
+                    <label className="category-name" htmlFor={inputId}>
+                      {category.name}
+                    </label>
+                  </div>
+                  {canManage && !isEditing ? (
+                    <button
+                      className="button button-small button-secondary"
+                      onClick={() => {
+                        setSavedMessage(null);
+                        setEditingCategoryId(category.id);
+                      }}
+                      type="button"
+                    >
+                      Renommer
+                    </button>
+                  ) : null}
                 </div>
-                {canManage ? (
+                {isEditing ? (
                   <RenameCategoryForm
                     categoryId={category.id}
                     categoryName={category.name}
+                    onCancel={() => setEditingCategoryId(null)}
+                    onSaved={(message) => {
+                      setEditingCategoryId(null);
+                      setSavedMessage(message);
+                    }}
                   />
                 ) : null}
               </li>
