@@ -3,7 +3,7 @@ story: 1-5-voir-son-rôle-dans-l-espace-membre
 title: Voir son rôle dans l'espace membre
 epic: 1
 sprint: 4
-status: ready-for-dev
+status: done
 ---
 
 # Story 1.5 : Voir son rôle dans l'espace membre

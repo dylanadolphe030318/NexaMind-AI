@@ -3,7 +3,7 @@ story: 3-3-relancer-une-recherche-enregistrée
 title: Relancer une recherche enregistrée
 epic: 3
 sprint: 4
-status: ready-for-dev
+status: done
 ---
 
 # Story 3.3 : Relancer une recherche enregistrée

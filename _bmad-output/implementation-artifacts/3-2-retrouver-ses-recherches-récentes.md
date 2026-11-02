@@ -3,7 +3,7 @@ story: 3-2-retrouver-ses-recherches-récentes
 title: Retrouver ses recherches récentes
 epic: 3
 sprint: 4
-status: ready-for-dev
+status: done
 ---
 
 # Story 3.2 : Retrouver ses recherches récentes

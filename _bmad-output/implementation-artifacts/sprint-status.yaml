@@ -40,7 +40,7 @@ development_status:
   1-2-créer-un-compte-membre: done
   1-3-se-connecter-et-se-déconnecter: done
   1-4-accéder-à-son-espace-protégé: done
-  1-5-voir-son-rôle-dans-l-espace-membre: review
+  1-5-voir-son-rôle-dans-l-espace-membre: done
   epic-1-retrospective: done
 
   epic-2: done
@@ -54,9 +54,9 @@ development_status:
 
   epic-3: in-progress
   3-1-rechercher-des-ressources-par-mots-clés: done
-  3-2-retrouver-ses-recherches-récentes: review
-  3-3-relancer-une-recherche-enregistrée: review
-  3-4-supprimer-une-recherche-de-son-historique: review
+  3-2-retrouver-ses-recherches-récentes: done
+  3-3-relancer-une-recherche-enregistrée: done
+  3-4-supprimer-une-recherche-de-son-historique: done
   epic-3-retrospective: optional
 
   epic-4: backlog

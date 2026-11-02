@@ -3,7 +3,7 @@ story: 3-4-supprimer-une-recherche-de-son-historique
 title: Supprimer une recherche de son historique
 epic: 3
 sprint: 4
-status: ready-for-dev
+status: done
 ---
 
 # Story 3.4 : Supprimer une recherche de son historique
