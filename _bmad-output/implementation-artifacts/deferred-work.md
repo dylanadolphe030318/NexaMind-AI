@@ -43,3 +43,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/4-2-créer-et-enregistrer-les-embeddings.md`
   summary: Vérifier le traitement des passages historiques sans embeddings avec une migration sur une base de test.
   evidence: Aucun harnais local de migrations n'est disponible pour tester le backfill des passages pré-4.2.
+- source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
+  summary: Définir comment récupérer les ressources laissées en préparation après une interruption brutale du traitement.
+  evidence: `begin_resource_reindexing` met la ressource en `processing` avant l'indexation; un processus interrompu peut ne jamais la marquer `failed`, et aucun mécanisme de récupération n'est prévu.
+- source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
+  summary: Vérifier les parcours visuels Story 4.3 et exécuter les tests Supabase sur un environnement de test.
+  evidence: Les tests unitaires et le build ne valident pas l'affichage navigateur ni l'intégration RLS; la migration doit être appliquée en environnement de test avant exécution.

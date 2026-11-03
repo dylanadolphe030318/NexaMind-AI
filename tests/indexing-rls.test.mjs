@@ -204,6 +204,36 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
       assert.equal(failedResource.indexing_status, "failed");
     });
 
+    await t.test("seul le propriétaire ou responsable peut relancer une ressource en échec", async () => {
+      const { data: denied, error: deniedError } = await b.client.rpc(
+        "begin_resource_reindexing",
+        { p_resource_id: resource.id, p_revision: 2 },
+      );
+      assert.ifError(deniedError);
+      assert.deepEqual(denied, []);
+
+      const { data: ownerStarted, error: ownerError } = await a.client.rpc(
+        "begin_resource_reindexing",
+        { p_resource_id: resource.id, p_revision: 2 },
+      );
+      assert.ifError(ownerError);
+      assert.deepEqual(ownerStarted, [{ id: resource.id }]);
+
+      const { data: failedAgain, error: failedAgainError } = await manager.client.rpc(
+        "mark_resource_failed",
+        { p_resource_id: resource.id, p_revision: 2 },
+      );
+      assert.ifError(failedAgainError);
+      assert.equal(failedAgain, true);
+
+      const { data: managerStarted, error: managerError } = await manager.client.rpc(
+        "begin_resource_reindexing",
+        { p_resource_id: resource.id, p_revision: 2 },
+      );
+      assert.ifError(managerError);
+      assert.deepEqual(managerStarted, [{ id: resource.id }]);
+    });
+
     await t.test("supprimer la ressource supprime ses passages", async () => {
       const { data: deleted, error } = await a.client
         .from("resources")

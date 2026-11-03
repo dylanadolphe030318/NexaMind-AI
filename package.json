@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:unit": "node --test tests/chunking.test.mjs tests/indexing-core.test.mjs tests/openai-embeddings.test.mjs src/features/resources/resource-validation.test.mjs",
+    "test:unit": "node --test tests/chunking.test.mjs tests/indexing-core.test.mjs tests/openai-embeddings.test.mjs src/features/resources/resource-validation.test.mjs src/features/resources/resource-status.test.mjs",
     "test:integration": "node --env-file=.env.local --test tests/supabase-rls.test.mjs tests/indexing-rls.test.mjs"
   },
   "dependencies": {

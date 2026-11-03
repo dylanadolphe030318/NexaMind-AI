@@ -2,12 +2,14 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "./resource-format";
+import type { ResourceIndexingStatus } from "./resource-status";
 
 export type ResourceSummary = {
   id: string;
   title: string;
   updatedAt: string;
   categoryName: string | null;
+  indexingStatus: ResourceIndexingStatus;
 };
 
 export type ResourceDetail = ResourceSummary & { body: string };
@@ -17,6 +19,7 @@ type Row = {
   title: string;
   body?: string;
   updated_at: string;
+  indexing_status: ResourceIndexingStatus;
   categories: { name: string } | { name: string }[] | null;
 };
 
@@ -45,7 +48,7 @@ export async function getResourceListData(categoryId?: string): Promise<{
 
   let query = supabase
     .from("resources")
-    .select("id, title, updated_at, categories(name)")
+    .select("id, title, updated_at, indexing_status, categories(name)")
     .order("updated_at", { ascending: false });
   if (categoryId) {
     query = query.eq("category_id", categoryId);
@@ -67,6 +70,7 @@ export async function getResourceListData(categoryId?: string): Promise<{
       title: row.title,
       updatedAt: row.updated_at,
       categoryName: categoryName(row.categories),
+      indexingStatus: row.indexing_status,
     })),
   };
 }
@@ -227,7 +231,9 @@ export async function getResourceDetail(id: string): Promise<ResourceDetailResul
 
   const { data, error } = await supabase
     .from("resources")
-    .select("id, title, body, updated_at, owner_id, workspace_id, categories(name)")
+    .select(
+      "id, title, body, updated_at, indexing_status, owner_id, workspace_id, categories(name)",
+    )
     .eq("id", id)
     .maybeSingle();
 
@@ -249,6 +255,7 @@ export async function getResourceDetail(id: string): Promise<ResourceDetailResul
       body: row.body ?? "",
       updatedAt: row.updated_at,
       categoryName: categoryName(row.categories),
+      indexingStatus: row.indexing_status,
     },
   };
 }

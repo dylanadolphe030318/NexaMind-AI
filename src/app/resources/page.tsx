@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { formatResourceDate, isUuid } from "@/features/resources/resource-format";
+import { getResourceIndexingLabel } from "@/features/resources/resource-status";
 import { getResourceListData } from "@/features/resources/resources";
 
 export const metadata: Metadata = {
@@ -100,6 +101,12 @@ export default async function ResourcesPage({
                     </span>
                     <span className="resource-meta">
                       Mise &agrave; jour le {formatResourceDate(resource.updatedAt)}
+                    </span>
+                    <span
+                      aria-label={`État de préparation : ${getResourceIndexingLabel(resource.indexingStatus)}`}
+                      className={`resource-indexing-status resource-indexing-status-${resource.indexingStatus}`}
+                    >
+                      {getResourceIndexingLabel(resource.indexingStatus)}
                     </span>
                   </div>
                 </li>

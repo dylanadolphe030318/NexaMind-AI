@@ -742,6 +742,37 @@ a:focus-visible {
   font-size: 0.92rem;
 }
 
+.resource-indexing-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.resource-indexing-status-processing {
+  background: #f3edf8;
+  color: var(--purple-deep);
+}
+
+.resource-indexing-status-ready {
+  background: #e8f4ec;
+  color: #245d38;
+}
+
+.resource-indexing-status-failed {
+  background: #fbe9e9;
+  color: #8f2929;
+}
+
+.resource-preparation-error {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  margin-top: 16px;
+}
+
 .resource-filter {
   margin-top: 20px;
 }

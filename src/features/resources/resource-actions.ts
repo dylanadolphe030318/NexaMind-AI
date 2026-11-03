@@ -158,6 +158,88 @@ export async function updateResource(
   redirect(`/resources/${resourceId}`);
 }
 
+export async function retryResourceIndexing(resourceId: string): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect("/login");
+  }
+  if (!isUuid(resourceId)) {
+    notFound();
+  }
+
+  const editable = await getResourceForEdit(resourceId);
+  if (editable.status === "unauthenticated") {
+    redirect("/login");
+  }
+  if (editable.status === "not-found") {
+    notFound();
+  }
+  if (editable.status === "forbidden") {
+    revalidatePath(`/resources/${resourceId}`);
+    redirect(`/resources/${resourceId}?preparation=denied`);
+  }
+  if (editable.status === "error") {
+    redirect(`/resources/${resourceId}`);
+  }
+
+  const { data: resource, error: resourceError } = await supabase
+    .from("resources")
+    .select("id, revision, body, indexing_status")
+    .eq("id", resourceId)
+    .maybeSingle();
+  if (resourceError || !resource) {
+    redirect(`/resources/${resourceId}`);
+  }
+  if (resource.indexing_status !== "failed") {
+    revalidatePath("/resources");
+    revalidatePath(`/resources/${resourceId}`);
+    redirect(`/resources/${resourceId}`);
+  }
+
+  const { data: started, error: startError } = await supabase
+    .rpc("begin_resource_reindexing", {
+      p_resource_id: resourceId,
+      p_revision: resource.revision,
+    })
+    .select("id");
+  if (startError) {
+    console.error(
+      `La préparation de la ressource ${resourceId} n'a pas pu être relancée.`,
+      startError,
+    );
+    revalidatePath(`/resources/${resourceId}`);
+    redirect(`/resources/${resourceId}`);
+  }
+  const startedId = Array.isArray(started) ? started[0]?.id : started?.id;
+  if (startedId !== resourceId) {
+    revalidatePath("/resources");
+    revalidatePath(`/resources/${resourceId}`);
+    redirect(`/resources/${resourceId}`);
+  }
+
+  const indexing = await indexResource(
+    supabase,
+    resourceId,
+    resource.revision,
+    resource.body,
+  );
+  if (!indexing.success) {
+    console.error(
+      `La préparation de la ressource ${resourceId} a échoué : ${indexing.message}`,
+    );
+    revalidatePath("/resources");
+    revalidatePath(`/resources/${resourceId}`);
+    redirect(`/resources/${resourceId}`);
+  }
+
+  revalidatePath("/resources");
+  revalidatePath(`/resources/${resourceId}`);
+  redirect(`/resources/${resourceId}?preparation=launched`);
+}
+
 export async function deleteResource(resourceId: string): Promise<void> {
   const supabase = await createClient();
   const {
