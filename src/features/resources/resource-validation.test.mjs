@@ -11,11 +11,17 @@ function form(entries) {
 
 test("accepte une ressource valide et normalise les espaces", () => {
   const result = parseResourceForm(
-    form({ title: "  Guide  ", body: "  Texte coll\u00e9 \n", categoryId: validCategory }),
+    form({
+      title: "  Guide  ",
+      body: "  Texte coll\u00e9 \n",
+      categoryId: validCategory,
+      openAiConsent: "on",
+    }),
   );
   assert.deepEqual(result, {
     ok: true,
     values: { title: "Guide", body: "Texte coll\u00e9", categoryId: validCategory },
+    consentChecked: true,
   });
 });
 
@@ -27,11 +33,17 @@ test("signale chaque champ manquant ou vide", () => {
     body: "Saisissez le texte de la ressource.",
     categoryId: "Choisissez une cat\u00e9gorie.",
   });
+  assert.equal(result.consentChecked, false);
 });
 
 test("ne signale que le champ manquant et conserve les autres valeurs", () => {
   const result = parseResourceForm(
-    form({ title: "Titre", body: "Texte", categoryId: "" }),
+    form({
+      title: "Titre",
+      body: "Texte",
+      categoryId: "",
+      openAiConsent: "on",
+    }),
   );
   assert.equal(result.ok, false);
   assert.deepEqual(Object.keys(result.errors), ["categoryId"]);
@@ -41,7 +53,12 @@ test("ne signale que le champ manquant et conserve les autres valeurs", () => {
 
 test("refuse une cat\u00e9gorie qui n'est pas un identifiant valide", () => {
   const result = parseResourceForm(
-    form({ title: "T", body: "B", categoryId: "pas-un-uuid" }),
+    form({
+      title: "T",
+      body: "B",
+      categoryId: "pas-un-uuid",
+      openAiConsent: "on",
+    }),
   );
   assert.equal(result.ok, false);
   assert.equal(result.errors.categoryId, "Cette cat\u00e9gorie n\u2019est pas disponible.");
@@ -49,7 +66,12 @@ test("refuse une cat\u00e9gorie qui n'est pas un identifiant valide", () => {
 
 test("refuse les valeurs non textuelles (fichiers)", () => {
   const result = parseResourceForm(
-    form({ title: new File(["x"], "x.txt"), body: "B", categoryId: validCategory }),
+    form({
+      title: new File(["x"], "x.txt"),
+      body: "B",
+      categoryId: validCategory,
+      openAiConsent: "on",
+    }),
   );
   assert.equal(result.ok, false);
   assert.equal(result.errors.title, "Saisissez un titre.");
@@ -57,9 +79,27 @@ test("refuse les valeurs non textuelles (fichiers)", () => {
 
 test("refuse un titre ou un texte trop long", () => {
   const result = parseResourceForm(
-    form({ title: "a".repeat(201), body: "b".repeat(20001), categoryId: validCategory }),
+    form({
+      title: "a".repeat(201),
+      body: "b".repeat(20001),
+      categoryId: validCategory,
+      openAiConsent: "on",
+    }),
   );
   assert.equal(result.ok, false);
   assert.ok(result.errors.title);
   assert.ok(result.errors.body);
+});
+
+test("refuse une ressource valide si l'autorisation OpenAI manque", () => {
+  const result = parseResourceForm(
+    form({ title: "Guide", body: "Texte fictif.", categoryId: validCategory }),
+    true,
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(
+    result.errors.consent,
+    "Une autorisation explicite est requise pour envoyer le texte à OpenAI.",
+  );
 });

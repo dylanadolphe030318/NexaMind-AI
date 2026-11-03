@@ -137,6 +137,32 @@ function ResourceForm({
         ) : null}
       </div>
 
+      <div className="auth-field">
+        <p className="auth-hint">
+          Le texte de la ressource sera transmis &agrave; OpenAI pour calculer ses
+          embeddings.
+        </p>
+        <label className="resource-consent" htmlFor="resource-openai-consent">
+          <input
+            aria-describedby={errors.consent ? "resource-consent-error" : undefined}
+            aria-invalid={errors.consent ? true : undefined}
+            defaultChecked={state.consentChecked}
+            className="resource-consent-checkbox"
+            id="resource-openai-consent"
+            name="openAiConsent"
+            type="checkbox"
+            value="on"
+          />
+          Je confirme que ces donn&eacute;es sont fictives ou que je suis autoris&eacute;
+          &agrave; les envoyer &agrave; OpenAI.
+        </label>
+        {errors.consent ? (
+          <p className="field-error" id="resource-consent-error">
+            {errors.consent}
+          </p>
+        ) : null}
+      </div>
+
       <button className="button auth-submit" disabled={pending} type="submit">
         {pending ? "Enregistrement..." : submitLabel}
       </button>

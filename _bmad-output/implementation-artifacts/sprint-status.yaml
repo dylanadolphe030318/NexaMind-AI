@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-01-2026 16:15
+last_updated: 11-03-2026 15:55
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -60,9 +60,9 @@ development_status:
   3-4-supprimer-une-recherche-de-son-historique: done
   epic-3-retrospective: done
 
-  epic-4: backlog
+  epic-4: in-progress
   4-1-découper-une-ressource-en-passages: in-progress
-  4-2-créer-et-enregistrer-les-embeddings: ready-for-dev
+  4-2-créer-et-enregistrer-les-embeddings: review
   4-3-suivre-l-état-de-préparation-d-une-ressource: ready-for-dev
   4-4-retrouver-les-passages-pertinents-par-le-sens: backlog
   4-5-afficher-les-extraits-des-passages-retrouvés: backlog

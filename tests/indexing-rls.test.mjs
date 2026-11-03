@@ -28,6 +28,18 @@ async function login([email, password]) {
 }
 
 const PREFIX = "RLS-TEST-IDX-";
+const EMBEDDING_DIMENSIONS = 1536;
+
+function embeddedChunks(contents) {
+  return contents.map((content, index) => ({
+    content,
+    embedding: Array(EMBEDDING_DIMENSIONS).fill((index + 1) / 10),
+  }));
+}
+
+function readEmbedding(value) {
+  return typeof value === "string" ? JSON.parse(value) : value;
+}
 
 test("indexation : passages, révisions et droits (RLS active, sans clé de service)", async (t) => {
   const a = await login(accounts.memberA);
@@ -72,20 +84,34 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
       const { data, error } = await a.client.rpc("publish_resource_chunks", {
         p_resource_id: resource.id,
         p_revision: 1,
-        p_chunks: [{ content: "Passage un" }, { content: "Passage deux" }],
+        p_chunks: embeddedChunks(["Passage un", "Passage deux"]),
       });
       assert.ifError(error);
       assert.equal(data, true);
 
-      const { data: chunks } = await a.client
+      const { data: chunks, error: chunksError } = await a.client
         .from("resource_chunks")
-        .select("position, content")
+        .select("position, content, embedding")
         .eq("resource_id", resource.id)
         .order("position");
-      assert.deepEqual(chunks, [
+      assert.ifError(chunksError);
+      assert.deepEqual(chunks.map(({ position, content }) => ({ position, content })), [
         { position: 0, content: "Passage un" },
         { position: 1, content: "Passage deux" },
       ]);
+      assert.ok(
+        chunks.every(
+          ({ embedding }) => readEmbedding(embedding).length === EMBEDDING_DIMENSIONS,
+        ),
+      );
+
+      const { data: ready, error: readyError } = await a.client
+        .from("resources")
+        .select("indexing_status")
+        .eq("id", resource.id)
+        .single();
+      assert.ifError(readyError);
+      assert.equal(ready.indexing_status, "ready");
     });
 
     await t.test("un autre membre du même espace lit les passages mais ne peut pas écrire", async () => {
@@ -98,7 +124,7 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
       const { data: published } = await b.client.rpc("publish_resource_chunks", {
         p_resource_id: resource.id,
         p_revision: 1,
-        p_chunks: [{ content: "Intrus" }],
+        p_chunks: embeddedChunks(["Intrus"]),
       });
       assert.equal(published, false);
 
@@ -135,24 +161,47 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
       const { data: stale } = await a.client.rpc("publish_resource_chunks", {
         p_resource_id: resource.id,
         p_revision: 1,
-        p_chunks: [{ content: "Ancien" }],
+        p_chunks: embeddedChunks(["Ancien"]),
       });
       assert.equal(stale, false);
+
+      const { data: stillProcessing, error: statusError } = await a.client
+        .from("resources")
+        .select("indexing_status")
+        .eq("id", resource.id)
+        .single();
+      assert.ifError(statusError);
+      assert.equal(stillProcessing.indexing_status, "processing");
     });
 
     await t.test("le responsable peut publier et marquer en échec", async () => {
       const { data: published } = await manager.client.rpc("publish_resource_chunks", {
         p_resource_id: resource.id,
         p_revision: 2,
-        p_chunks: [{ content: "Passage du responsable" }],
+        p_chunks: embeddedChunks(["Passage du responsable"]),
       });
       assert.equal(published, true);
+
+      const { data: chunks, error: chunksError } = await manager.client
+        .from("resource_chunks")
+        .select("embedding")
+        .eq("resource_id", resource.id);
+      assert.ifError(chunksError);
+      assert.equal(readEmbedding(chunks[0].embedding).length, EMBEDDING_DIMENSIONS);
 
       const { data: failed } = await manager.client.rpc("mark_resource_failed", {
         p_resource_id: resource.id,
         p_revision: 2,
       });
       assert.equal(failed, true);
+
+      const { data: failedResource, error: failedStatusError } = await manager.client
+        .from("resources")
+        .select("indexing_status")
+        .eq("id", resource.id)
+        .single();
+      assert.ifError(failedStatusError);
+      assert.equal(failedResource.indexing_status, "failed");
     });
 
     await t.test("supprimer la ressource supprime ses passages", async () => {

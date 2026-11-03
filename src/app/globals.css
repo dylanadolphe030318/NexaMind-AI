@@ -566,6 +566,21 @@ a:focus-visible {
   font: inherit;
 }
 
+.auth-field .resource-consent-checkbox {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.auth-field .resource-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .auth-field textarea,
 .auth-field select {
   width: 100%;

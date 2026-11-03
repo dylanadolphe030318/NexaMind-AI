@@ -2,6 +2,7 @@ export type ResourceFieldErrors = {
   title?: string;
   body?: string;
   categoryId?: string;
+  consent?: string;
 };
 
 export type ResourceValues = {
@@ -15,6 +16,7 @@ export type ResourceFormState = {
   message: string;
   errors: ResourceFieldErrors;
   values: ResourceValues;
+  consentChecked: boolean;
 };
 
 export const initialResourceFormState: ResourceFormState = {
@@ -22,11 +24,17 @@ export const initialResourceFormState: ResourceFormState = {
   message: "",
   errors: {},
   values: { title: "", body: "", categoryId: "" },
+  consentChecked: false,
 };
 
 export type ResourceParseResult =
-  | { ok: true; values: ResourceValues }
-  | { ok: false; errors: ResourceFieldErrors; values: ResourceValues };
+  | { ok: true; values: ResourceValues; consentChecked: boolean }
+  | {
+      ok: false;
+      errors: ResourceFieldErrors;
+      values: ResourceValues;
+      consentChecked: boolean;
+    };
 
 export const TITLE_MAX_LENGTH = 200;
 export const BODY_MAX_LENGTH = 20000;
@@ -40,12 +48,13 @@ function text(value: FormDataEntryValue | null): string {
 
 export function parseResourceForm(formData: {
   get(name: string): FormDataEntryValue | null;
-}): ResourceParseResult {
+}, requireOpenAiConsent = false): ResourceParseResult {
   const rawValues: ResourceValues = {
     title: text(formData.get("title")),
     body: text(formData.get("body")),
     categoryId: text(formData.get("categoryId")),
   };
+  const consentChecked = formData.get("openAiConsent") === "on";
   const values: ResourceValues = {
     title: rawValues.title.trim(),
     body: rawValues.body.trim(),
@@ -71,10 +80,15 @@ export function parseResourceForm(formData: {
     errors.categoryId = "Cette cat\u00e9gorie n\u2019est pas disponible.";
   }
 
-  if (errors.title || errors.body || errors.categoryId) {
-    // On conserve la saisie brute pour ne rien effacer.
-    return { ok: false, errors, values: rawValues };
+  if (requireOpenAiConsent && !consentChecked) {
+    errors.consent =
+      "Une autorisation explicite est requise pour envoyer le texte \u00e0 OpenAI.";
   }
 
-  return { ok: true, values };
+  if (errors.title || errors.body || errors.categoryId || errors.consent) {
+    // On conserve la saisie brute pour ne rien effacer.
+    return { ok: false, errors, values: rawValues, consentChecked };
+  }
+
+  return { ok: true, values, consentChecked };
 }

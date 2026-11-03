@@ -24,6 +24,7 @@ export async function updateResource(
       message: "Corrigez les champs signal\u00e9s pour enregistrer la ressource.",
       errors: parsed.errors,
       values: parsed.values,
+      consentChecked: parsed.consentChecked,
     };
   }
 
@@ -50,6 +51,7 @@ export async function updateResource(
       body: formData.get("body") as string,
       categoryId: parsed.values.categoryId,
     },
+    consentChecked: parsed.consentChecked,
   });
 
   // Contr\u00f4le serveur : la ressource doit \u00eatre modifiable par cette personne.
@@ -93,6 +95,13 @@ export async function updateResource(
   let newRevision: number | null = null;
 
   if (bodyChanged) {
+    if (!parsed.consentChecked) {
+      return failure(
+        "Confirmez l\u2019autorisation avant d\u2019envoyer le texte \u00e0 OpenAI.",
+        { consent: "Une autorisation explicite est requise pour envoyer le texte \u00e0 OpenAI." },
+      );
+    }
+
     // Début d'une révision : texte mis à jour et anciens passages retirés, de façon atomique.
     const { data: revision, error: revisionError } = await supabase.rpc(
       "begin_resource_revision",
@@ -131,7 +140,17 @@ export async function updateResource(
   }
 
   if (newRevision !== null) {
-    await indexResource(supabase, resourceId, newRevision, parsed.values.body);
+    const indexing = await indexResource(
+      supabase,
+      resourceId,
+      newRevision,
+      parsed.values.body,
+    );
+    if (!indexing.success) {
+      console.error(
+        `La ressource ${resourceId} a été enregistrée, mais sa préparation a échoué : ${indexing.message}`,
+      );
+    }
   }
 
   revalidatePath("/resources");
@@ -184,13 +203,14 @@ export async function createResource(
   _previousState: ResourceFormState,
   formData: FormData,
 ): Promise<ResourceFormState> {
-  const parsed = parseResourceForm(formData);
+  const parsed = parseResourceForm(formData, true);
   if (!parsed.ok) {
     return {
       status: "error",
       message: "Corrigez les champs signal\u00e9s pour enregistrer la ressource.",
       errors: parsed.errors,
       values: parsed.values,
+      consentChecked: parsed.consentChecked,
     };
   }
 
@@ -214,6 +234,7 @@ export async function createResource(
       body: formData.get("body") as string,
       categoryId: parsed.values.categoryId,
     },
+    consentChecked: parsed.consentChecked,
   });
 
   // owner_id et workspace_id viennent de la session et du profil, jamais du formulaire.
@@ -258,7 +279,17 @@ export async function createResource(
     return failure("La ressource n\u2019a pas pu \u00eatre enregistr\u00e9e. R\u00e9essayez.");
   }
 
-  await indexResource(supabase, created.id, created.revision, parsed.values.body);
+  const indexing = await indexResource(
+    supabase,
+    created.id,
+    created.revision,
+    parsed.values.body,
+  );
+  if (!indexing.success) {
+    console.error(
+      `La ressource ${created.id} a été enregistrée, mais sa préparation a échoué : ${indexing.message}`,
+    );
+  }
 
   revalidatePath("/resources");
   redirect(`/resources/${created.id}`);
