@@ -3,7 +3,7 @@ story: 4-3-suivre-l-état-de-préparation-d-une-ressource
 title: Suivre l'état de préparation d'une ressource
 epic: 4
 sprint: 5
-status: done
+status: in-review
 baseline_commit: d07d087f46065181b2b363eecdac73377bb0f940
 ---
 
@@ -81,3 +81,13 @@ Affichage de l'état et relance de la préparation. La recherche sémantique com
 | medium | carried — verification-gap: aucun test ne vérifie que `retryResourceIndexing` n'annonce le succès qu'après une indexation réussie. | defer — le code vérifie le résultat, mais il manque une preuve automatisée du parcours de l'action serveur. |
 | medium | carried — verification-gap: aucun test ne vérifie que l'état lu par `getResourceListData` et `getResourceDetail` atteint les badges des pages. | defer — la relation requête-mappage-affichage nécessite une vérification navigateur ou de test d'intégration. |
 | low | carried — le paramètre URL `preparation=launched` peut être fabriqué pour afficher un succès sans relance réelle. | rejetée — même constat déjà consigné; l'effet reste limité à l'affichage et le correctif exigerait un mécanisme de flash plus large. |
+| false | blind-hunter: un changement de droits entre `getResourceForEdit` et le RPC pourrait autoriser une relance non permise. | réfutée — le RPC revérifie propriétaire/responsable sous verrou de ligne avant de modifier l'état; la lecture de la ressource reste également sous RLS. |
+| false | blind-hunter: les erreurs de relance redirigent sans expliquer l'échec. | réfutée — les échecs de démarrage laissent l'état en échec et la fiche affiche alors le message prévu; un refus d'accès a son message dédié, tandis qu'un état concurrent affiche son état courant. |
+| false | blind-hunter: `auth.uid()` nul pourrait contourner la vérification SQL. | réfutée pour le parcours applicatif — l'action exige une session et le RPC n'est exécutable que par `authenticated`; aucun contexte utilisateur valide sans identité n'est établi dans le dépôt. |
+| low | carried — blind-hunter: le paramètre URL `preparation=launched` peut afficher un succès fabriqué. | rejetée — même constat que les lignes précédentes; le corriger demanderait un mécanisme de flash plus large que cette story. |
+| false | blind-hunter: `indexResource` pourrait annoncer une réussite sans que la ressource soit `ready`. | réfutée — `indexResource` ne réussit qu'après que `publish_resource_chunks` a publié tous les embeddings et renvoyé vrai après la transition atomique vers `ready`. |
+| medium | carried — blind-hunter: les badges et contrôles de relance ne sont pas couverts par des tests de rendu. | defer — même lacune de couverture navigateur déjà consignée; vérifier les requêtes, libellés, message d'échec et visibilité du bouton. |
+| false | blind-hunter: les relances concurrentes ne distinguent pas refus et état déjà traité. | réfutée — un refus réel a un message dédié; un conflit de statut retourne à la fiche qui affiche l'état actuel, sans annoncer de succès. |
+| low | blind-hunter: les éléments reportés ne sont pas reliés au code par des commentaires. | rejetée — les reports sont consignés dans `deferred-work.md`; aucun défaut d'exécution concret ne justifie d'ajouter des commentaires au code. |
+| medium | carried — verification-gap: aucune preuve automatisée ne garantit que l'action n'annonce pas un succès après un échec d'indexation. | defer — même lacune de test d'action déjà consignée; couvrir les chemins d'échec et de réussite. |
+| medium | carried — verification-gap: aucun test ne prouve que les états lus en base sont rendus correctement dans les pages liste et détail. | defer — même lacune de couverture navigateur déjà consignée; vérifier les deux pages et le contrôle de relance. |

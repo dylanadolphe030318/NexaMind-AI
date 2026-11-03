@@ -49,3 +49,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
   summary: Vérifier les parcours visuels Story 4.3 et exécuter les tests Supabase sur un environnement de test.
   evidence: Les tests unitaires et le build ne valident pas l'affichage navigateur ni l'intégration RLS; la migration doit être appliquée en environnement de test avant exécution.
+- source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
+  summary: Tester l'action de relance pour garantir qu'un échec d'indexation n'annonce jamais un succès.
+  evidence: Aucun test n'exécute `retryResourceIndexing` avec un résultat d'indexation en échec puis en réussite.
+- source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
+  summary: Vérifier par test que les états lus en base atteignent les badges et contrôles des pages liste et détail.
+  evidence: Les tests actuels couvrent les fonctions de libellé et d'autorisation, mais pas le rendu des deux pages ni le mappage des données.
