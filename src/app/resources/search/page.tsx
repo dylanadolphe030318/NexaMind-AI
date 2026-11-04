@@ -125,6 +125,12 @@ export default async function SearchResourcesPage({
             )}
           </section>
         ) : null}
+        {semantic?.status === "rate-limited" ? (
+          <p className="auth-message auth-message-error" role="alert">
+            Trop de recherches en peu de temps. R&eacute;essayez dans une minute.
+          </p>
+        ) : null}
+
         {semantic?.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             La recherche par le sens n&apos;a pas pu aboutir. R&eacute;essayez dans un instant.

@@ -22,6 +22,7 @@ function deps(overrides = {}) {
   const calls = { embed: 0, search: [] };
   return {
     calls,
+    consumeQuota: async () => true,
     embed: async () => {
       calls.embed += 1;
       return [[0.1, 0.2]];
@@ -107,4 +108,11 @@ test("une erreur d'embedding ou de base donne un échec journalisé sans le text
   assert.deepEqual(searchFails, { status: "error" });
   assert.equal(logs.length, 2);
   assert.ok(logs.every((m) => !m.includes(secretQuestion)));
+});
+
+test("au-delà de la limite par minute, OpenAI n'est pas appelé", async () => {
+  const d = deps({ consumeQuota: async () => false });
+  assert.deepEqual(await runSemanticSearch("une question", d), { status: "rate-limited" });
+  assert.equal(d.calls.embed, 0);
+  assert.equal(d.calls.search.length, 0);
 });

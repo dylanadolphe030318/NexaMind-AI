@@ -164,3 +164,36 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
     }
   }
 });
+
+test("limite de recherches : refus au-delà du plafond, compteur propre à chaque membre", async () => {
+  const b = await login(accounts.memberB);
+  const a = await login(accounts.memberA);
+  const consume = (session, max) =>
+    session.client.rpc("consume_semantic_search_quota", { p_max_per_minute: max });
+
+  try {
+    await b.client.from("semantic_search_calls").delete().eq("user_id", b.userId);
+    await a.client.from("semantic_search_calls").delete().eq("user_id", a.userId);
+
+    for (let i = 0; i < 3; i += 1) {
+      const { data, error } = await consume(b, 3);
+      assert.ifError(error);
+      assert.equal(data, true);
+    }
+    const { data: refused, error } = await consume(b, 3);
+    assert.ifError(error);
+    assert.equal(refused, false);
+
+    const { data: other } = await consume(a, 3);
+    assert.equal(other, true, "la limite d'un membre ne bloque pas les autres");
+
+    const { data: seen } = await a.client.from("semantic_search_calls").select("user_id");
+    assert.ok(seen.every((row) => row.user_id === a.userId), "un membre ne voit que ses propres appels");
+
+    const anonymous = await newClient().rpc("consume_semantic_search_quota", { p_max_per_minute: 3 });
+    assert.ok(anonymous.error, "un visiteur sans session est refusé");
+  } finally {
+    await b.client.from("semantic_search_calls").delete().eq("user_id", b.userId);
+    await a.client.from("semantic_search_calls").delete().eq("user_id", a.userId);
+  }
+});

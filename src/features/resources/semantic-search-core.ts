@@ -1,5 +1,6 @@
 export const SEMANTIC_QUERY_MAX_LENGTH = 300;
 export const SEMANTIC_RESULT_LIMIT = 5;
+export const SEMANTIC_MAX_SEARCHES_PER_MINUTE = 20;
 // Seuil de proximité cosinus : en dessous, le passage est considéré hors sujet.
 export const SEMANTIC_MIN_SIMILARITY = 0.3;
 
@@ -13,6 +14,7 @@ export type SemanticPassage = {
 export type SemanticSearchOutcome =
   | { status: "ok"; passages: SemanticPassage[] }
   | { status: "invalid" }
+  | { status: "rate-limited" }
   | { status: "error" };
 
 type SearchRow = {
@@ -23,6 +25,8 @@ type SearchRow = {
 };
 
 export type SemanticSearchDeps = {
+  /** true si le membre peut encore lancer une recherche (limite par minute). */
+  consumeQuota: () => Promise<boolean>;
   embed: (input: string[]) => Promise<number[][]>;
   search: (
     queryEmbedding: string,
@@ -67,6 +71,10 @@ export async function runSemanticSearch(
   }
 
   try {
+    if (!(await deps.consumeQuota())) {
+      return { status: "rate-limited" };
+    }
+
     const [embedding] = await deps.embed([question]);
     if (!embedding?.length) {
       throw new Error("Embedding de la question absent.");
