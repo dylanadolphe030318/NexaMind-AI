@@ -3,7 +3,7 @@ story: 4-5-afficher-les-extraits-des-passages-retrouvés
 title: Afficher les extraits des passages retrouvés
 epic: 4
 sprint: 6
-status: review
+status: done
 ---
 
 # Story 4.5 : Afficher les extraits des passages retrouvés
