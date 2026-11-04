@@ -2,7 +2,7 @@ export const SEMANTIC_QUERY_MAX_LENGTH = 300;
 export const SEMANTIC_RESULT_LIMIT = 5;
 export const SEMANTIC_MAX_SEARCHES_PER_MINUTE = 20;
 // Seuil de proximité cosinus : en dessous, le passage est considéré hors sujet.
-export const SEMANTIC_MIN_SIMILARITY = 0.3;
+export const SEMANTIC_MIN_SIMILARITY = 0.4;
 
 export type SemanticPassage = {
   resourceId: string;
