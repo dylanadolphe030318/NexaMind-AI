@@ -165,6 +165,13 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
       });
       assert.equal(stale, false);
 
+      const { error: tooMany } = await a.client.rpc("publish_resource_chunks", {
+        p_resource_id: resource.id,
+        p_revision: 2,
+        p_chunks: embeddedChunks(Array.from({ length: 101 }, (_, i) => `Passage ${i}`)),
+      });
+      assert.ok(tooMany, "plus de 100 passages doivent être refusés");
+
       const { data: stillProcessing, error: statusError } = await a.client
         .from("resources")
         .select("indexing_status")
