@@ -3,7 +3,7 @@ story: 4-4-retrouver-les-passages-pertinents-par-le-sens
 title: Retrouver les passages pertinents par le sens
 epic: 4
 sprint: 6
-status: ready-for-dev
+status: review
 ---
 
 # Story 4.4 : Retrouver les passages pertinents par le sens

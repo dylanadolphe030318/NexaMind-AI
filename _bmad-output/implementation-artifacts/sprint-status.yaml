@@ -64,7 +64,7 @@ development_status:
   4-1-découper-une-ressource-en-passages: done
   4-2-créer-et-enregistrer-les-embeddings: done
   4-3-suivre-l-état-de-préparation-d-une-ressource: done
-  4-4-retrouver-les-passages-pertinents-par-le-sens: ready-for-dev
+  4-4-retrouver-les-passages-pertinents-par-le-sens: review
   4-5-afficher-les-extraits-des-passages-retrouvés: ready-for-dev
   4-6-limiter-la-recherche-aux-ressources-accessibles: ready-for-dev
   4-7-générer-une-réponse-à-partir-des-passages-retrouvés: backlog
