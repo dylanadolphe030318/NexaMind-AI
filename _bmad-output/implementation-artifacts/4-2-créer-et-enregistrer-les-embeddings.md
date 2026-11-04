@@ -3,7 +3,7 @@ story: 4-2-créer-et-enregistrer-les-embeddings
 title: Créer et enregistrer les embeddings
 epic: 4
 sprint: 5
-status: in-review
+status: done
 baseline_commit: a263b792db54e476892dd0864364ba9092af8590
 ---
 

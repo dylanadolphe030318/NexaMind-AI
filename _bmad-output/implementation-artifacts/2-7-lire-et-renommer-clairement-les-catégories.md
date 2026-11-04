@@ -3,7 +3,7 @@ story: 2-7-lire-et-renommer-clairement-les-catégories
 title: Lire et renommer clairement les catégories
 epic: 2
 sprint: 5
-status: ready-for-dev
+status: done
 ---
 
 # Story 2.7 : Lire et renommer clairement les catégories

@@ -3,7 +3,7 @@ story: 4-1-découper-une-ressource-en-passages
 title: Découper une ressource en passages
 epic: 4
 sprint: 5
-status: ready-for-dev
+status: done
 ---
 
 # Story 4.1 : Découper une ressource en passages

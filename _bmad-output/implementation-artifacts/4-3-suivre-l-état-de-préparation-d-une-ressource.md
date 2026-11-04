@@ -3,7 +3,7 @@ story: 4-3-suivre-l-état-de-préparation-d-une-ressource
 title: Suivre l'état de préparation d'une ressource
 epic: 4
 sprint: 5
-status: in-review
+status: done
 baseline_commit: d07d087f46065181b2b363eecdac73377bb0f940
 ---
 
