@@ -125,6 +125,11 @@ export default async function SearchResourcesPage({
             )}
           </section>
         ) : null}
+        {semantic?.status === "error" ? (
+          <p className="auth-message auth-message-error" role="alert">
+            La recherche par le sens n&apos;a pas pu aboutir. R&eacute;essayez dans un instant.
+          </p>
+        ) : null}
 
         <Link className="auth-back" href="/resources/searches">
           Mes recherches r&eacute;centes

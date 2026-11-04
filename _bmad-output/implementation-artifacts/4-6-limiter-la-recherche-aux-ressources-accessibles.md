@@ -3,7 +3,7 @@ story: 4-6-limiter-la-recherche-aux-ressources-accessibles
 title: Limiter la recherche aux ressources accessibles
 epic: 4
 sprint: 6
-status: ready-for-dev
+status: review
 ---
 
 # Story 4.6 : Limiter la recherche aux ressources accessibles
