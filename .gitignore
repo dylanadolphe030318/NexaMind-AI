@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# fichiers locaux contenant des clés (ne jamais versionner)
+/RAG , IA/
