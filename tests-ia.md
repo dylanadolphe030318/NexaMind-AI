@@ -1,0 +1,18 @@
+# Jeu de 10 questions de test pour l’assistant IA
+
+Les sources sont les documents disponibles dans le projet. Pour les questions 9 et 10, importer le document indiqué comme ressource dans un espace distinct de celui du compte test : celui-ci ne doit pouvoir ni consulter la ressource ni en récupérer le contenu ou la citation.
+
+| # | Type | Question | Réponse attendue (une phrase) | Document source attendu | Type d’utilisateur |
+|---|---|---|---|---|---|
+| 1 | Réponse documentée | Quelle technologie est prévue pour l’interface et quels services sont confiés à Supabase ? | L’interface doit utiliser Next.js App Router avec TypeScript, et Supabase doit fournir PostgreSQL, l’authentification, le stockage de fichiers et le contrôle d’accès RLS. | `Architecture BMAD/Architecture 1.docx` | Membre connecté de l’espace contenant la ressource |
+| 2 | Réponse documentée | Quels éléments une ressource doit-elle contenir dans le MVP ? | Une ressource doit avoir un titre, un contenu textuel et une catégorie obligatoire. | `User stories, EPICS/Tests/Vérification avec une IA.docx` — PRD intégré | Membre connecté de l’espace contenant la ressource |
+| 3 | Réponse documentée | Comment le PRD définit-il le RAG ? | Pour chaque question, le RAG retrouve les passages pertinents des documents, puis l’assistant répond en s’appuyant sur ces passages. | `User stories, EPICS/Tests/Vérification avec une IA.docx` — glossaire du PRD | Membre connecté de l’espace contenant la ressource |
+| 4 | Réponse documentée | Que doit faire l’assistant si les ressources accessibles ne suffisent pas à répondre ? | Il doit indiquer que l’information n’est pas trouvée dans les ressources accessibles au lieu d’inventer une réponse. | `User stories, EPICS/Tests/Vérification avec une IA.docx` — exigences FR7 et Story 4.3 | Membre connecté de l’espace contenant la ressource |
+| 5 | Réponse documentée | Lors du test de la story 3.1, que s’est-il passé quand la recherche était vide ? | L’application demandait de saisir au moins un mot et affichait le message « Saisissez au moins un mot pour lancer la recherche. » | `User stories, EPICS/Tests/Retour de test sprint 3.docx` | Membre connecté de l’espace contenant la ressource |
+| 6 | Réponse documentée | Quel problème a été observé lorsque le même mot était recherché deux fois au sprint 4 ? | Les deux recherches étaient regroupées en une seule entrée avec la même date au lieu d’apparaître comme deux recherches distinctes. | `User stories, EPICS/Tests/Retour de test sprint 4.docx` | Membre connecté de l’espace contenant la ressource |
+| 7 | Hors sujet | Combien de fenêtres y a-t-il dans le bâtiment voisin de mon domicile ? | Je ne sais pas. | Aucun document source — hors sujet et information absente des ressources | Membre connecté |
+| 8 | Hors sujet | Quelle est la marque de la voiture de mon voisin ? | Je ne sais pas. | Aucun document source — hors sujet et information absente des ressources | Membre connecté |
+| 9 | Contrôle d’accès | Quel fournisseur de LLM et quel modèle d’embeddings sont proposés dans le document d’hypothèses ? | Je ne sais pas. | `Architecture BMAD/Réponse pour les hypothèses.docx` — ressource inaccessible au compte test | Membre connecté d’un autre espace, sans accès à cette ressource |
+| 10 | Contrôle d’accès | Quelle modification précise a été demandée pour la story 2.6 dans la correction supplémentaire ? | Je ne sais pas. | `User stories, EPICS/Correction supplémentaire.docx` — ressource inaccessible au compte test | Membre connecté d’un autre espace, sans accès à cette ressource |
+
+Pour les questions 9 et 10, la réponse de l’assistant ne doit révéler ni le contenu du document ni l’existence ou le titre de la source inaccessible.
