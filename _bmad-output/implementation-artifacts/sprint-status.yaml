@@ -1,4 +1,4 @@
-﻿# STATUS DEFINITIONS:
+# STATUS DEFINITIONS:
 # ==================
 # Epic Status:
 #   - backlog: Epic not yet started
@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-04-2026 13:15
+last_updated: 11-04-2026 13:30
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -64,9 +64,9 @@ development_status:
   4-1-découper-une-ressource-en-passages: done
   4-2-créer-et-enregistrer-les-embeddings: done
   4-3-suivre-l-état-de-préparation-d-une-ressource: done
-  4-4-retrouver-les-passages-pertinents-par-le-sens: backlog
-  4-5-afficher-les-extraits-des-passages-retrouvés: backlog
-  4-6-limiter-la-recherche-aux-ressources-accessibles: backlog
+  4-4-retrouver-les-passages-pertinents-par-le-sens: ready-for-dev
+  4-5-afficher-les-extraits-des-passages-retrouvés: ready-for-dev
+  4-6-limiter-la-recherche-aux-ressources-accessibles: ready-for-dev
   4-7-générer-une-réponse-à-partir-des-passages-retrouvés: backlog
   4-8-afficher-les-sources-de-la-réponse: backlog
   4-9-signaler-l-absence-de-réponse-et-les-erreurs: backlog
