@@ -202,6 +202,13 @@ test("indexation : passages, révisions et droits (RLS active, sans clé de serv
         .single();
       assert.ifError(failedStatusError);
       assert.equal(failedResource.indexing_status, "failed");
+
+      const { data: hiddenChunks, error: hiddenError } = await a.client
+        .from("resource_chunks")
+        .select("id")
+        .eq("resource_id", resource.id);
+      assert.ifError(hiddenError);
+      assert.equal(hiddenChunks.length, 0);
     });
 
     await t.test("seul le propriétaire ou responsable peut relancer une ressource en échec", async () => {
