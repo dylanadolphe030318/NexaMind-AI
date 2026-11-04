@@ -5,6 +5,7 @@ import {
   SEMANTIC_MIN_SIMILARITY,
   SEMANTIC_QUERY_MAX_LENGTH,
   SEMANTIC_RESULT_LIMIT,
+  buildPassageExcerpt,
   formatVector,
   normalizeQuestion,
   runSemanticSearch,
@@ -73,6 +74,17 @@ test("aucun passage au-dessus du seuil donne une liste vide", async () => {
     deps({ search: async () => ({ data: [row("a", 0.05)], error: null }) }),
   );
   assert.deepEqual(outcome, { status: "ok", passages: [] });
+});
+
+test("l'extrait garde un texte court tel quel et coupe proprement un texte long", () => {
+  assert.equal(buildPassageExcerpt("  Un   texte\ncourt. "), "Un texte court.");
+
+  const long = Array.from({ length: 80 }, (_, i) => `mot${i}`).join(" ");
+  const excerpt = buildPassageExcerpt(long);
+  assert.ok(excerpt.endsWith("\u2026"));
+  assert.ok(excerpt.length <= 201);
+  assert.ok(long.startsWith(excerpt.slice(0, -1)));
+  assert.match(excerpt.slice(0, -1), /mot\d+$/, "ne coupe pas un mot en deux");
 });
 
 test("une erreur d'embedding ou de base donne un échec journalisé sans le texte de la question", async () => {

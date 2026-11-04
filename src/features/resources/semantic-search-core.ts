@@ -44,6 +44,19 @@ export function formatVector(embedding: number[]): string {
   return `[${embedding.join(",")}]`;
 }
 
+const EXCERPT_LENGTH = 200;
+
+export function buildPassageExcerpt(content: string, maxLength = EXCERPT_LENGTH): string {
+  const flat = content.replace(/\s+/g, " ").trim();
+  if (flat.length <= maxLength) {
+    return flat;
+  }
+  const cut = flat.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  const clean = lastSpace > maxLength / 2 ? cut.slice(0, lastSpace) : cut;
+  return `${clean.replace(/[\s.,;:!?]+$/, "")}\u2026`;
+}
+
 export async function runSemanticSearch(
   rawQuestion: string,
   deps: SemanticSearchDeps,

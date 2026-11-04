@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { formatResourceDate } from "@/features/resources/resource-format";
 import { SEARCH_MAX_LENGTH, searchResources } from "@/features/resources/resources";
 import { recordSearch } from "@/features/resources/searches";
+import { searchPassages } from "@/features/resources/semantic-search";
+import {
+  SEMANTIC_QUERY_MAX_LENGTH,
+  buildPassageExcerpt,
+} from "@/features/resources/semantic-search-core";
 
 export const metadata: Metadata = {
   title: "Rechercher - NexaMind AI",
@@ -21,10 +26,12 @@ export default async function SearchResourcesPage({
   const { q } = await searchParams;
   const raw = typeof q === "string" ? q.trim() : "";
   const submitted = typeof q === "string";
-  const tooLong = raw.length > SEARCH_MAX_LENGTH;
+  const tooLong = raw.length > SEMANTIC_QUERY_MAX_LENGTH;
+  const keywordTooLong = raw.length > SEARCH_MAX_LENGTH;
 
-  const outcome = raw && !tooLong ? await searchResources(raw) : null;
-  if (raw && !tooLong && !outcome) {
+  const outcome = raw && !keywordTooLong ? await searchResources(raw) : null;
+  const semantic = raw && !tooLong ? await searchPassages(raw) : null;
+  if (raw && !tooLong && !semantic) {
     redirect("/login");
   }
   if (outcome?.results || (submitted && !raw)) {
@@ -53,7 +60,11 @@ export default async function SearchResourcesPage({
             </p>
           ) : tooLong ? (
             <p className="auth-message auth-message-error" role="alert">
-              La recherche est trop longue ({SEARCH_MAX_LENGTH} caract&egrave;res au maximum).
+              La recherche est trop longue ({SEMANTIC_QUERY_MAX_LENGTH} caract&egrave;res au maximum).
+            </p>
+          ) : keywordTooLong ? (
+            <p className="auth-message auth-message-info" role="status">
+              La recherche par mots-cl&eacute;s est limit&eacute;e &agrave; {SEARCH_MAX_LENGTH} caract&egrave;res.
             </p>
           ) : outcome && outcome.results === null ? (
             <p className="auth-message auth-message-error" role="alert">
@@ -86,6 +97,34 @@ export default async function SearchResourcesPage({
             </>
           ) : null}
         </section>
+
+        {semantic?.status === "ok" ? (
+          <section aria-labelledby="semantic-title" className="category-list-section">
+            <h2 id="semantic-title">Passages trouv&eacute;s par le sens</h2>
+            {semantic.passages.length === 0 ? (
+              <div className="category-empty" role="status">
+                <p>
+                  Aucun passage pertinent n&apos;a &eacute;t&eacute; trouv&eacute;. Reformulez votre question avec
+                  d&apos;autres mots et relancez la recherche.
+                </p>
+              </div>
+            ) : (
+              <ul className="category-list">
+                {semantic.passages.map((passage) => (
+                  <li className="category-entry" key={passage.resourceId}>
+                    <p className="category-name">{passage.title}</p>
+                    <p className="resource-excerpt">{buildPassageExcerpt(passage.content)}</p>
+                    <p className="resource-meta">
+                      <Link className="resource-link" href={`/resources/${passage.resourceId}`}>
+                        Ouvrir la ressource
+                      </Link>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        ) : null}
 
         <Link className="auth-back" href="/resources/searches">
           Mes recherches r&eacute;centes
