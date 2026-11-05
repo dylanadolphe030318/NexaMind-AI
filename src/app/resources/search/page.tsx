@@ -110,8 +110,8 @@ export default async function SearchResourcesPage({
               </div>
             ) : (
               <ul className="category-list">
-                {semantic.passages.map((passage) => (
-                  <li className="category-entry" key={passage.resourceId}>
+                {semantic.passages.map((passage, index) => (
+                  <li className="category-entry" key={`${passage.resourceId}-${index}`}>
                     <p className="category-name">{passage.title}</p>
                     <p className="resource-excerpt">{buildPassageExcerpt(passage.content)}</p>
                     <p className="resource-meta">

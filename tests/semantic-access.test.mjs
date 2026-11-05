@@ -18,6 +18,16 @@ test("la fonction de recherche sémantique s'exécute avec les droits du membre 
   assert.match(sql, /grant execute on function public\.search_resource_chunks[\s\S]*to authenticated/i);
 });
 
+test("la recherche corrigée reste sous RLS et ne garde plus un seul passage par ressource", () => {
+  const sql = readFileSync("supabase/migrations/20261105130000_search_all_matching_chunks.sql", "utf8");
+  assert.match(sql, /security invoker/i);
+  assert.doesNotMatch(sql, /security definer/i);
+  assert.doesNotMatch(sql, /distinct on/i);
+  assert.match(sql, /limit least\(greatest\(coalesce\(p_limit, 5\), 1\), 5\)/i);
+  assert.match(sql, /revoke all on function public\.search_resource_chunks[\s\S]*from public, anon/i);
+  assert.match(sql, /grant execute on function public\.search_resource_chunks[\s\S]*to authenticated/i);
+});
+
 test("aucune clé privilégiée Supabase n'est utilisée dans le code de l'application", () => {
   for (const file of sourceFiles("src")) {
     const content = readFileSync(file, "utf8");
