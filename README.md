@@ -45,6 +45,8 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
    ```env
    OPENAI_API_KEY=<openai-key>
+   # Optionnel : modèle des réponses de l'assistant (défaut : gpt-6-luna)
+   OPENAI_CHAT_MODEL=gpt-6-luna
    ```
 
    Elle ne se lit que dans du code serveur (`import "server-only"`, comme `src/lib/supabase/server.ts`), jamais dans un composant client. Sur Vercel, elle se déclare dans les variables d’environnement du projet, sans préfixe `NEXT_PUBLIC_`.
