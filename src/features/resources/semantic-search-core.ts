@@ -22,6 +22,7 @@ type SearchRow = {
   title: string;
   content: string;
   similarity: number;
+  ranking_score?: number;
 };
 
 export type SemanticSearchDeps = {
@@ -32,6 +33,7 @@ export type SemanticSearchDeps = {
     queryEmbedding: string,
     limit: number,
     minSimilarity: number,
+    queryText?: string,
   ) => Promise<{ data: SearchRow[] | null; error: unknown }>;
   logError?: (message: string) => void;
 };
@@ -64,6 +66,7 @@ export function buildPassageExcerpt(content: string, maxLength = EXCERPT_LENGTH)
 export async function runSemanticSearch(
   rawQuestion: string,
   deps: SemanticSearchDeps,
+  options: { rankByText?: boolean } = {},
 ): Promise<SemanticSearchOutcome> {
   const question = normalizeQuestion(rawQuestion);
   if (!question) {
@@ -80,18 +83,25 @@ export async function runSemanticSearch(
       throw new Error("Embedding de la question absent.");
     }
 
-    const { data, error } = await deps.search(
+    const searchArgs: [string, number, number] = [
       formatVector(embedding),
       SEMANTIC_RESULT_LIMIT,
       SEMANTIC_MIN_SIMILARITY,
-    );
+    ];
+    const { data, error } = options.rankByText
+      ? await deps.search(...searchArgs, question)
+      : await deps.search(...searchArgs);
     if (error || !data) {
       throw new Error("La recherche des passages a échoué.");
     }
 
     const passages = data
       .filter((row) => row.similarity >= SEMANTIC_MIN_SIMILARITY)
-      .sort((a, b) => b.similarity - a.similarity)
+      .sort(
+        (a, b) =>
+          (b.ranking_score ?? b.similarity) - (a.ranking_score ?? a.similarity) ||
+          b.similarity - a.similarity,
+      )
       .slice(0, SEMANTIC_RESULT_LIMIT)
       .map((row) => ({
         resourceId: row.resource_id,

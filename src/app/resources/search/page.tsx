@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { formatResourceDate } from "@/features/resources/resource-format";
 import { SEARCH_MAX_LENGTH, searchResources } from "@/features/resources/resources";
 import { recordSearch } from "@/features/resources/searches";
-import { searchPassages } from "@/features/resources/semantic-search";
+import { searchResourcePassages } from "@/features/resources/semantic-search";
 import {
   SEMANTIC_QUERY_MAX_LENGTH,
   buildPassageExcerpt,
@@ -30,7 +30,7 @@ export default async function SearchResourcesPage({
   const keywordTooLong = raw.length > SEARCH_MAX_LENGTH;
 
   const outcome = raw && !keywordTooLong ? await searchResources(raw) : null;
-  const semantic = raw && !tooLong ? await searchPassages(raw) : null;
+  const semantic = raw && !tooLong ? await searchResourcePassages(raw) : null;
   if (raw && !tooLong && !semantic) {
     redirect("/login");
   }

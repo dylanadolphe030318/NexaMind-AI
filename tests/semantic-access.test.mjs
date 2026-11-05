@@ -28,6 +28,36 @@ test("la recherche corrigée reste sous RLS et ne garde plus un seul passage par
   assert.match(sql, /grant execute on function public\.search_resource_chunks[\s\S]*to authenticated/i);
 });
 
+test("le classement hybride reste sous RLS, borne le texte et garde le seuil brut", () => {
+  const sql = readFileSync("supabase/migrations/20261105140000_search_resource_chunks_hybrid.sql", "utf8");
+  assert.match(sql, /security invoker/i);
+  assert.doesNotMatch(sql, /security definer/i);
+  assert.match(sql, /similarity >= p_min_similarity/i);
+  assert.match(sql, /similarity >= best\.similarity - 0\.10/i);
+  assert.match(sql, /normalized_text_rank \* 0\.10/i);
+  assert.match(sql, /query_identifiers[\s\S]*matches_identifier desc/i);
+  assert.match(sql, /limit least\(greatest\(coalesce\(p_limit, 5\), 1\), 5\)/i);
+  assert.match(sql, /revoke all on function public\.search_resource_chunks_hybrid[\s\S]*from public, anon/i);
+  assert.match(sql, /grant execute on function public\.search_resource_chunks_hybrid[\s\S]*to authenticated/i);
+});
+
+test("seule la recherche de ressources active le classement hybride", () => {
+  const search = readFileSync("src/features/resources/semantic-search.ts", "utf8");
+  const resourcePage = readFileSync("src/app/resources/search/page.tsx", "utf8");
+  const assistant = readFileSync("src/features/assistant/assistant.ts", "utf8");
+  assert.match(search, /queryText[\s\S]*search_resource_chunks_hybrid/);
+  assert.match(search, /: await supabase\.rpc\("search_resource_chunks"/);
+  assert.match(resourcePage, /searchResourcePassages\(raw\)/);
+  assert.match(assistant, /retrieve:\s*searchPassages/);
+});
+
+test("la migration hybride ne qualifie pas les expressions conditionnelles SQL", () => {
+  const sql = readFileSync("supabase/migrations/20261105140000_search_resource_chunks_hybrid.sql", "utf8");
+  assert.doesNotMatch(sql, /\bpg_catalog\s*\.\s*(coalesce|nullif|greatest|least)\s*\(/i);
+  assert.match(sql, /coalesce\(p_query_text, ''\)/i);
+  assert.match(sql, /coalesce\(eligible\.content, ''\)/i);
+});
+
 test("aucune clé privilégiée Supabase n'est utilisée dans le code de l'application", () => {
   for (const file of sourceFiles("src")) {
     const content = readFileSync(file, "utf8");

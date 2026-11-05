@@ -51,7 +51,7 @@ test("la recherche envoie le vecteur, la limite et le seuil", async () => {
   assert.equal(formatVector([1, 2, 3]), "[1,2,3]");
 });
 
-test("les passages sont triés, limités à 5 et filtrés par le seuil", async () => {
+test("les passages sont triés, limités à 5 et filtrés par le seuil brut", async () => {
   const rows = [
     row("a", 0.4),
     row("b", 0.9),
@@ -66,6 +66,47 @@ test("les passages sont triés, limités à 5 et filtrés par le seuil", async (
   assert.deepEqual(
     outcome.passages.map((p) => p.resourceId),
     ["b", "d", "e", "f", "g"],
+  );
+});
+
+test("le classement textuel priorise un résultat proche sans modifier le seuil vectoriel brut", async () => {
+  const rows = [
+    { ...row("distracteur", 0.99), ranking_score: 0.99 },
+    { ...row("pertinent", 0.95), ranking_score: 1.05 },
+    { ...row("hors-seuil", 0.39), ranking_score: 0.49 },
+  ];
+  const d = deps({
+    search: async (...args) => {
+      d.calls.search.push(args);
+      return { data: rows, error: null };
+    },
+  });
+  const outcome = await runSemanticSearch("story 4.4 et RAG", d, { rankByText: true });
+
+  assert.deepEqual(d.calls.search, [
+    ["[0.1,0.2]", SEMANTIC_RESULT_LIMIT, SEMANTIC_MIN_SIMILARITY, "story 4.4 et RAG"],
+  ]);
+  assert.deepEqual(
+    outcome.passages.map((passage) => passage.resourceId),
+    ["pertinent", "distracteur"],
+  );
+  assert.equal(outcome.passages[0].similarity, 0.95);
+});
+
+test("sans correspondance textuelle, le classement conserve l'ordre vectoriel", async () => {
+  const rows = [
+    { ...row("plus-proche", 0.92), ranking_score: 0.92 },
+    { ...row("moins-proche", 0.81), ranking_score: 0.81 },
+  ];
+  const outcome = await runSemanticSearch(
+    "termes absents du document",
+    deps({ search: async () => ({ data: rows, error: null }) }),
+    { rankByText: true },
+  );
+
+  assert.deepEqual(
+    outcome.passages.map((passage) => passage.resourceId),
+    ["plus-proche", "moins-proche"],
   );
 });
 
