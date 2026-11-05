@@ -67,9 +67,9 @@ development_status:
   4-4-retrouver-les-passages-pertinents-par-le-sens: done
   4-5-afficher-les-extraits-des-passages-retrouvés: done
   4-6-limiter-la-recherche-aux-ressources-accessibles: done
-  4-7-générer-une-réponse-à-partir-des-passages-retrouvés: ready-for-dev
-  4-8-afficher-les-sources-de-la-réponse: ready-for-dev
-  4-9-signaler-l-absence-de-réponse-et-les-erreurs: ready-for-dev
+  4-7-générer-une-réponse-à-partir-des-passages-retrouvés: done
+  4-8-afficher-les-sources-de-la-réponse: done
+  4-9-signaler-l-absence-de-réponse-et-les-erreurs: done
   4-10-consulter-la-liste-de-ses-conversations: backlog
   4-11-rouvrir-une-conversation: backlog
   4-12-continuer-une-conversation-précédente: backlog

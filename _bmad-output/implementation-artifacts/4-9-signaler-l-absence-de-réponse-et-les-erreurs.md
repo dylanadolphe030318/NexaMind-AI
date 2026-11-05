@@ -3,7 +3,7 @@ story: 4-9-signaler-l-absence-de-réponse-et-les-erreurs
 title: Signaler l'absence de réponse et les erreurs
 epic: 4
 sprint: 7
-status: ready-for-dev
+status: done
 ---
 
 # Story 4.9 : Signaler l'absence de réponse et les erreurs

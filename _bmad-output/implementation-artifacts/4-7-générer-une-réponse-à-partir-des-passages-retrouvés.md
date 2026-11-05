@@ -3,7 +3,7 @@ story: 4-7-générer-une-réponse-à-partir-des-passages-retrouvés
 title: Générer une réponse à partir des passages retrouvés
 epic: 4
 sprint: 7
-status: ready-for-dev
+status: done
 ---
 
 # Story 4.7 : Générer une réponse à partir des passages retrouvés

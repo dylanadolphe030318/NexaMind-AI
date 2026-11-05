@@ -3,7 +3,7 @@ story: 4-8-afficher-les-sources-de-la-réponse
 title: Afficher les sources de la réponse
 epic: 4
 sprint: 7
-status: ready-for-dev
+status: done
 ---
 
 # Story 4.8 : Afficher les sources de la réponse
