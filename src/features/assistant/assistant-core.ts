@@ -132,7 +132,8 @@ export async function runAssistant(
     const reply = parseAssistantReply(content, search.passages.length);
     const sources = buildSources(reply.sources, search.passages);
     // Une réponse sans source valide n'est jamais présentée comme fiable.
-    if (reply.missing || !reply.answer || !sources.length) {
+    // Garde-fou : un « Je ne sais pas » écrit dans le texte ne doit jamais s'afficher avec des sources.
+    if (reply.missing || !reply.answer || !sources.length || /^je ne sais pas/i.test(reply.answer)) {
       return { status: "unknown" };
     }
     return { status: "ok", answer: reply.answer, sources };

@@ -91,6 +91,14 @@ test("une réponse sans source valide n'est pas présentée comme fiable", async
   assert.equal(outcome.status, "unknown");
 });
 
+test("un « Je ne sais pas » écrit dans le texte n'affiche pas de sources", async () => {
+  const outcome = await runAssistant("Q ?", {
+    retrieve: async () => okSearch,
+    generate: async () => '{"answer":"Je ne sais pas.","sources":[1],"missing":false}',
+  });
+  assert.equal(outcome.status, "unknown");
+});
+
 test("le code de l'assistant utilise searchPassages et aucune clé privilégiée", () => {
   const assistant = readFileSync("src/features/assistant/assistant.ts", "utf8");
   assert.match(assistant, /import "server-only"/);
