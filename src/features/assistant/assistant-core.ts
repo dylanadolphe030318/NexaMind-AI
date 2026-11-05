@@ -1,11 +1,17 @@
 import type { ChatMessage } from "@/lib/ai/openai-chat-client";
-import type { SemanticPassage, SemanticSearchOutcome } from "@/features/resources/semantic-search-core";
+import {
+  buildPassageExcerpt,
+  type SemanticPassage,
+  type SemanticSearchOutcome,
+} from "../resources/semantic-search-core.ts";
 
 export const ASSISTANT_QUESTION_MAX_LENGTH = 300;
 const PASSAGE_MAX_CHARS = 2000;
 
+export type AssistantSource = { resourceId: string; title: string; excerpt: string };
+
 export type AssistantOutcome =
-  | { status: "ok"; answer: string }
+  | { status: "ok"; answer: string; sources: AssistantSource[] }
   | { status: "unknown" }
   | { status: "no-context" }
   | { status: "invalid" }
@@ -81,6 +87,25 @@ export function parseAssistantReply(content: string, passageCount: number): Assi
   };
 }
 
+/** Sources = passages réellement cités, une seule entrée par ressource, du plus pertinent au moins pertinent. */
+export function buildSources(numbers: number[], passages: SemanticPassage[]): AssistantSource[] {
+  const sources: AssistantSource[] = [];
+  const seen = new Set<string>();
+  for (const number of [...numbers].sort((a, b) => a - b)) {
+    const passage = passages[number - 1];
+    if (!passage || seen.has(passage.resourceId)) {
+      continue;
+    }
+    seen.add(passage.resourceId);
+    sources.push({
+      resourceId: passage.resourceId,
+      title: passage.title,
+      excerpt: buildPassageExcerpt(passage.content),
+    });
+  }
+  return sources;
+}
+
 /** null = pas de session. */
 export async function runAssistant(
   rawQuestion: string,
@@ -105,10 +130,12 @@ export async function runAssistant(
   try {
     const content = await deps.generate(buildAssistantMessages(question, search.passages));
     const reply = parseAssistantReply(content, search.passages.length);
-    if (reply.missing || !reply.answer) {
+    const sources = buildSources(reply.sources, search.passages);
+    // Une réponse sans source valide n'est jamais présentée comme fiable.
+    if (reply.missing || !reply.answer || !sources.length) {
       return { status: "unknown" };
     }
-    return { status: "ok", answer: reply.answer };
+    return { status: "ok", answer: reply.answer, sources };
   } catch (error) {
     deps.logError?.(error instanceof Error ? error.message : "Erreur de génération.");
     return { status: "error" };

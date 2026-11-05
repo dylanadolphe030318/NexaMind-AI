@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { submitQuestion } from "./assistant-actions";
@@ -43,6 +44,18 @@ export function AssistantForm() {
           <>
             <h2>R&eacute;ponse</h2>
             <p className="assistant-answer">{outcome.answer}</p>
+            <h2>Sources</h2>
+            <ul className="category-list">
+              {outcome.sources.map((source) => (
+                <li key={source.resourceId}>
+                  <strong>{source.title}</strong>
+                  <p className="resource-excerpt">{source.excerpt}</p>
+                  <Link className="resource-link" href={`/resources/${source.resourceId}`}>
+                    Ouvrir la ressource
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </>
         ) : null}
         {outcome?.status === "unknown" || outcome?.status === "no-context" ? (

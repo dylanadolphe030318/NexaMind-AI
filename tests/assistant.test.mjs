@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import {
   ASSISTANT_SYSTEM_PROMPT,
   buildAssistantMessages,
+  buildSources,
   parseAssistantReply,
   runAssistant,
 } from "../src/features/assistant/assistant-core.ts";
@@ -46,6 +48,7 @@ test("réponse normale, je ne sais pas, quota et session", async () => {
   assert.deepEqual(await runAssistant("Q ?", { retrieve: async () => okSearch, generate }), {
     status: "ok",
     answer: "Next.js",
+    sources: [{ resourceId: "r1", title: "Archi", excerpt: "Next.js et Supabase" }],
   });
   const missing = async () => '{"answer":"Je ne sais pas.","sources":[],"missing":true}';
   assert.equal((await runAssistant("Q ?", { retrieve: async () => okSearch, generate: missing })).status, "unknown");
@@ -68,6 +71,34 @@ test("une erreur du modèle donne error sans journaliser la question", async () 
   });
   assert.equal(outcome.status, "error");
   assert.ok(!logs.join().includes("secrète"));
+});
+
+test("les sources sont dédoublonnées par ressource et ordonnées par pertinence", () => {
+  const passages = [
+    { resourceId: "a", title: "A", content: "un", similarity: 0.9 },
+    { resourceId: "a", title: "A", content: "deux", similarity: 0.8 },
+    { resourceId: "b", title: "B", content: "trois", similarity: 0.7 },
+  ];
+  const sources = buildSources([3, 2, 1], passages);
+  assert.deepEqual(sources.map((s) => s.resourceId), ["a", "b"]);
+});
+
+test("une réponse sans source valide n'est pas présentée comme fiable", async () => {
+  const outcome = await runAssistant("Q ?", {
+    retrieve: async () => okSearch,
+    generate: async () => '{"answer":"Une réponse","sources":[],"missing":false}',
+  });
+  assert.equal(outcome.status, "unknown");
+});
+
+test("le code de l'assistant utilise searchPassages et aucune clé privilégiée", () => {
+  const assistant = readFileSync("src/features/assistant/assistant.ts", "utf8");
+  assert.match(assistant, /import "server-only"/);
+  assert.match(assistant, /retrieve: searchPassages/);
+  for (const file of ["assistant.ts", "assistant-core.ts", "assistant-form.tsx"]) {
+    assert.ok(!/service_role|SERVICE_ROLE/.test(readFileSync(`src/features/assistant/${file}`, "utf8")));
+  }
+  assert.ok(!/OPENAI_API_KEY/.test(readFileSync("src/features/assistant/assistant-form.tsx", "utf8")));
 });
 
 test("le client envoie la limite de tokens et un délai, et ne divulgue pas la clé", async () => {
