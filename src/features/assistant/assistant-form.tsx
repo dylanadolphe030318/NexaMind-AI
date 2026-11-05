@@ -10,6 +10,7 @@ import { initialAssistantState } from "./assistant-state";
 export function AssistantForm() {
   const [state, formAction, pending] = useActionState(submitQuestion, initialAssistantState);
   const { outcome } = state;
+  const shown = pending ? null : outcome;
 
   return (
     <>
@@ -37,16 +38,27 @@ export function AssistantForm() {
         <button className="button auth-submit" disabled={pending} type="submit">
           Poser la question
         </button>
+        {shown?.status === "error" ? (
+          <button className="button" type="submit">
+            R&eacute;essayer
+          </button>
+        ) : null}
       </form>
 
+      {pending ? (
+        <p className="auth-message auth-message-info" role="status">
+          L&apos;assistant pr&eacute;pare sa r&eacute;ponse&hellip;
+        </p>
+      ) : null}
+
       <section aria-label="R&eacute;sultat de l'assistant" className="category-list-section">
-        {outcome?.status === "ok" ? (
+        {shown?.status === "ok" ? (
           <>
             <h2>R&eacute;ponse</h2>
-            <p className="assistant-answer">{outcome.answer}</p>
+            <p className="assistant-answer">{shown.answer}</p>
             <h2>Sources</h2>
             <ul className="category-list">
-              {outcome.sources.map((source) => (
+              {shown.sources.map((source) => (
                 <li key={source.resourceId}>
                   <strong>{source.title}</strong>
                   <p className="resource-excerpt">{source.excerpt}</p>
@@ -58,22 +70,22 @@ export function AssistantForm() {
             </ul>
           </>
         ) : null}
-        {outcome?.status === "unknown" || outcome?.status === "no-context" ? (
+        {shown?.status === "unknown" || shown?.status === "no-context" ? (
           <p className="auth-message auth-message-info" role="status">
             Je ne trouve pas cette information dans les ressources disponibles.
           </p>
         ) : null}
-        {outcome?.status === "invalid" ? (
+        {shown?.status === "invalid" ? (
           <p className="auth-message auth-message-info" role="status">
             Saisissez une question de {ASSISTANT_QUESTION_MAX_LENGTH} caract&egrave;res au maximum.
           </p>
         ) : null}
-        {outcome?.status === "rate-limited" ? (
+        {shown?.status === "rate-limited" ? (
           <p className="auth-message auth-message-error" role="alert">
             Trop de questions en peu de temps. R&eacute;essayez dans une minute.
           </p>
         ) : null}
-        {outcome?.status === "error" ? (
+        {shown?.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             La r&eacute;ponse n&apos;a pas pu &ecirc;tre produite. R&eacute;essayez dans un instant.
           </p>

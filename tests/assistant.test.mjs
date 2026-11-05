@@ -101,6 +101,14 @@ test("le code de l'assistant utilise searchPassages et aucune clé privilégiée
   assert.ok(!/OPENAI_API_KEY/.test(readFileSync("src/features/assistant/assistant-form.tsx", "utf8")));
 });
 
+test("l'écran prévoit attente, absence de réponse, erreur avec réessai et quota", () => {
+  const form = readFileSync("src/features/assistant/assistant-form.tsx", "utf8");
+  for (const text of ["prépare sa réponse|pr&eacute;pare sa r&eacute;ponse", "Je ne trouve pas cette information", "Réessayer|R&eacute;essayer", "Trop de questions"]) {
+    assert.match(form, new RegExp(text));
+  }
+  assert.match(form, /disabled=\{pending\}/);
+});
+
 test("le client envoie la limite de tokens et un délai, et ne divulgue pas la clé", async () => {
   let body;
   let signal;
