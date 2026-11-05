@@ -1,0 +1,40 @@
+- id: "s8-1"
+  title: Fiabiliser le classement de la recherche
+  description: >-
+    Préparer puis réaliser CAP-1 selon stories/s8-1-fiabiliser-la-recherche.md.
+    Préserver la recherche validée de l'assistant et tester le classement après le RPC.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Ne pas développer maintenant. Plus tard : une story à la fois dans l'ordre, un commit par story, arrêt en cas de blocage, aucun statut done avant mon évaluation."
+- id: "4-10"
+  title: Consulter la liste de ses conversations
+  description: >-
+    Réaliser CAP-2 selon stories/4-10-consulter-la-liste-de-ses-conversations.md.
+    Inclure l'enregistrement initial, les relations privées et l'expiration des conversations.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Ne pas développer maintenant. Plus tard : une story à la fois dans l'ordre, un commit par story, arrêt en cas de blocage, aucun statut done avant mon évaluation."
+- id: "4-11"
+  title: Rouvrir une conversation
+  description: >-
+    Réaliser CAP-3 selon stories/4-11-rouvrir-une-conversation.md.
+    Afficher les messages conservés et vérifier la disponibilité actuelle des sources.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Ne pas développer maintenant. Plus tard : une story à la fois dans l'ordre, un commit par story, arrêt en cas de blocage, aucun statut done avant mon évaluation."
+- id: "4-12"
+  title: Continuer une conversation précédente
+  description: >-
+    Réaliser CAP-4 selon stories/4-12-continuer-une-conversation-precedente.md.
+    Ajouter des questions avec un contexte récent borné et des sources actuellement autorisées.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Ne pas développer maintenant. Plus tard : une story à la fois dans l'ordre, un commit par story, arrêt en cas de blocage, aucun statut done avant mon évaluation."
+- id: "4-13"
+  title: Supprimer une conversation de son historique
+  description: >-
+    Réaliser CAP-5 selon stories/4-13-supprimer-une-conversation-de-son-historique.md.
+    Confirmer la suppression privée et atomique sans modifier les ressources citées.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Ne pas développer maintenant. Plus tard : une story à la fois dans l'ordre, un commit par story, arrêt en cas de blocage, aucun statut done avant mon évaluation."

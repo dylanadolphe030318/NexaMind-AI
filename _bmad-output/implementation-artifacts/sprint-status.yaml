@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-05-2026 22:32
+last_updated: 11-05-2026 22:59
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -72,14 +72,34 @@ development_status:
   4-7-générer-une-réponse-à-partir-des-passages-retrouvés: done
   4-8-afficher-les-sources-de-la-réponse: done
   4-9-signaler-l-absence-de-réponse-et-les-erreurs: done
-  4-10-consulter-la-liste-de-ses-conversations: backlog
-  4-11-rouvrir-une-conversation: backlog
-  4-12-continuer-une-conversation-précédente: backlog
-  4-13-supprimer-une-conversation-de-son-historique: backlog
+  # Fiches du sprint 8 : _bmad-output/specs/spec-sprint-8-ia/stories/
+  # Relire chaque fiche avant développement ; évaluer chaque story avant done.
+  4-10-consulter-la-liste-de-ses-conversations: ready-for-dev
+  4-11-rouvrir-une-conversation: ready-for-dev
+  4-12-continuer-une-conversation-précédente: ready-for-dev
+  4-13-supprimer-une-conversation-de-son-historique: ready-for-dev
   4-14-relier-les-affirmations-aux-sources: backlog
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
   epic-4-retrospective: optional
+sprint_story_limits:
+  min: 3
+  max: 5
+  includes_complements: true
+sprint_8_preparation:
+  story_folder: "_bmad-output/specs/spec-sprint-8-ia/stories"
+  manifest: "_bmad-output/specs/spec-sprint-8-ia/stories.yaml"
+  execution_order: ["s8-1", "4-10", "4-11", "4-12", "4-13"]
+  complements:
+    s8-1: ready-for-dev
+  development_started: false
+sprint_9_planned:
+  execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
+  deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
+  complements:
+    s8-2: ready-for-dev
+    s8-3: ready-for-dev
+  development_started: false
 action_items:
   - id: "epic-1-retro-item-1-pr-parer-un-compte-membre-et-un-compte-r"
     epic: 1
