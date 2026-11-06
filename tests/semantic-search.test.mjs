@@ -69,6 +69,32 @@ test("les passages sont triés, limités à 5 et filtrés par le seuil brut", as
   );
 });
 
+test("les résultats conservent les identifiants de passage et de révision pour les sources persistées", async () => {
+  const outcome = await runSemanticSearch(
+    "question",
+    deps({
+      search: async () => ({
+        data: [
+          {
+            ...row("resource-1", 0.8),
+            chunk_id: "chunk-1",
+            revision: 4,
+          },
+        ],
+        error: null,
+      }),
+    }),
+  );
+  assert.deepEqual(outcome.passages[0], {
+    chunkId: "chunk-1",
+    revision: 4,
+    resourceId: "resource-1",
+    title: "Titre resource-1",
+    content: "Passage resource-1",
+    similarity: 0.8,
+  });
+});
+
 test("le classement hybride conserve le résultat priorisé sans modifier le seuil vectoriel brut", async () => {
   const rows = [
     { ...row("pertinent", 0.95), ranking_score: 1.05 },

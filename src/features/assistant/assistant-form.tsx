@@ -5,12 +5,17 @@ import { useActionState } from "react";
 
 import { submitQuestion } from "./assistant-actions";
 import { ASSISTANT_QUESTION_MAX_LENGTH } from "./assistant-core";
-import { initialAssistantState } from "./assistant-state";
+import type { AssistantFormState } from "./assistant-state";
 
-export function AssistantForm() {
-  const [state, formAction, pending] = useActionState(submitQuestion, initialAssistantState);
-  const { outcome } = state;
-  const shown = pending ? null : outcome;
+export function AssistantForm({ initialQuestionId }: { initialQuestionId: string }) {
+  const initialState: AssistantFormState = {
+    question: "",
+    questionId: initialQuestionId,
+    submission: null,
+  };
+  const [state, formAction, pending] = useActionState(submitQuestion, initialState);
+  const submission = pending ? null : state.submission;
+  const outcome = submission?.status === "saved" ? submission.outcome : null;
 
   return (
     <>
@@ -18,8 +23,9 @@ export function AssistantForm() {
         action={formAction}
         className="auth-form"
         // La clé remet la question saisie dans le champ après chaque réponse.
-        key={state.question + (outcome?.status ?? "")}
+        key={`${state.questionId}:${state.question}:${submission?.status ?? ""}`}
       >
+        <input name="questionId" type="hidden" value={state.questionId} />
         <div className="auth-field">
           <label htmlFor="assistant-question">Votre question</label>
           <textarea
@@ -38,8 +44,8 @@ export function AssistantForm() {
         <button className="button auth-submit" disabled={pending} type="submit">
           Poser la question
         </button>
-        {shown?.status === "error" ? (
-          <button className="button" type="submit">
+        {submission?.status === "save-error" || submission?.status === "generation-error" ? (
+          <button className="button" disabled={pending} type="submit">
             R&eacute;essayer
           </button>
         ) : null}
@@ -52,13 +58,13 @@ export function AssistantForm() {
       ) : null}
 
       <section aria-label="R&eacute;sultat de l'assistant" className="category-list-section">
-        {shown?.status === "ok" ? (
+        {outcome?.status === "ok" ? (
           <>
             <h2>R&eacute;ponse</h2>
-            <p className="assistant-answer">{shown.answer}</p>
+            <p className="assistant-answer">{outcome.answer}</p>
             <h2>Sources</h2>
             <ul className="category-list">
-              {shown.sources.map((source) => (
+              {outcome.sources.map((source) => (
                 <li key={source.resourceId}>
                   <strong>{source.title}</strong>
                   <p className="resource-excerpt">{source.excerpt}</p>
@@ -70,24 +76,36 @@ export function AssistantForm() {
             </ul>
           </>
         ) : null}
-        {shown?.status === "unknown" || shown?.status === "no-context" ? (
+        {outcome?.status === "unknown" || outcome?.status === "no-context" ? (
           <p className="auth-message auth-message-info" role="status">
             Je ne trouve pas cette information dans les ressources disponibles.
           </p>
         ) : null}
-        {shown?.status === "invalid" ? (
+        {submission?.status === "invalid" ? (
           <p className="auth-message auth-message-info" role="status">
             Saisissez une question de {ASSISTANT_QUESTION_MAX_LENGTH} caract&egrave;res au maximum.
           </p>
         ) : null}
-        {shown?.status === "rate-limited" ? (
+        {submission?.status === "save-error" ? (
           <p className="auth-message auth-message-error" role="alert">
-            Trop de questions en peu de temps. R&eacute;essayez dans une minute.
+            L&apos;&eacute;change n&apos;a pas pu &ecirc;tre enregistr&eacute;. R&eacute;essayez.
           </p>
         ) : null}
-        {shown?.status === "error" ? (
+        {submission?.status === "generation-error" ? (
           <p className="auth-message auth-message-error" role="alert">
-            La r&eacute;ponse n&apos;a pas pu &ecirc;tre produite. R&eacute;essayez dans un instant.
+            {submission.reason === "rate-limited"
+              ? "Trop de questions en peu de temps. Réessayez dans une minute."
+              : "La réponse n'a pas pu être produite. Réessayez dans un instant."}
+          </p>
+        ) : null}
+        {submission?.status === "in-progress" ? (
+          <p className="auth-message auth-message-info" role="status">
+            La question est d&eacute;j&agrave; en cours de traitement. R&eacute;essayez dans un instant.
+          </p>
+        ) : null}
+        {submission?.status === "already-complete" ? (
+          <p className="auth-message auth-message-info" role="status">
+            Cette question a d&eacute;j&agrave; &eacute;t&eacute; enregistr&eacute;e.
           </p>
         ) : null}
       </section>

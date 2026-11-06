@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-06-2026 11:42
+last_updated: 11-06-2026 12:04
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -74,7 +74,7 @@ development_status:
   4-9-signaler-l-absence-de-réponse-et-les-erreurs: done
   # Fiches du sprint 8 : _bmad-output/specs/spec-sprint-8-ia/stories/
   # Relire chaque fiche avant développement ; évaluer chaque story avant done.
-  4-10-consulter-la-liste-de-ses-conversations: ready-for-dev
+  4-10-consulter-la-liste-de-ses-conversations: review
   4-11-rouvrir-une-conversation: ready-for-dev
   4-12-continuer-une-conversation-précédente: ready-for-dev
   4-13-supprimer-une-conversation-de-son-historique: ready-for-dev
@@ -93,6 +93,7 @@ sprint_8_preparation:
   complements:
     s8-1: review
   development_started: true
+  blocked_on: "Story 4.10 : migration, Cron, expiration SQL et 38/38 tests d'intégration validés. Revue du sprint : deux corrections fonctionnelles attendent l'autorisation de Dylan ; parcours manuel suspendu pour cette revue, commit de story encore à faire."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"

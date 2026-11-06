@@ -1,8 +1,7 @@
-import type { AssistantOutcome } from "./assistant-core";
+import type { AssistantSubmission } from "./assistant-conversation-core";
 
 export type AssistantFormState = {
   question: string;
-  outcome: AssistantOutcome | null;
+  questionId: string;
+  submission: AssistantSubmission | null;
 };
-
-export const initialAssistantState: AssistantFormState = { question: "", outcome: null };

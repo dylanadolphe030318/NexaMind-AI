@@ -8,7 +8,13 @@ import {
 export const ASSISTANT_QUESTION_MAX_LENGTH = 300;
 const PASSAGE_MAX_CHARS = 2000;
 
-export type AssistantSource = { resourceId: string; title: string; excerpt: string };
+export type AssistantSource = {
+  chunkId?: string;
+  resourceId: string;
+  revision?: number;
+  title: string;
+  excerpt: string;
+};
 
 export type AssistantOutcome =
   | { status: "ok"; answer: string; sources: AssistantSource[] }
@@ -101,6 +107,8 @@ export function buildSources(numbers: number[], passages: SemanticPassage[]): As
       resourceId: passage.resourceId,
       title: passage.title,
       excerpt: buildPassageExcerpt(passage.content),
+      ...(passage.chunkId ? { chunkId: passage.chunkId } : {}),
+      ...(passage.revision === undefined ? {} : { revision: passage.revision }),
     });
   }
   return sources;

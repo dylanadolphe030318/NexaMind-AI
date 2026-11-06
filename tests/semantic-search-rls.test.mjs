@@ -122,6 +122,20 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       assert.ok(hit, "le passage proche doit être retrouvé");
       assert.equal(hit.content, "Passage prete");
       assert.ok(hit.similarity > 0.99);
+      assert.equal(hit.revision, ready.revision);
+      const { data: chunk, error: chunkError } = await a.client
+        .from("resource_chunks")
+        .select("id")
+        .eq("resource_id", ready.id)
+        .single();
+      assert.ifError(chunkError);
+      assert.equal(hit.chunk_id, chunk.id);
+      const { data: hybridHits, error: hybridError } = await hybridSearch(a, axis(0), "prete");
+      assert.ifError(hybridError);
+      const hybridHit = hybridHits.find((row) => row.resource_id === ready.id);
+      assert.ok(hybridHit);
+      assert.equal(hybridHit.chunk_id, chunk.id);
+      assert.equal(hybridHit.revision, ready.revision);
 
       const { data: far, error: farError } = await search(a, axis(1));
       assert.ifError(farError);
@@ -220,6 +234,12 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       assert.ok(data[relevantIndex].similarity < data[distractorIndex].similarity);
     });
 
+    await t.test("un autre membre du même espace retrouve les passages de ressources prêtes", async () => {
+      const { data, error } = await search(b, axis(0));
+      assert.ifError(error);
+      assert.ok(data.some((row) => row.resource_id === ready.id));
+    });
+
     await t.test("le classement hybride plafonne à cinq même si le RPC en demande davantage", async () => {
       for (let i = 1; i <= 6; i += 1) {
         await createResource(`hybrid-limit${i}`, 0);
@@ -253,12 +273,6 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       const { data: hybridData, error: hybridError } = await hybridSearch(a, axis(30), "en préparation", 5, -1);
       assert.ifError(hybridError);
       assert.equal(hybridData.some((row) => row.resource_id === notReady.id), false);
-    });
-
-    await t.test("un autre membre du même espace retrouve les passages de ressources prêtes", async () => {
-      const { data, error } = await search(b, axis(0));
-      assert.ifError(error);
-      assert.ok(data.some((row) => row.resource_id === ready.id));
     });
 
     await t.test("un visiteur sans session ne peut pas lancer la recherche", async () => {

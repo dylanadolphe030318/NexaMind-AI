@@ -1,4 +1,6 @@
+import { randomUUID } from "node:crypto";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AssistantForm } from "@/features/assistant/assistant-form";
@@ -24,7 +26,10 @@ export default async function AssistantPage() {
     <main className="auth-page category-page">
       <section aria-labelledby="assistant-title" className="auth-card category-card">
         <h1 id="assistant-title">Assistant</h1>
-        <AssistantForm />
+        <p>
+          <Link href="/assistant/conversations">Mes conversations</Link>
+        </p>
+        <AssistantForm initialQuestionId={randomUUID()} />
       </section>
     </main>
   );

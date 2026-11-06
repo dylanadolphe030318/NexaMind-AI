@@ -5,6 +5,8 @@ export const SEMANTIC_MAX_SEARCHES_PER_MINUTE = 20;
 export const SEMANTIC_MIN_SIMILARITY = 0.4;
 
 export type SemanticPassage = {
+  chunkId?: string;
+  revision?: number;
   resourceId: string;
   title: string;
   content: string;
@@ -18,7 +20,9 @@ export type SemanticSearchOutcome =
   | { status: "error" };
 
 type SearchRow = {
+  chunk_id?: string;
   resource_id: string;
+  revision?: number;
   title: string;
   content: string;
   similarity: number;
@@ -102,6 +106,8 @@ export async function runSemanticSearch(
     const passages = orderedRows
       .slice(0, SEMANTIC_RESULT_LIMIT)
       .map((row) => ({
+        chunkId: row.chunk_id,
+        revision: row.revision,
         resourceId: row.resource_id,
         title: row.title,
         content: row.content,
