@@ -69,10 +69,10 @@ test("les passages sont triés, limités à 5 et filtrés par le seuil brut", as
   );
 });
 
-test("le classement textuel priorise un résultat proche sans modifier le seuil vectoriel brut", async () => {
+test("le classement hybride conserve le résultat priorisé sans modifier le seuil vectoriel brut", async () => {
   const rows = [
-    { ...row("distracteur", 0.99), ranking_score: 0.99 },
     { ...row("pertinent", 0.95), ranking_score: 1.05 },
+    { ...row("distracteur", 0.99), ranking_score: 0.99 },
     { ...row("hors-seuil", 0.39), ranking_score: 0.49 },
   ];
   const d = deps({
@@ -91,6 +91,40 @@ test("le classement textuel priorise un résultat proche sans modifier le seuil 
     ["pertinent", "distracteur"],
   );
   assert.equal(outcome.passages[0].similarity, 0.95);
+});
+
+test("le mode hybride conserve l'ordre du RPC après filtrage, même si ranking_score est inférieur", async () => {
+  const rows = [
+    { ...row("identifiant-exact", 0.95), ranking_score: 0.8 },
+    { ...row("meilleur-ranking-score", 0.96), ranking_score: 0.99 },
+    { ...row("sous-seuil", 0.39), ranking_score: 1.1 },
+  ];
+  const outcome = await runSemanticSearch(
+    "story 3.1",
+    deps({ search: async () => ({ data: rows, error: null }) }),
+    { rankByText: true },
+  );
+
+  assert.deepEqual(
+    outcome.passages.map((passage) => passage.resourceId),
+    ["identifiant-exact", "meilleur-ranking-score"],
+  );
+});
+
+test("le mode vectoriel trie toujours par similarité, sans tenir compte de ranking_score", async () => {
+  const rows = [
+    { ...row("plus-proche", 0.96), ranking_score: 0.8 },
+    { ...row("moins-proche", 0.95), ranking_score: 1.1 },
+  ];
+  const outcome = await runSemanticSearch(
+    "question",
+    deps({ search: async () => ({ data: rows, error: null }) }),
+  );
+
+  assert.deepEqual(
+    outcome.passages.map((passage) => passage.resourceId),
+    ["plus-proche", "moins-proche"],
+  );
 });
 
 test("sans correspondance textuelle, le classement conserve l'ordre vectoriel", async () => {

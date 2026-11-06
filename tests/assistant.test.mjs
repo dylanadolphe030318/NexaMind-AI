@@ -22,7 +22,10 @@ test("la consigne impose passages, sources et je ne sais pas", () => {
   assert.match(ASSISTANT_SYSTEM_PROMPT, /sources/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /Je ne sais pas/);
   const messages = buildAssistantMessages("Q ?", [passage]);
-  assert.match(messages[1].content, /\[Passage 1\]/);
+  assert.equal(
+    messages[1].content,
+    "Passages :\n\n[Passage 1] Ressource : Archi\nNext.js et Supabase\n\nQuestion : Q ?",
+  );
 });
 
 test("une réponse avec un numéro de passage inconnu est refusée", () => {

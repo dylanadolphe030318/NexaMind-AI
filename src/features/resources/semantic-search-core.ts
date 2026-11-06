@@ -95,13 +95,11 @@ export async function runSemanticSearch(
       throw new Error("La recherche des passages a échoué.");
     }
 
-    const passages = data
-      .filter((row) => row.similarity >= SEMANTIC_MIN_SIMILARITY)
-      .sort(
-        (a, b) =>
-          (b.ranking_score ?? b.similarity) - (a.ranking_score ?? a.similarity) ||
-          b.similarity - a.similarity,
-      )
+    const eligibleRows = data.filter((row) => row.similarity >= SEMANTIC_MIN_SIMILARITY);
+    const orderedRows = options.rankByText
+      ? eligibleRows
+      : eligibleRows.sort((a, b) => b.similarity - a.similarity);
+    const passages = orderedRows
       .slice(0, SEMANTIC_RESULT_LIMIT)
       .map((row) => ({
         resourceId: row.resource_id,

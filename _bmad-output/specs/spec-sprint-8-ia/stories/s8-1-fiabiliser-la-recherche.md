@@ -4,7 +4,8 @@ title: Fiabiliser le classement de la recherche
 epic: 4
 sprint: 8
 type: bugfix
-status: ready-for-dev
+status: in-review
+baseline_commit: d9ed4c71e325f7fa80c860497638089a1d628dcf
 context:
   - ../SPEC.md
 ---
@@ -44,3 +45,27 @@ Tests ciblés de recherche, accès et assistant, puis intégration sémantique s
 ## Hors périmètre
 
 Autres constats de rétrospective, historique et changements visuels. Aucun développement pendant la préparation.
+
+## Autorisation de développement
+
+Dylan a validé la fiche S8-1 et autorisé son développement le 2026-11-06. La restriction de préparation est levée pour cette story uniquement. Ne pas marquer la story `done`, ne pas commiter depuis l'agent d'implémentation : la revue et le commit sont réalisés après vérification. Ne pas développer les stories suivantes.
+
+## Résultat du développement — 2026-11-06
+
+- [x] Conserver l'ordre SQL en mode hybride et le tri par similarité en mode vectoriel.
+- [x] Tester la conservation de priorité après filtrage avec un score de classement inférieur.
+- [x] Tester le signal lexical sans numéro sous RLS et l'exclusion sous le seuil.
+- [x] Vérifier le texte exact des passages et de la question envoyés à l'assistant.
+- [ ] Évaluation par Dylan : dix questions sur les deux écrans et scénario S8-A.
+
+Vérifications : 54/54 tests unitaires, 11/11 tests d'intégration sémantique, TypeScript et ESLint réussis. Aucun changement de migration ou appel au LLM pour ces vérifications.
+
+## Review Triage Log
+
+| Revue | Verdict | Preuve et décision |
+|---|---|---|
+| Blind hunter : évaluation manuelle non consignée | medium | Critère 5 toujours en attente : les tests automatisés ne remplacent pas les dix questions rejouées par Dylan. Point de validation utilisateur conservé, aucune prétention de résultat manuel. |
+| Edge case hunter | Aucun problème | Aucun défaut remonté sur le diff. |
+| Verification gap | Aucun problème | Aucun manque de couverture automatisée remonté. |
+
+La story reste `in-review`, pas `done`, conformément à la demande de Dylan.

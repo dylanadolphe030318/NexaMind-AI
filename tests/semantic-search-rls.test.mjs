@@ -163,6 +163,26 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
         "un numéro exact ne fait pas remonter un passage éloigné sémantiquement",
       );
 
+      const belowThresholdIdentifier = await createResource(
+        "hybrid-below-threshold",
+        nearAxis(0.39),
+        true,
+        "La story 3.1 précise ce qui s'est passé quand la recherche était vide.",
+      );
+      const { data: thresholdResults, error: thresholdError } = await hybridSearch(
+        a,
+        axis(0),
+        query,
+        5,
+        0.4,
+      );
+      assert.ifError(thresholdError);
+      assert.equal(
+        thresholdResults.some((row) => row.resource_id === belowThresholdIdentifier.id),
+        false,
+        "un numéro exact ne fait pas remonter un passage sous le seuil",
+      );
+
       const { data: memberBResults, error: memberBError } = await hybridSearch(b, axis(0), query);
       assert.ifError(memberBError);
       assert.ok(
@@ -173,6 +193,31 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       const anonymous = await hybridSearch({ client: newClient() }, axis(0), query);
       assert.ok(anonymous.error, "un visiteur sans session ne peut pas appeler le classement hybride");
       assert.equal(anonymous.data, null);
+    });
+
+    await t.test("sans numéro, le signal lexical départage les passages proches sous RLS", async () => {
+      const distractor = await createResource(
+        "hybrid-lexical-distractor",
+        nearAxis(0.97),
+        true,
+        "Les règles de publication décrivent le calendrier des mises à jour.",
+      );
+      const relevant = await createResource(
+        "hybrid-lexical-relevant",
+        nearAxis(0.95),
+        true,
+        "Le diagnostic explique pourquoi la recherche affiche zéro passage après l'indexation.",
+      );
+      const query = "Quel diagnostic explique la recherche après indexation ?";
+      const { data, error } = await hybridSearch(a, axis(0), query, 5, 0.4);
+      assert.ifError(error);
+
+      const relevantIndex = data.findIndex((row) => row.resource_id === relevant.id);
+      const distractorIndex = data.findIndex((row) => row.resource_id === distractor.id);
+      assert.ok(relevantIndex >= 0, "le passage lexicalement pertinent doit être retrouvé");
+      assert.ok(distractorIndex >= 0, "le distracteur vectoriel doit être retrouvé");
+      assert.ok(relevantIndex < distractorIndex, "le signal lexical départage le distracteur plus proche");
+      assert.ok(data[relevantIndex].similarity < data[distractorIndex].similarity);
     });
 
     await t.test("le classement hybride plafonne à cinq même si le RPC en demande davantage", async () => {
