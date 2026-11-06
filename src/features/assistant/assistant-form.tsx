@@ -1,11 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { submitQuestion } from "./assistant-actions";
+import { editAssistantQuestion, type AssistantQuestionDraft } from "./assistant-conversation-core";
 import { ASSISTANT_QUESTION_MAX_LENGTH } from "./assistant-core";
 import type { AssistantFormState } from "./assistant-state";
+
+function AssistantQuestionInput({ initial }: { initial: AssistantQuestionDraft }) {
+  const [draft, setDraft] = useState(initial);
+
+  return (
+    <>
+      <input name="questionId" type="hidden" value={draft.questionId} />
+      <div className="auth-field">
+        <label htmlFor="assistant-question">Votre question</label>
+        <textarea
+          id="assistant-question"
+          maxLength={ASSISTANT_QUESTION_MAX_LENGTH}
+          name="question"
+          onChange={(event) => {
+            setDraft(editAssistantQuestion(initial, event.currentTarget.value, () => crypto.randomUUID()));
+          }}
+          required
+          rows={3}
+          value={draft.question}
+        />
+      </div>
+    </>
+  );
+}
 
 export function AssistantForm({ initialQuestionId }: { initialQuestionId: string }) {
   const initialState: AssistantFormState = {
@@ -23,20 +48,9 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
         action={formAction}
         className="auth-form"
         // La clé remet la question saisie dans le champ après chaque réponse.
-        key={`${state.questionId}:${state.question}:${submission?.status ?? ""}`}
+        key={`${state.questionId}:${state.question}:${state.submission?.status ?? ""}`}
       >
-        <input name="questionId" type="hidden" value={state.questionId} />
-        <div className="auth-field">
-          <label htmlFor="assistant-question">Votre question</label>
-          <textarea
-            defaultValue={state.question}
-            id="assistant-question"
-            maxLength={ASSISTANT_QUESTION_MAX_LENGTH}
-            name="question"
-            required
-            rows={3}
-          />
-        </div>
+        <AssistantQuestionInput initial={state} />
         <p className="auth-intro">
           Votre question et des extraits de vos ressources sont envoy&eacute;s &agrave; OpenAI pour pr&eacute;parer la
           r&eacute;ponse.

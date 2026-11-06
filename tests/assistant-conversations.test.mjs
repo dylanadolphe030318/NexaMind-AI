@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   conversationQuestionStatusLabel,
+  editAssistantQuestion,
   nextAssistantQuestionId,
   submitSavedAssistantQuestion,
 } from "../src/features/assistant/assistant-conversation-core.ts";
@@ -22,6 +23,52 @@ const successfulOutcome = {
     },
   ],
 };
+
+test("modifier la question change son identifiant, mais une vraie relance le conserve", () => {
+  const initial = { question: "Question initiale ?", questionId: "initial-id" };
+  let created = 0;
+  const createId = () => `edited-id-${++created}`;
+
+  assert.deepEqual(editAssistantQuestion(initial, "  Question initiale ?  ", createId), {
+    question: "  Question initiale ?  ",
+    questionId: "initial-id",
+  });
+  assert.equal(created, 0);
+
+  const edited = editAssistantQuestion(initial, "Question modifiée ?", createId);
+  assert.equal(edited.questionId, "edited-id-1");
+  assert.equal(editAssistantQuestion(initial, initial.question, createId).questionId, "initial-id");
+  assert.notEqual(editAssistantQuestion(initial, "", createId).questionId, initial.questionId);
+  assert.equal(created, 2);
+});
+
+test("une nouvelle question après un échec ne réutilise pas l'identifiant du texte enregistré", async () => {
+  const storedQuestions = new Map();
+  let generated = 0;
+  const deps = dependencies({
+    claim: async (id, question) => {
+      if (storedQuestions.has(id) && storedQuestions.get(id) !== question) {
+        return { claimed: false, generationToken: null, status: "conflict" };
+      }
+      storedQuestions.set(id, question);
+      return { claimed: true, generationToken: "attempt-token", status: "generating" };
+    },
+    generate: async () => ++generated === 1 ? { status: "error" } : successfulOutcome,
+  });
+  const initial = { question: "Première question ?", questionId: "first-id" };
+  const failed = await submitSavedAssistantQuestion(initial.question, initial.questionId, deps);
+  assert.equal(failed.status, "generation-error");
+  assert.equal(nextAssistantQuestionId(initial.questionId, failed, () => "unused-id"), "first-id");
+
+  const edited = editAssistantQuestion(initial, "Question modifiée ?", () => "second-id");
+  const saved = await submitSavedAssistantQuestion(edited.question, edited.questionId, deps);
+  assert.equal(saved.status, "saved");
+  assert.deepEqual([...storedQuestions], [
+    ["first-id", "Première question ?"],
+    ["second-id", "Question modifiée ?"],
+  ]);
+  assert.equal(generated, 2);
+});
 
 test("l'état du formulaire conserve l'identifiant en échec et le réutilise à la tentative suivante", async () => {
   const id = "same-question-id";

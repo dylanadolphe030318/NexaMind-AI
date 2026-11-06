@@ -8,6 +8,22 @@ export type AssistantSubmission =
   | { status: "already-complete" }
   | { status: "invalid" };
 
+export type AssistantQuestionDraft = {
+  question: string;
+  questionId: string;
+};
+
+export function editAssistantQuestion(
+  initial: AssistantQuestionDraft,
+  question: string,
+  createId: () => string,
+): AssistantQuestionDraft {
+  return {
+    question,
+    questionId: question.trim() === initial.question.trim() ? initial.questionId : createId(),
+  };
+}
+
 export function nextAssistantQuestionId(
   questionId: string,
   submission: AssistantSubmission,

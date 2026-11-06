@@ -38,4 +38,10 @@ Les dix questions ci-dessus restent inchangées pour vérifier que les réponses
 | S9-I — catégories (sprint 9) | Sur Ressources, choisir une catégorie puis « Toutes les catégories ». Sur Catégories avec le responsable, sélectionner et renommer une catégorie de test ; vérifier aussi au clavier et sur mobile. | Deux menus déroulants clairement nommés, filtre inchangé, création et renommage conservés. Aucun bouton de gestion supplémentaire pour un simple membre ; erreur et liste vide compréhensibles. |
 | S9-J — cartes (sprint 9) | Examiner la liste Ressources, les deux types de résultats de recherche, une réponse et ses sources sur Assistant puis dans une conversation ; tester mobile et zoom 200 %. | Cartes mauve pâle sur fond blanc ; liens/textes lisibles, focus visible. Les messages d'erreur/succès gardent leurs couleurs. Les contrastes sont mesurés par le développeur, pas seulement appréciés à l'œil. |
 
+Complément S8-G, correction R1 de 4.10 : après une erreur sur une question fictive,
+« Réessayer » sans modifier le texte doit reprendre la même question sans doublon.
+Modifier ensuite le texte doit permettre une nouvelle question, sans erreur de conflit
+avec l'ancienne. Les tests unitaires simulent l'échec ; ne pas retirer une clé réelle
+pour provoquer ce cas.
+
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.
