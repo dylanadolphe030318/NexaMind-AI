@@ -93,7 +93,7 @@ sprint_8_preparation:
   complements:
     s8-1: review
   development_started: true
-  blocked_on: "Story 4.10 : migration, Cron, expiration SQL et 38/38 tests d'intégration validés. Revue du sprint : deux corrections fonctionnelles attendent l'autorisation de Dylan ; parcours manuel suspendu pour cette revue, commit de story encore à faire."
+  blocked_on: "Story 4.10 : migration, Cron et expiration SQL vérifiés ; deux corrections de revue autorisées et appliquées. 68/68 tests unitaires, 39/39 intégration, types, lint et build réussis. Parcours manuel et évaluation de Dylan encore attendus ; S8-1 et 4.10 restent en revue."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"

@@ -4,6 +4,11 @@ import test from "node:test";
 
 import { createClient } from "@supabase/supabase-js";
 
+import {
+  nextAssistantQuestionId,
+  submitSavedAssistantQuestion,
+} from "../src/features/assistant/assistant-conversation-core.ts";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const accounts = {
@@ -135,6 +140,49 @@ test(
         const { data: rows, error } = await a.client.from("messages").select("id").eq("id", invalidId);
         assert.ifError(error);
         assert.deepEqual(rows, []);
+      }
+    });
+
+    await t.test("une abstention déjà enregistrée est idempotente et ne relance pas l'IA", async () => {
+      for (const status of ["no-context", "unknown"]) {
+        const terminalId = randomUUID();
+        const terminalQuestion = `S8 état terminal ${status}`;
+        const initial = await claim(a.client, terminalId, terminalQuestion);
+        assert.equal(initial.claimed, true);
+        const { data: finished, error: finishError } = await a.client.rpc(
+          "finish_conversation_question",
+          {
+            p_question_id: terminalId,
+            p_generation_token: initial.generation_token,
+            p_status: status,
+          },
+        );
+        assert.ifError(finishError);
+        assert.equal(finished, true);
+
+        const result = await submitSavedAssistantQuestion(terminalQuestion, terminalId, {
+          claim: async (id, text) => {
+            const row = await claim(a.client, id, text);
+            assert.equal(row.question_status, status);
+            return {
+              claimed: row.claimed,
+              generationToken: row.generation_token,
+              status: row.question_status,
+            };
+          },
+          generate: async () => assert.fail("Une abstention enregistrée ne doit pas rappeler l'IA."),
+          finalize: async () => assert.fail("Aucune réponse ne doit être ajoutée."),
+          finish: async () => assert.fail("L'état terminal doit rester inchangé."),
+        });
+        assert.deepEqual(result, { status: "already-complete" });
+        assert.notEqual(nextAssistantQuestionId(terminalId, result, randomUUID), terminalId);
+
+        const { data: questions, error } = await a.client
+          .from("messages")
+          .select("id, status")
+          .eq("id", terminalId);
+        assert.ifError(error);
+        assert.deepEqual(questions, [{ id: terminalId, status }]);
       }
     });
 

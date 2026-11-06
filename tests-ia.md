@@ -44,4 +44,10 @@ Modifier ensuite le texte doit permettre une nouvelle question, sans erreur de c
 avec l'ancienne. Les tests unitaires simulent l'échec ; ne pas retirer une clé réelle
 pour provoquer ce cas.
 
+Complément S8-G, correction R2 de 4.10 : le test d'intégration rejoue une demande
+ayant déjà reçu un état « aucune ressource pertinente » ou « information introuvable ».
+La demande est reconnue comme déjà traitée, sans erreur d'enregistrement ni nouvel
+appel IA ; le formulaire peut ensuite accepter une nouvelle question. Aucun incident
+réseau réel n'est nécessaire pour vérifier ce cas.
+
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.

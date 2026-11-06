@@ -110,7 +110,7 @@ export async function submitSavedAssistantQuestion(
   }
 
   if (!claim.claimed) {
-    if (claim.status === "complete") {
+    if (["complete", "no-context", "unknown"].includes(claim.status)) {
       return { status: "already-complete" };
     }
     if (claim.status === "generating") {

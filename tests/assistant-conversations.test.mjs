@@ -166,7 +166,7 @@ test("une limite de débit reste visible comme telle dans l'état enregistré", 
 });
 
 test("une revendication déjà active ou terminée ne rappelle pas le fournisseur", async () => {
-  for (const status of ["generating", "complete"]) {
+  for (const status of ["generating", "complete", "no-context", "unknown"]) {
     const deps = dependencies({
       claim: async () => ({ claimed: false, generationToken: null, status }),
     });
@@ -177,6 +177,12 @@ test("une revendication déjà active ou terminée ne rappelle pas le fournisseu
       status === "generating" ? { status: "in-progress" } : { status: "already-complete" },
     );
     assert.deepEqual(deps.calls.generated, []);
+    assert.deepEqual(deps.calls.finalized, []);
+    assert.deepEqual(deps.calls.finished, []);
+    assert.equal(
+      nextAssistantQuestionId("question-id", result, () => "new-question-id"),
+      status === "generating" ? "question-id" : "new-question-id",
+    );
   }
 });
 
