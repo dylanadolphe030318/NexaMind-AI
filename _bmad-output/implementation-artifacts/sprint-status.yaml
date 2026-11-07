@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-07-2026 16:43
+last_updated: 11-07-2026 17:12
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -81,7 +81,7 @@ development_status:
   4-14-relier-les-affirmations-aux-sources: backlog
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
 sprint_story_limits:
   min: 3
   max: 5
@@ -93,7 +93,10 @@ sprint_8_preparation:
   complements:
     s8-1: done
   development_started: true
-  blocked_on: "Évaluation Dylan du 2026-11-07 : S8-1 et 4.10 validées ; score IA 7/10, deux abstentions respectées, aucune fuite. La cible de qualité de l'epic (8/10) reste à atteindre. Prochaine story : 4.11. Intégration actuelle : 38/40 réussis ; un test de recherche vectorielle échoue sur chunk_id/révision manquants."
+  blocked_on: "Évaluation Dylan du 2026-11-07 : S8-1 et 4.10 validées ; score IA 7/10,
+    deux abstentions respectées, aucune fuite. La cible de qualité de l'epic (8/10)
+    reste à atteindre. Prochaine story : 4.11. Intégration actuelle : 38/40 réussis
+    ; un test de recherche vectorielle échoue sur chunk_id/révision manquants."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
@@ -170,7 +173,7 @@ action_items:
     action: "Page des catégories lisible (nom en évidence, une seule zone de renommage),
       par la story 2.7 ajoutée via correction de trajectoire"
     owner: "Dylan + développeur"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-11-02.md"
   - id: "epic-3-retro-item-11-décisions-de-comportement-valid-es-avant"
     epic: 3
