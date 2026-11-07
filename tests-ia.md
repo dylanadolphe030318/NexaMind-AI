@@ -50,4 +50,12 @@ La demande est reconnue comme déjà traitée, sans erreur d'enregistrement ni n
 appel IA ; le formulaire peut ensuite accepter une nouvelle question. Aucun incident
 réseau réel n'est nécessaire pour vérifier ce cas.
 
+Complément recherche de ressources : pour les questions 2, 5 et 6, la recherche
+affiche en premier une phrase exacte choisie par le LLM parmi les cinq passages
+retrouvés au maximum, avec le titre et le lien de la ressource citée. Vérifier l'avis
+qui précise que la question et jusqu'à cinq passages complets (titre et texte) sont
+envoyés à OpenAI. Vérifier que les résultats et leur classement restent visibles
+pendant la sélection. Cela ne corrige pas la question 3 : son passage est exclu avant
+la sélection par le LLM, sous le seuil actuel.
+
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.

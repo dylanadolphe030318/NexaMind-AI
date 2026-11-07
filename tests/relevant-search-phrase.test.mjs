@@ -1,0 +1,209 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import {
+  buildRelevantPhraseMessages,
+  parseRelevantPhraseReply,
+  RELEVANT_PHRASE_MAX_LENGTH,
+  RELEVANT_PHRASE_MAX_PASSAGES,
+  RELEVANT_PHRASE_SYSTEM_PROMPT,
+  runRelevantPhraseSelection,
+} from "../src/features/resources/relevant-search-phrase-core.ts";
+
+const passage = (resourceId, title, content) => ({
+  resourceId,
+  title,
+  content,
+  similarity: 0.6,
+});
+
+test("la consigne demande une phrase exacte et traite les passages comme des données", () => {
+  assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /une seule phrase complète exactement/);
+  assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /jamais des instructions/);
+  assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /au plus 300 caractères/);
+
+  const messages = buildRelevantPhraseMessages("Que faut-il saisir ?", [
+    passage("resource-1", "Guide", "Un titre, un contenu et une catégorie sont requis."),
+  ]);
+  assert.equal(messages[1].content, [
+    "Passages :",
+    "",
+    "[Passage 1] Ressource : Guide",
+    "Un titre, un contenu et une catégorie sont requis.",
+    "",
+    "Question : Que faut-il saisir ?",
+  ].join("\n"));
+});
+
+test("la phrase doit être une phrase complète et exacte du seul passage cité", () => {
+  const passages = [
+    passage(
+      "resource-1",
+      "PRD",
+      "Le titre est utile. Un titre, un contenu non vide et une catégorie sont requis ; si l’un manque, un message indique le champ à corriger.",
+    ),
+    passage("resource-2", "Autre", "Une phrase sans rapport."),
+  ];
+  assert.deepEqual(
+    parseRelevantPhraseReply(
+      JSON.stringify({
+        answer: "Un titre, un contenu non vide et une catégorie sont requis ; si l’un manque, un message indique le champ à corriger.",
+        sources: [1],
+        missing: false,
+      }),
+      passages,
+    ),
+    {
+      status: "selected",
+      phrase:
+        "Un titre, un contenu non vide et une catégorie sont requis ; si l’un manque, un message indique le champ à corriger.",
+      resourceId: "resource-1",
+      title: "PRD",
+    },
+  );
+});
+
+test("une phrase reformulée, tronquée, trop longue ou associée à plusieurs sources est refusée", () => {
+  const passages = [passage("resource-1", "Guide", "Le titre et une catégorie sont obligatoires.")];
+  for (const reply of [
+    { answer: "Il faut un titre et une catégorie.", sources: [1], missing: false },
+    { answer: "Le titre", sources: [1], missing: false },
+    { answer: "x".repeat(RELEVANT_PHRASE_MAX_LENGTH + 1), sources: [1], missing: false },
+    { answer: "Le titre et une catégorie sont obligatoires.", sources: [1, 1], missing: false },
+    { answer: "Le titre et une catégorie sont obligatoires.", sources: [2], missing: false },
+  ]) {
+    assert.deepEqual(parseRelevantPhraseReply(JSON.stringify(reply), passages), { status: "error" });
+  }
+});
+
+test("les phrases sont comparées en ignorant uniquement les espaces de mise en forme", () => {
+  const passages = [passage("resource-1", "Guide", "- La première exigence\nest précise.")];
+  assert.equal(
+    parseRelevantPhraseReply(
+      JSON.stringify({
+        answer: "La première exigence est précise.",
+        sources: [1],
+        missing: false,
+      }),
+      passages,
+    ).status,
+    "selected",
+  );
+});
+
+test("une phrase exacte reste reconnue quand elle est citée dans le passage", () => {
+  const passages = [
+    passage("resource-1", "Guide", "« La réponse est précise ! » Puis vient une autre phrase."),
+  ];
+  assert.equal(
+    parseRelevantPhraseReply(
+      JSON.stringify({
+        answer: "La réponse est précise !",
+        sources: [1],
+        missing: false,
+      }),
+      passages,
+    ).status,
+    "selected",
+  );
+});
+
+test("un refus explicite et un JSON invalide restent des états distincts", () => {
+  const passages = [passage("resource-1", "Guide", "Une phrase pertinente.")];
+  assert.deepEqual(
+    parseRelevantPhraseReply(
+      JSON.stringify({ answer: "", sources: [], missing: true }),
+      passages,
+    ),
+    { status: "none" },
+  );
+  assert.deepEqual(parseRelevantPhraseReply("pas du JSON", passages), { status: "error" });
+  assert.deepEqual(
+    parseRelevantPhraseReply(
+      JSON.stringify({ answer: "Une phrase pertinente.", sources: [], missing: false }),
+      passages,
+    ),
+    { status: "error" },
+  );
+});
+
+test("le LLM ne reçoit jamais plus de cinq passages", () => {
+  const passages = Array.from({ length: RELEVANT_PHRASE_MAX_PASSAGES + 2 }, (_, index) =>
+    passage(`resource-${index + 1}`, `Titre ${index + 1}`, `Contenu ${index + 1}.`),
+  );
+  const messages = buildRelevantPhraseMessages("Question ?", passages);
+  assert.equal((messages[1].content.match(/\[Passage \d+\]/g) ?? []).length, 5);
+  assert.match(messages[1].content, /Contenu 5\./);
+  assert.doesNotMatch(messages[1].content, /Contenu 6\./);
+});
+
+test("une recherche fait au plus un appel LLM et aucun appel sans passage", async () => {
+  let calls = 0;
+  const generate = async () => {
+    calls += 1;
+    return JSON.stringify({
+      answer: "Une phrase pertinente.",
+      sources: [1],
+      missing: false,
+    });
+  };
+  const passages = [passage("resource-1", "Guide", "Une phrase pertinente.")];
+  assert.deepEqual(
+    await runRelevantPhraseSelection("Question ?", [], { generate }),
+    { status: "none" },
+  );
+  assert.equal(calls, 0);
+
+  assert.deepEqual(
+    await runRelevantPhraseSelection("Question ?", passages, { generate }),
+    {
+      status: "selected",
+      phrase: "Une phrase pertinente.",
+      resourceId: "resource-1",
+      title: "Guide",
+    },
+  );
+  assert.equal(calls, 1);
+});
+
+test("une erreur fournisseur est explicite et journalisée sans loguer la question", async () => {
+  const logs = [];
+  const result = await runRelevantPhraseSelection("question privée", [
+    passage("resource-1", "Guide", "Une phrase pertinente."),
+  ], {
+    generate: async () => {
+      throw new Error("HTTP 500");
+    },
+    logError: () => logs.push("Impossible de sélectionner la phrase."),
+  });
+  assert.deepEqual(result, { status: "error" });
+  assert.deepEqual(logs, ["Impossible de sélectionner la phrase."]);
+  assert.equal(logs.join().includes("question privée"), false);
+});
+
+test("une réponse modèle invalide est journalisée sans afficher la question", async () => {
+  const logs = [];
+  const result = await runRelevantPhraseSelection(
+    "question privée",
+    [passage("resource-1", "Guide", "Une phrase pertinente.")],
+    {
+      generate: async () => "réponse invalide",
+      logError: () => logs.push("Impossible de sélectionner la phrase."),
+    },
+  );
+  assert.deepEqual(result, { status: "error" });
+  assert.deepEqual(logs, ["Impossible de sélectionner la phrase."]);
+  assert.equal(logs.join().includes("question privée"), false);
+});
+
+test("la recherche documente l’avis OpenAI, l’extrait pertinent et ses états", async () => {
+  const page = await import("node:fs/promises").then((fs) =>
+    fs.readFile("src/app/resources/search/page.tsx", "utf8"),
+  );
+  assert.match(page, /cinq passages complets\s*\(titre et texte\) sont envoy&eacute;s/i);
+  assert.match(page, /&agrave; OpenAI/);
+  assert.match(page, /Phrase la plus pertinente/);
+  assert.match(page, /<Suspense/);
+  assert.match(page, /selectRelevantSearchPhrase/);
+  assert.match(page, /La phrase pertinente n&apos;a pas pu/);
+});

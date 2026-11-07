@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import { formatResourceDate } from "@/features/resources/resource-format";
+import type { RelevantPhraseResult } from "@/features/resources/relevant-search-phrase-core";
 import { SEARCH_MAX_LENGTH, searchResources } from "@/features/resources/resources";
 import { recordSearch } from "@/features/resources/searches";
+import { selectRelevantSearchPhrase } from "@/features/resources/relevant-search-phrase";
 import { searchResourcePassages } from "@/features/resources/semantic-search";
 import {
   SEMANTIC_QUERY_MAX_LENGTH,
   buildPassageExcerpt,
+  type SemanticPassage,
 } from "@/features/resources/semantic-search-core";
 
 export const metadata: Metadata = {
@@ -17,6 +21,47 @@ export const metadata: Metadata = {
 };
 
 export const instant = false;
+
+async function RelevantPhraseSelection({
+  question,
+  passages,
+}: {
+  question: string;
+  passages: SemanticPassage[];
+}) {
+  const result: RelevantPhraseResult = await selectRelevantSearchPhrase(question, passages);
+
+  if (result.status === "selected") {
+    return (
+      <article aria-label="Phrase la plus pertinente" className="category-entry">
+        <h3>Phrase la plus pertinente</h3>
+        <blockquote>{result.phrase}</blockquote>
+        <p className="resource-meta">
+          {result.title} &middot;{" "}
+          <Link className="resource-link" href={`/resources/${result.resourceId}`}>
+            Ouvrir la ressource
+          </Link>
+        </p>
+      </article>
+    );
+  }
+
+  if (result.status === "none") {
+    return (
+      <p className="auth-message auth-message-info" role="status">
+        Aucune phrase pertinente n&apos;a pu &ecirc;tre s&eacute;lectionn&eacute;e. Les r&eacute;sultats restent
+        disponibles ci-dessous.
+      </p>
+    );
+  }
+
+  return (
+    <p className="auth-message auth-message-error" role="alert">
+      La phrase pertinente n&apos;a pas pu &ecirc;tre s&eacute;lectionn&eacute;e. Les r&eacute;sultats restent
+      disponibles ci-dessous. Relancez la recherche pour r&eacute;essayer.
+    </p>
+  );
+}
 
 export default async function SearchResourcesPage({
   searchParams,
@@ -52,6 +97,10 @@ export default async function SearchResourcesPage({
             Rechercher
           </button>
         </form>
+        <p className="auth-intro">
+          Pour choisir une phrase pertinente, votre question et jusqu&apos;&agrave; cinq passages complets
+          (titre et texte) sont envoy&eacute;s &agrave; OpenAI.
+        </p>
 
         <section aria-label="R&eacute;sultats de la recherche" className="category-list-section">
           {submitted && !raw ? (
@@ -101,6 +150,17 @@ export default async function SearchResourcesPage({
         {semantic?.status === "ok" ? (
           <section aria-labelledby="semantic-title" className="category-list-section">
             <h2 id="semantic-title">Passages trouv&eacute;s par le sens</h2>
+            {semantic.passages.length > 0 ? (
+              <Suspense
+                fallback={
+                  <p className="auth-message auth-message-info" role="status">
+                    S&eacute;lection de la phrase pertinente...
+                  </p>
+                }
+              >
+                <RelevantPhraseSelection passages={semantic.passages} question={raw} />
+              </Suspense>
+            ) : null}
             {semantic.passages.length === 0 ? (
               <div className="category-empty" role="status">
                 <p>
