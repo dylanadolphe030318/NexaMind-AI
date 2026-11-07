@@ -15,7 +15,7 @@ Les sources sont les documents disponibles dans le projet. Pour les questions 9 
 | 9 | Contrôle d’accès | Quel fournisseur de LLM et quel modèle d’embeddings sont proposés dans le document d’hypothèses ? | Je ne sais pas. | `Architecture BMAD/Réponse pour les hypothèses.docx` — ressource inaccessible au compte test | Membre connecté d’un autre espace, sans accès à cette ressource |
 | 10 | Contrôle d’accès | Quelle modification précise a été demandée pour la story 2.6 dans la correction supplémentaire ? | Je ne sais pas. | `User stories, EPICS/Correction supplémentaire.docx` — ressource inaccessible au compte test | Membre connecté d’un autre espace, sans accès à cette ressource |
 
-Pour les questions 9 et 10, la réponse de l’assistant ne doit révélQer ni le contenu du document ni l’existence ou le titre de la source inaccessible.
+Pour les questions 9 et 10, la réponse de l’assistant ne doit révéler ni le contenu du document ni l’existence ou le titre de la source inaccessible.
 
 ## Vérification du sprint 8 — conversations et recherche
 
