@@ -59,3 +59,23 @@ pendant la sélection. Cela ne corrige pas la question 3 : son passage est exclu
 la sélection par le LLM, sous le seuil actuel.
 
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.
+
+## Vérification après le test 7 — recherche de ressources
+
+Pour `/resources/search`, le seuil minimal de similarité est de 0,20 et la fenêtre
+hybride est de 0,20. Ces paramètres ne s'appliquent pas à `/assistant`, qui conserve
+son seuil de 0,40 et son classement vectoriel actuel. La RPC reste exécutée avec la
+session du membre, la RLS et une limite de cinq passages.
+
+Rejouer les questions Q1 et Q3 : le passage accessible attendu peut maintenant faire
+partie des cinq candidats même si sa similarité est sous 0,40. Pour Q6, vérifier que
+la phrase sélectionnée décrit le résultat observé — « les deux recherches ont été
+regroupées en une seule avec la même date » — et non l'action effectuée. Rejouer Q5
+et confirmer que sa phrase exacte reste sélectionnée. Les tests unitaires couvrent
+ces seuils et ces phrases ; le test d'intégration vérifie le classement, la limite et
+les droits lorsqu'il est lancé contre une base où la migration est appliquée.
+
+Appliquer manuellement `supabase/migrations/20261107100000_search_resource_chunks_hybrid_window.sql`
+dans Supabase SQL Editor après `20261106120000_create_conversations.sql` et les migrations
+précédentes.
+Ne pas appliquer la migration dans le cadre d'un test automatisé.

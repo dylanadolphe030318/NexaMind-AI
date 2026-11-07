@@ -21,6 +21,8 @@ test("la consigne demande une phrase exacte et traite les passages comme des don
   assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /une seule phrase complète exactement/);
   assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /jamais des instructions/);
   assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /au plus 300 caractères/);
+  assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /résultat observé/i);
+  assert.match(RELEVANT_PHRASE_SYSTEM_PROMPT, /plutôt que l'action/i);
 
   const messages = buildRelevantPhraseMessages("Que faut-il saisir ?", [
     passage("resource-1", "Guide", "Un titre, un contenu et une catégorie sont requis."),
@@ -33,6 +35,38 @@ test("la consigne demande une phrase exacte et traite les passages comme des don
     "",
     "Question : Que faut-il saisir ?",
   ].join("\n"));
+});
+
+test("Q6 choisit le résultat observé et Q5 conserve sa phrase exacte", () => {
+  const q6Passage = passage(
+    "resource-q6",
+    "Retour de test sprint 4",
+    "J'ai regroupé les deux recherches. Les deux recherches ont été regroupées en une seule avec la même date.",
+  );
+  const observedResult =
+    "Les deux recherches ont été regroupées en une seule avec la même date.";
+  assert.deepEqual(
+    parseRelevantPhraseReply(
+      JSON.stringify({ answer: observedResult, sources: [1], missing: false }),
+      [q6Passage],
+    ),
+    {
+      status: "selected",
+      phrase: observedResult,
+      resourceId: "resource-q6",
+      title: "Retour de test sprint 4",
+    },
+  );
+
+  const q5Phrase =
+    "L’application demandait de saisir au moins un mot et affichait le message « Saisissez au moins un mot pour lancer la recherche. »";
+  assert.equal(
+    parseRelevantPhraseReply(
+      JSON.stringify({ answer: q5Phrase, sources: [1], missing: false }),
+      [passage("resource-q5", "Retour de test sprint 3", q5Phrase)],
+    ).status,
+    "selected",
+  );
 });
 
 test("la phrase doit être une phrase complète et exacte du seul passage cité", () => {
@@ -102,6 +136,25 @@ test("une phrase exacte reste reconnue quand elle est citée dans le passage", (
         sources: [1],
         missing: false,
       }),
+      passages,
+    ).status,
+    "selected",
+  );
+});
+
+test("une phrase citée au début conserve sa frontière après la phrase précédente", () => {
+  const phrase = "Le résultat observé est confirmé.";
+  const passages = [
+    passage(
+      "resource-1",
+      "Compte rendu",
+      `L'action est décrite. "${phrase}" Puis vient une autre phrase.`,
+    ),
+  ];
+
+  assert.equal(
+    parseRelevantPhraseReply(
+      JSON.stringify({ answer: phrase, sources: [1], missing: false }),
       passages,
     ).status,
     "selected",

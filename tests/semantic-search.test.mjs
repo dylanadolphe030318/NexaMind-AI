@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   SEMANTIC_MIN_SIMILARITY,
+  SEMANTIC_RESOURCE_MIN_SIMILARITY,
   SEMANTIC_QUERY_MAX_LENGTH,
   SEMANTIC_RESULT_LIMIT,
   buildPassageExcerpt,
@@ -49,6 +50,57 @@ test("la recherche envoie le vecteur, la limite et le seuil", async () => {
   await runSemanticSearch("Quelle technologie ?", d);
   assert.deepEqual(d.calls.search, [["[0.1,0.2]", SEMANTIC_RESULT_LIMIT, SEMANTIC_MIN_SIMILARITY]]);
   assert.equal(formatVector([1, 2, 3]), "[1,2,3]");
+});
+
+test("la recherche de ressources utilise son seuil réduit sans modifier celui de l'assistant", async () => {
+  const rows = [row("passage-sous-ancien-seuil", 0.25)];
+  const resourceDeps = deps({
+    search: async (...args) => {
+      resourceDeps.calls.search.push(args);
+      return { data: rows, error: null };
+    },
+  });
+  const resourceOutcome = await runSemanticSearch("question Q1 ou Q3", resourceDeps, {
+    rankByText: true,
+    minSimilarity: SEMANTIC_RESOURCE_MIN_SIMILARITY,
+  });
+
+  assert.deepEqual(resourceDeps.calls.search, [[
+    "[0.1,0.2]",
+    SEMANTIC_RESULT_LIMIT,
+    SEMANTIC_RESOURCE_MIN_SIMILARITY,
+    "question Q1 ou Q3",
+  ]]);
+  assert.deepEqual(resourceOutcome.passages.map((passage) => passage.resourceId), [
+    "passage-sous-ancien-seuil",
+  ]);
+
+  const assistantDeps = deps({
+    search: async (...args) => {
+      assistantDeps.calls.search.push(args);
+      return { data: rows, error: null };
+    },
+  });
+  const assistantOutcome = await runSemanticSearch("question assistant", assistantDeps);
+  assert.deepEqual(assistantDeps.calls.search, [[
+    "[0.1,0.2]",
+    SEMANTIC_RESULT_LIMIT,
+    SEMANTIC_MIN_SIMILARITY,
+  ]]);
+  assert.deepEqual(assistantOutcome.passages, []);
+});
+
+test("la migration conserve la RLS et le plafond avec une fenêtre hybride de 0,20", async () => {
+  const migration = await import("node:fs/promises").then((fs) =>
+    fs.readFile(
+      "supabase/migrations/20261107100000_search_resource_chunks_hybrid_window.sql",
+      "utf8",
+    ),
+  );
+  assert.match(migration, /security invoker/i);
+  assert.match(migration, /similarity >= p_min_similarity\s+and\s+scored\.similarity >= best\.similarity - 0\.20::real/i);
+  assert.match(migration, /limit least\(greatest\(coalesce\(p_limit, 5\), 1\), 5\)/i);
+  assert.match(migration, /grant execute[\s\S]+to authenticated/i);
 });
 
 test("les passages sont triés, limités à 5 et filtrés par le seuil brut", async () => {

@@ -51,6 +51,16 @@ test("seule la recherche de ressources active le classement hybride", () => {
   assert.match(assistant, /retrieve:\s*searchPassages/);
 });
 
+test("seule la recherche de ressources transmet le seuil dédié", () => {
+  const search = readFileSync("src/features/resources/semantic-search.ts", "utf8");
+  assert.match(
+    search,
+    /minSimilarity:\s*rankByText\s*\?\s*SEMANTIC_RESOURCE_MIN_SIMILARITY\s*:\s*undefined/,
+  );
+  assert.match(search, /searchResourcePassages\(question: string\)[\s\S]*search\(question, true\)/);
+  assert.match(search, /searchPassages\(question: string\)[\s\S]*search\(question, false\)/);
+});
+
 test("la migration hybride ne qualifie pas les expressions conditionnelles SQL", () => {
   const sql = readFileSync("supabase/migrations/20261105140000_search_resource_chunks_hybrid.sql", "utf8");
   assert.doesNotMatch(sql, /\bpg_catalog\s*\.\s*(coalesce|nullif|greatest|least)\s*\(/i);

@@ -47,6 +47,13 @@ function nearAxis(similarity) {
   return vector;
 }
 
+function nearAxisAt(index, similarity) {
+  const vector = Array(DIMENSIONS).fill(0);
+  vector[index] = similarity;
+  vector[index + 1] = Math.sqrt(1 - similarity ** 2);
+  return vector;
+}
+
 function literal(vector) {
   return `[${vector.join(",")}]`;
 }
@@ -140,6 +147,57 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       const { data: far, error: farError } = await search(a, axis(1));
       assert.ifError(farError);
       assert.equal(far.some((row) => row.resource_id === ready.id), false);
+    });
+
+    await t.test("la recherche de ressources accepte le seuil 0,20 dans la fenêtre hybride 0,20", async () => {
+      let queryAxisIndex = -1;
+      for (let index = DIMENSIONS - 2; index >= DIMENSIONS - 40; index -= 1) {
+        const { data, error } = await hybridSearch(a, axis(index), "termeabsenttest", 5, 0);
+        assert.ifError(error);
+        if (data.every((row) => row.similarity < 0.2)) {
+          queryAxisIndex = index;
+          break;
+        }
+      }
+      assert.notEqual(queryAxisIndex, -1, "un axe de test sans passages vectoriellement proches est disponible");
+
+      const anchor = await createResource(
+        "window-anchor",
+        nearAxisAt(queryAxisIndex, 0.39),
+        true,
+        "Passage témoin pour la fenêtre sémantique.",
+      );
+      const lowerThresholdHit = await createResource(
+        "window-low-threshold",
+        nearAxisAt(queryAxisIndex, 0.25),
+        true,
+        "Passage attendu sous le seuil historique.",
+      );
+      const belowNewThreshold = await createResource(
+        "window-below-threshold",
+        nearAxisAt(queryAxisIndex, 0.19),
+        true,
+        "Passage toujours sous le nouveau seuil.",
+      );
+      const { data, error } = await hybridSearch(
+        a,
+        axis(queryAxisIndex),
+        "termeabsenttest",
+        5,
+        0.2,
+      );
+      assert.ifError(error);
+      assert.ok(data.length <= 5);
+      assert.ok(data.some((row) => row.resource_id === anchor.id));
+      assert.ok(
+        data.some((row) => row.resource_id === lowerThresholdHit.id),
+        "un passage à 0,25 reste candidat sous le seuil et dans la fenêtre de 0,20",
+      );
+      assert.equal(
+        data.some((row) => row.resource_id === belowNewThreshold.id),
+        false,
+        "le nouveau seuil brut de 0,20 continue d'écarter les passages plus faibles",
+      );
     });
 
     await t.test("le texte exact départage les passages proches sans dépasser cinq résultats", async () => {

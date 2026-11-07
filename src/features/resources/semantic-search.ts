@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   runSemanticSearch,
   SEMANTIC_MAX_SEARCHES_PER_MINUTE,
+  SEMANTIC_RESOURCE_MIN_SIMILARITY,
   type SemanticSearchOutcome,
 } from "./semantic-search-core";
 
@@ -51,7 +52,10 @@ async function search(
       },
       logError: (message) => console.error(`[recherche sémantique] ${message}`),
     },
-    { rankByText },
+    {
+      rankByText,
+      minSimilarity: rankByText ? SEMANTIC_RESOURCE_MIN_SIMILARITY : undefined,
+    },
   );
 }
 
