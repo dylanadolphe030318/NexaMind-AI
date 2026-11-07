@@ -4,7 +4,7 @@ title: Fiabiliser le classement de la recherche
 epic: 4
 sprint: 8
 type: bugfix
-status: in-review
+status: done
 baseline_commit: d9ed4c71e325f7fa80c860497638089a1d628dcf
 context:
   - ../SPEC.md
@@ -56,7 +56,7 @@ Dylan a validé la fiche S8-1 et autorisé son développement le 2026-11-06. La 
 - [x] Tester la conservation de priorité après filtrage avec un score de classement inférieur.
 - [x] Tester le signal lexical sans numéro sous RLS et l'exclusion sous le seuil.
 - [x] Vérifier le texte exact des passages et de la question envoyés à l'assistant.
-- [ ] Évaluation par Dylan : dix questions sur les deux écrans et scénario S8-A.
+- [x] Évaluation par Dylan : dix questions sur les deux écrans et scénario S8-A.
 
 Vérifications : 54/54 tests unitaires, 11/11 tests d'intégration sémantique, TypeScript et ESLint réussis. Aucun changement de migration ou appel au LLM pour ces vérifications.
 
@@ -68,4 +68,4 @@ Vérifications : 54/54 tests unitaires, 11/11 tests d'intégration sémantique, 
 | Edge case hunter | Aucun problème | Aucun défaut remonté sur le diff. |
 | Verification gap | Aucun problème | Aucun manque de couverture automatisée remonté. |
 
-La story reste `in-review`, pas `done`, conformément à la demande de Dylan.
+Évaluation finale de Dylan le 2026-11-07 : les scénarios dédiés de S8-1 sont validés. Sur l'évaluation IA globale, 7/10 réponses sont correctes, les deux abstentions attendues sont respectées et aucune fuite n'est constatée. La cible globale de qualité de l'epic reste à améliorer ; elle ne bloque pas la validation de cette story.

@@ -91,4 +91,7 @@ context:
 - `npx tsc --noEmit` : réussi.
 - `npx eslint src tests` : réussi.
 - `git diff --check` : réussi.
-- `npm run test:integration` et les vérifications manuelles restent à exécuter après l'application manuelle de la migration.
+- `npm run test:integration` : 38 tests réussissent sur 40 ; un contrôle de recherche vectorielle échoue car la réponse RPC ne contient pas `chunk_id`/révision. Le test ajouté pour le seuil et la fenêtre 0,20 réussit.
+- Évaluation Dylan du 2026-11-07 : scénarios dédiés de S8-1 validés ; résultat global IA 7/10, deux abstentions respectées et aucune fuite.
+- La migration SQL n'est pas appliquée par le dépôt ; Dylan l'a exécutée manuellement avant son évaluation. L'échec d'intégration de la recherche vectorielle reste à diagnostiquer.
+- Les contrôles manuels de recherche demandés ont été évalués par Dylan ; l'objectif global de qualité de l'epic reste à améliorer.

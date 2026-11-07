@@ -3,7 +3,7 @@ story: 4-10-consulter-la-liste-de-ses-conversations
 title: Consulter la liste de ses conversations
 epic: 4
 sprint: 8
-status: in-review
+status: done
 baseline_commit: 36d8694559c65f4a48afaf177fa8ae0ccd590fb2
 context:
   - ../SPEC.md
@@ -114,3 +114,7 @@ Preuve complémentaire reçue avant cette revue : Dylan a exécuté avec succès
 - Verification gap, purge non automatisée : `low`, non retenu ; le script exécuté vérifie déjà suppression en cascade et préservation de l'actif. Même besoin de canal privilégié, sans défaut de purge démontré.
 
 Bilan : deux groupes `patch`, aucun `decision-needed`, aucun `defer`, onze constats écartés. Trois constats retenus au total : R1 constaté directement, et deux signalements identiques regroupés en R2 (blind hunter et edge-case hunter).
+
+### Acceptation finale — 2026-11-07
+
+Dylan confirme que les scénarios dédiés de la liste des conversations sont validés. La story passe à `done`. L'évaluation globale IA (7/10 réponses correctes, deux abstentions respectées, aucune fuite) reste une amélioration à poursuivre au niveau de l'epic.

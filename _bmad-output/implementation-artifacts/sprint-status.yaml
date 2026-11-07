@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 11-06-2026 12:04
+last_updated: 11-07-2026 16:43
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -61,7 +61,7 @@ development_status:
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.
-  # Stories 4.7 à 4.9 terminées ; prochain sprint IA : 8 (stories 4.10 à 4.13).
+  # Stories 4.7 à 4.10 terminées ; sprint IA 8 en cours, prochaine story : 4.11.
   epic-4: in-progress
   4-1-découper-une-ressource-en-passages: done
   4-2-créer-et-enregistrer-les-embeddings: done
@@ -74,7 +74,7 @@ development_status:
   4-9-signaler-l-absence-de-réponse-et-les-erreurs: done
   # Fiches du sprint 8 : _bmad-output/specs/spec-sprint-8-ia/stories/
   # Relire chaque fiche avant développement ; évaluer chaque story avant done.
-  4-10-consulter-la-liste-de-ses-conversations: review
+  4-10-consulter-la-liste-de-ses-conversations: done
   4-11-rouvrir-une-conversation: ready-for-dev
   4-12-continuer-une-conversation-précédente: ready-for-dev
   4-13-supprimer-une-conversation-de-son-historique: ready-for-dev
@@ -91,9 +91,9 @@ sprint_8_preparation:
   manifest: "_bmad-output/specs/spec-sprint-8-ia/stories.yaml"
   execution_order: ["s8-1", "4-10", "4-11", "4-12", "4-13"]
   complements:
-    s8-1: review
+    s8-1: done
   development_started: true
-  blocked_on: "Story 4.10 : migration, Cron et expiration SQL vérifiés ; deux corrections de revue autorisées et appliquées. 68/68 tests unitaires, 39/39 intégration, types, lint et build réussis. Parcours manuel et évaluation de Dylan encore attendus ; S8-1 et 4.10 restent en revue."
+  blocked_on: "Évaluation Dylan du 2026-11-07 : S8-1 et 4.10 validées ; score IA 7/10, deux abstentions respectées, aucune fuite. La cible de qualité de l'epic (8/10) reste à atteindre. Prochaine story : 4.11. Intégration actuelle : 38/40 réussis ; un test de recherche vectorielle échoue sur chunk_id/révision manquants."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
