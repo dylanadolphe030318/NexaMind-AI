@@ -97,6 +97,11 @@ test("la migration conserve la RLS et le plafond avec une fenêtre hybride de 0,
       "utf8",
     ),
   );
+  assert.match(
+    migration,
+    /drop function if exists public\.search_resource_chunks_hybrid\(extensions\.vector, text, integer, real\);\s+create function public\.search_resource_chunks_hybrid/i,
+  );
+  assert.doesNotMatch(migration, /drop function[^;]*cascade/i);
   assert.match(migration, /security invoker/i);
   assert.match(migration, /similarity >= p_min_similarity\s+and\s+scored\.similarity >= best\.similarity - 0\.20::real/i);
   assert.match(migration, /limit least\(greatest\(coalesce\(p_limit, 5\), 1\), 5\)/i);

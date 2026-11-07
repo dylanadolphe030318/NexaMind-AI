@@ -1,6 +1,9 @@
 -- Élargit uniquement la fenêtre du classement hybride de /resources/search.
 -- Le seuil minimal reste basé sur la similarité brute et SECURITY INVOKER conserve la RLS.
-create or replace function public.search_resource_chunks_hybrid(
+-- PostgreSQL ne permet pas de modifier le type de retour d'une fonction avec CREATE OR REPLACE.
+drop function if exists public.search_resource_chunks_hybrid(extensions.vector, text, integer, real);
+
+create function public.search_resource_chunks_hybrid(
   p_query_embedding extensions.vector(1536),
   p_query_text text,
   p_limit integer default 5,
