@@ -6,6 +6,7 @@ export type AssistantSubmission =
   | { status: "save-error" }
   | { status: "in-progress" }
   | { status: "already-complete" }
+  | { status: "expired" }
   | { status: "invalid" };
 
 export type AssistantQuestionDraft = {
@@ -29,7 +30,11 @@ export function nextAssistantQuestionId(
   submission: AssistantSubmission,
   createId: () => string,
 ): string {
-  return submission.status === "saved" || submission.status === "already-complete"
+  return (
+    submission.status === "saved" ||
+    submission.status === "already-complete" ||
+    submission.status === "expired"
+  )
     ? createId()
     : questionId;
 }
@@ -118,6 +123,9 @@ export async function submitSavedAssistantQuestion(
     }
     if (claim.status === "invalid") {
       return { status: "invalid" };
+    }
+    if (claim.status === "expired") {
+      return { status: "expired" };
     }
     return { status: "save-error" };
   }

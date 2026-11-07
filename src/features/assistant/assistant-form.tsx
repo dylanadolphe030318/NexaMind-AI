@@ -122,6 +122,12 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
             Cette question a d&eacute;j&agrave; &eacute;t&eacute; enregistr&eacute;e.
           </p>
         ) : null}
+        {submission?.status === "expired" ? (
+          <p className="auth-message auth-message-info" role="status">
+            Cette conversation a expir&eacute;. Vous pouvez poser de nouveau cette question pour commencer
+            un nouvel &eacute;change.
+          </p>
+        ) : null}
       </section>
     </>
   );

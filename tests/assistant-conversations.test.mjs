@@ -186,6 +186,28 @@ test("une revendication déjà active ou terminée ne rappelle pas le fournisseu
   }
 });
 
+test("une conversation expirée permet un nouvel envoi avec un identifiant neuf", async () => {
+  const claimedIds = [];
+  const deps = dependencies({
+    claim: async (id) => {
+      claimedIds.push(id);
+      return id === "expired-id"
+        ? { claimed: false, generationToken: null, status: "expired" }
+        : { claimed: true, generationToken: "new-token", status: "generating" };
+    },
+  });
+  const expired = await submitSavedAssistantQuestion("Question ?", "expired-id", deps);
+
+  assert.deepEqual(expired, { status: "expired" });
+  const newId = nextAssistantQuestionId("expired-id", expired, () => "fresh-id");
+  assert.equal(newId, "fresh-id");
+
+  const retried = await submitSavedAssistantQuestion("Question ?", newId, deps);
+  assert.equal(retried.status, "saved");
+  assert.deepEqual(claimedIds, ["expired-id", "fresh-id"]);
+  assert.deepEqual(deps.calls.generated, ["Question ?"]);
+});
+
 test("une entrée invalide ne crée pas de question et une absence de contexte est persistée", async () => {
   const invalidDeps = dependencies();
   assert.deepEqual(await submitSavedAssistantQuestion("  ", "question-id", invalidDeps), {
