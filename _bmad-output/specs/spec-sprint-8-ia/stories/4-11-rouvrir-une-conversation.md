@@ -3,7 +3,8 @@ story: 4-11-rouvrir-une-conversation
 title: Rouvrir une conversation
 epic: 4
 sprint: 8
-status: ready-for-dev
+status: in-review
+baseline_commit: 70011ad3436f3b0e3e16f56df0bccf459d581799
 context:
   - ../SPEC.md
 ---
@@ -45,3 +46,31 @@ Relire ses anciennes questions, réponses et sources sans générer une nouvelle
 ## Vérification
 
 Scénarios S8-C, S8-F et S8-G de [tests-ia.md](../../../../tests-ia.md). Dépend de 4.10 ; aucune nouvelle question dans cette story.
+
+## Hors périmètre
+
+Ajout d'une question dans la conversation (4.12), suppression (4.13), export/partage, nouvelle migration.
+
+## Autorisation de développement
+
+Dylan a demandé le 2026-11-09 de développer 4.11, 4.12 puis 4.13, une par une. Implémenter seulement cette fiche, sans commencer 4.12 ni marquer `done`. Ne pas commiter depuis l'agent d'implémentation ; le commit suit la revue. N'appliquer aucune migration à Supabase. Lire les guides Next.js pertinents dans `node_modules/next/dist/docs/` avant toute modification Next.js (route dynamique `[id]`, `params` asynchrones, `notFound`). Aucun appel LLM/embeddings, aucune clé ni `service_role` dans ce parcours : client Supabase serveur de l'utilisateur, RLS. Commandes du projet : voir `package.json` (tests unitaires, `tsc`, ESLint) ; les tests d'intégration RLS exigent `.env.local` et peuvent être lancés si la configuration existe.
+
+## État du développement
+
+- Page `/assistant/conversations/[id]` : messages dans l'ordre, états, réponse marquée « Réponse historique », sources relues sous RLS et affichées seulement si ressource et passage existent encore dans la révision enregistrée ; sinon « Source non disponible » et avertissement. Titres de la liste cliquables.
+- Identifiant invalide, conversation tierce, expirée ou supprimée : même message « Cette conversation n'est pas disponible. » ; erreur technique distincte avec « Réessayez. ».
+- Aucun appel IA à la lecture : `generateAssistantAnswer` est désormais importé seulement au moment d'une question.
+- Vérifications : 87/87 tests unitaires, `tsc`, ESLint. Intégration `conversations-rls` 5/5 après correction d'un sous-test imbriqué qui bloquait le runner (le contrôle de révision est maintenant exécuté dans le test de reprise).
+- Hors story, préexistant : `semantic-search-rls` échoue (2/40) car la migration `20261107100000_search_resource_chunks_hybrid_window.sql` a retiré `chunk_id`/`revision` du retour de `search_resource_chunks_hybrid`. L'assistant n'utilise pas cette fonction ; signalé à Dylan, non corrigé ici.
+
+## Review Triage Log
+
+| Constat | Verdict | Preuve et traitement |
+|---|---|---|
+| Expiration entre la vérification de la conversation et la lecture des messages : historique vide affiché | low | Fenêtre de quelques millisecondes à la 30e journée ; garde supplémentaire nécessaire. Rejeté (rare, correctif non direct). |
+| Tous les messages chargés sans pagination d'affichage | low | Lecture paginée par 500 côté serveur ; volumes MVP faibles. Rejeté. |
+| Date de chaque message non affichée | false | Non exigée par la fiche ; la liste affiche déjà la date de dernière question. Rejeté. |
+| État affiché sous la question et sous la réponse | false | L'état de la question est nécessaire quand aucune réponse n'existe (échec, limite) ; critère 1 demande les états enregistrés. Rejeté. |
+| Retours à la ligne non conservés | false | Même rendu que la réponse de l'assistant en direct (`.assistant-answer` sans `pre-wrap`) ; pas de régression. Rejeté. |
+| Erreur de lecture des sources masque toute la conversation | false | Choix voulu par la fiche : ne pas confondre erreur de chargement et source réellement absente. Rejeté. |
+| Lecteur applicatif non testé avec deux conversations | low | Filtre `.eq("conversation_id", id)` présent et RLS propriétaire testée ; test exigerait de simuler le client serveur `server-only`. Rejeté. |

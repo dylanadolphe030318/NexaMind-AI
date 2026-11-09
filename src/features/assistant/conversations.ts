@@ -2,14 +2,17 @@ import "server-only";
 
 import { unstable_rethrow } from "next/navigation";
 
-import { generateAssistantAnswer } from "./assistant";
 import {
   submitSavedAssistantQuestion,
   type AssistantSubmission,
   type ConversationClaim,
   type ConversationQuestionStatus,
 } from "./assistant-conversation-core";
-import { buildConversationSummaries } from "./conversations-core";
+import {
+  buildConversationSummaries,
+  readConversationHistory,
+  type ConversationHistoryResult,
+} from "./conversations-core";
 import { createClient } from "@/lib/supabase/server";
 
 const CONVERSATION_PAGE_SIZE = 500;
@@ -60,7 +63,10 @@ export async function askAndSaveQuestion(
         status: row.question_status,
       };
     },
-    generate: generateAssistantAnswer,
+    generate: async (text) => {
+      const { generateAssistantAnswer } = await import("./assistant");
+      return generateAssistantAnswer(text);
+    },
     finalize: async (id, generationToken, answer, sources) => {
       const { data, error } = await supabase.rpc("finalize_conversation_answer", {
         p_question_id: id,
@@ -164,6 +170,139 @@ export async function listMyConversations(): Promise<ConversationListResult | nu
     };
   } catch {
     logConversationError("Impossible de charger la liste.");
+    return { status: "error" };
+  }
+}
+
+export async function getMyConversation(
+  conversationId: string,
+): Promise<ConversationHistoryResult | null> {
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch (error) {
+    unstable_rethrow(error);
+    logConversationError("Impossible de charger la conversation.");
+    return { status: "error" };
+  }
+
+  try {
+    const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      logConversationError("Impossible de vérifier la session.");
+      return { status: "error" };
+    }
+    if (!auth.user) {
+      return null;
+    }
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+      return { status: "unavailable" };
+    }
+
+    const result = await readConversationHistory(conversationId, {
+      findConversation: async (id) => {
+        const { data, error } = await supabase
+          .from("conversations")
+          .select("id")
+          .eq("id", id)
+          .maybeSingle();
+        if (error) {
+          throw error;
+        }
+        return { status: "ok", data: Boolean(data) };
+      },
+      readMessages: async (id) => {
+        const messages = [];
+        for (let offset = 0; ; offset += CONVERSATION_PAGE_SIZE) {
+          const { data: page, error } = await supabase
+            .from("messages")
+            .select("id, role, content, status, created_at")
+            .eq("conversation_id", id)
+            .order("created_at", { ascending: true })
+            .order("id", { ascending: true })
+            .range(offset, offset + CONVERSATION_PAGE_SIZE - 1);
+          if (error) {
+            throw error;
+          }
+          messages.push(...page);
+          if (page.length < CONVERSATION_PAGE_SIZE) {
+            break;
+          }
+        }
+        return { status: "ok", data: messages };
+      },
+      readSources: async (answerIds) => {
+        const sources = [];
+        for (let start = 0; start < answerIds.length; start += CONVERSATION_ID_BATCH_SIZE) {
+          const batch = answerIds.slice(start, start + CONVERSATION_ID_BATCH_SIZE);
+          for (let offset = 0; ; offset += CONVERSATION_PAGE_SIZE) {
+            const { data: page, error } = await supabase
+              .from("message_sources")
+              .select("answer_message_id, resource_id, chunk_id, resource_revision")
+              .in("answer_message_id", batch)
+              .order("created_at", { ascending: true })
+              .order("id", { ascending: true })
+              .range(offset, offset + CONVERSATION_PAGE_SIZE - 1);
+            if (error) {
+              throw error;
+            }
+            sources.push(...page);
+            if (page.length < CONVERSATION_PAGE_SIZE) {
+              break;
+            }
+          }
+        }
+        return { status: "ok", data: sources };
+      },
+      readResources: async (resourceIds) => {
+        const resources = [];
+        for (let start = 0; start < resourceIds.length; start += CONVERSATION_ID_BATCH_SIZE) {
+          const batch = resourceIds.slice(start, start + CONVERSATION_ID_BATCH_SIZE);
+          for (let offset = 0; ; offset += CONVERSATION_PAGE_SIZE) {
+            const { data: page, error } = await supabase
+              .from("resources")
+              .select("id, title, revision")
+              .in("id", batch)
+              .range(offset, offset + CONVERSATION_PAGE_SIZE - 1);
+            if (error) {
+              throw error;
+            }
+            resources.push(...page);
+            if (page.length < CONVERSATION_PAGE_SIZE) {
+              break;
+            }
+          }
+        }
+        return { status: "ok", data: resources };
+      },
+      readChunks: async (chunkIds) => {
+        const chunks = [];
+        for (let start = 0; start < chunkIds.length; start += CONVERSATION_ID_BATCH_SIZE) {
+          const batch = chunkIds.slice(start, start + CONVERSATION_ID_BATCH_SIZE);
+          for (let offset = 0; ; offset += CONVERSATION_PAGE_SIZE) {
+            const { data: page, error } = await supabase
+              .from("resource_chunks")
+              .select("id, resource_id, revision, content")
+              .in("id", batch)
+              .range(offset, offset + CONVERSATION_PAGE_SIZE - 1);
+            if (error) {
+              throw error;
+            }
+            chunks.push(...page);
+            if (page.length < CONVERSATION_PAGE_SIZE) {
+              break;
+            }
+          }
+        }
+        return { status: "ok", data: chunks };
+      },
+    });
+    if (result.status === "error") {
+      logConversationError("Impossible de charger la conversation.");
+    }
+    return result;
+  } catch {
+    logConversationError("Impossible de charger la conversation.");
     return { status: "error" };
   }
 }

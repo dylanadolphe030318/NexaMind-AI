@@ -8,7 +8,7 @@ import {
   nextAssistantQuestionId,
   submitSavedAssistantQuestion,
 } from "../src/features/assistant/assistant-conversation-core.ts";
-import { buildConversationSummaries } from "../src/features/assistant/conversations-core.ts";
+import { buildConversationHistoryMessages, buildConversationSummaries, readConversationHistory } from "../src/features/assistant/conversations-core.ts";
 
 const successfulOutcome = {
   status: "ok",
@@ -277,4 +277,66 @@ test("l'historique trie par activité récente et titre chaque conversation par 
       { id: "older", firstQuestion: "Ancienne question", status: "complete" },
     ],
   );
+});
+
+
+test("la relecture n'affiche que les sources de la revision enregistree", () => {
+  const messages = buildConversationHistoryMessages(
+    [
+      { id: "answer", role: "assistant", content: "Saved answer", status: "complete", created_at: "2026-01-01T10:00:01Z" },
+      { id: "question", role: "user", content: "Saved question", status: "complete", created_at: "2026-01-01T10:00:00Z" },
+    ],
+    [
+      { answer_message_id: "answer", resource_id: "current-resource", chunk_id: "current-chunk", resource_revision: 2 },
+      { answer_message_id: "answer", resource_id: "changed-resource", chunk_id: "old-chunk", resource_revision: 2 },
+      { answer_message_id: "answer", resource_id: null, chunk_id: null, resource_revision: 2 },
+    ],
+    [
+      { id: "current-resource", title: "Current title", revision: 2 },
+      { id: "changed-resource", title: "Old private title", revision: 3 },
+    ],
+    [
+      { id: "current-chunk", resource_id: "current-resource", revision: 2, content: "Currently verifiable passage." },
+    ],
+  );
+
+  assert.deepEqual(messages.map(({ role }) => role), ["user", "assistant"]);
+  assert.deepEqual(messages[1].sources, [
+    {
+      status: "available",
+      resourceId: "current-resource",
+      title: "Current title",
+      excerpt: "Currently verifiable passage.",
+    },
+    { status: "unavailable" },
+    { status: "unavailable" },
+  ]);
+  assert.equal(messages[1].hasUnavailableSources, true);
+  assert.equal(JSON.stringify(messages).includes("Old private title"), false);
+});
+
+test("la relecture distingue une conversation indisponible d'une erreur de chargement", async () => {
+  let readCount = 0;
+  const unavailable = await readConversationHistory("expired-id", {
+    findConversation: async () => ({ status: "ok", data: false }),
+    readMessages: async () => { readCount++; return { status: "ok", data: [] }; },
+    readSources: async () => { readCount++; return { status: "ok", data: [] }; },
+    readResources: async () => { readCount++; return { status: "ok", data: [] }; },
+    readChunks: async () => { readCount++; return { status: "ok", data: [] }; },
+  });
+  assert.deepEqual(unavailable, { status: "unavailable" });
+  assert.equal(readCount, 0);
+
+  const failure = await readConversationHistory("active-id", {
+    findConversation: async () => ({ status: "ok", data: true }),
+    readMessages: async () => ({ status: "ok", data: [
+      { id: "answer", role: "assistant", content: "History", status: "complete", created_at: "2026-01-01T10:00:00Z" },
+    ] }),
+    readSources: async () => ({ status: "ok", data: [
+      { answer_message_id: "answer", resource_id: "resource", chunk_id: "chunk", resource_revision: 1 },
+    ] }),
+    readResources: async () => ({ status: "error" }),
+    readChunks: async () => ({ status: "ok", data: [] }),
+  });
+  assert.deepEqual(failure, { status: "error" });
 });

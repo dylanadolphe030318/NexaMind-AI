@@ -327,6 +327,45 @@ test(
         assert.deepEqual(hiddenSources, []);
       }
 
+      // Une nouvelle révision rend les anciennes sources indisponibles (4.11).
+      {
+        const { data: newRevision, error: revisionError } = await a.client.rpc("begin_resource_revision", {
+          p_resource_id: resource.id,
+          p_title: "S8 source modifiee",
+          p_body: "Nouveau contenu de ressource.",
+          p_category_id: categoryId,
+        });
+        assert.ifError(revisionError);
+        assert.equal(newRevision, resource.revision + 1);
+
+        const { data: currentResource, error: currentResourceError } = await a.client
+          .from("resources")
+          .select("id, title, revision")
+          .eq("id", resource.id)
+          .single();
+        assert.ifError(currentResourceError);
+        assert.equal(currentResource.title, "S8 source modifiee");
+        assert.equal(currentResource.revision, newRevision);
+
+        const { data: oldChunks, error: oldChunksError } = await a.client
+          .from("resource_chunks")
+          .select("id")
+          .eq("id", chunks.id);
+        assert.ifError(oldChunksError);
+        assert.deepEqual(oldChunks, []);
+
+        const { data: staleSources, error: staleError } = await a.client
+          .from("message_sources")
+          .select("resource_id, chunk_id, resource_revision")
+          .eq("answer_message_id", answers[0].id);
+        assert.ifError(staleError);
+        assert.deepEqual(staleSources, [{
+          resource_id: resource.id,
+          chunk_id: null,
+          resource_revision: resource.revision,
+        }]);
+      }
+
       const { error: deleteResourceError } = await a.client
         .from("resources")
         .delete()

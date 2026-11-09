@@ -41,7 +41,7 @@ export default async function ConversationsPage() {
         {result.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             Les conversations n&apos;ont pas pu &ecirc;tre charg&eacute;es.{" "}
-            <a href="/assistant/conversations">R&eacute;essayez.</a>
+            <Link href="/assistant/conversations">R&eacute;essayez.</Link>
           </p>
         ) : result.conversations.length === 0 ? (
           <p className="auth-message auth-message-info" role="status">
@@ -51,7 +51,11 @@ export default async function ConversationsPage() {
           <ul className="category-list">
             {result.conversations.map((conversation) => (
               <li key={conversation.id}>
-                <h2>{displayTitle(conversation.firstQuestion)}</h2>
+                <h2>
+                  <Link href={`/assistant/conversations/${conversation.id}`}>
+                    {displayTitle(conversation.firstQuestion)}
+                  </Link>
+                </h2>
                 <p>{conversationQuestionStatusLabel(conversation.status)}</p>
                 <time dateTime={conversation.lastQuestionAt}>
                   {displayDate(conversation.lastQuestionAt)}
