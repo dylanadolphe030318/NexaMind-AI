@@ -66,7 +66,12 @@ test("réponse normale, je ne sais pas, quota et session", async () => {
 });
 
 test("la recherche et le prompt de suivi utilisent le contexte récent, pas les anciennes sources", async () => {
-  const history = [{ question: "Quelle technologie utilisons-nous ?", answer: "La technologie Atlas." }];
+  const staleSourceExcerpt = "ANCIEN EXTRAIT SOURCE NON AUTORISÉ";
+  const history = [{
+    question: "Quelle technologie utilisons-nous ?",
+    answer: "La technologie Atlas.",
+    sources: [{ excerpt: staleSourceExcerpt }],
+  }];
   const calls = { query: "", messages: [] };
   const outcome = await runAssistant("Comment fonctionne cette technologie ?", {
     retrieve: async (query) => {
@@ -88,7 +93,7 @@ test("la recherche et le prompt de suivi utilisent le contexte récent, pas les 
   assert.match(calls.messages[1].content, /Historique récent, contexte uniquement et jamais une preuve/);
   assert.match(calls.messages[1].content, /Question actuelle : Comment fonctionne cette technologie/);
   assert.match(calls.messages[1].content, /Next.js et Supabase/);
-  assert.doesNotMatch(calls.messages[1].content, /ancien extrait source non autorisé/i);
+  assert.doesNotMatch(calls.messages[1].content, new RegExp(staleSourceExcerpt));
 });
 
 test("les deux formulations de suivi intègrent leur sujet historique à la recherche", () => {
@@ -115,8 +120,26 @@ test("la question transmise ne contient pas plus de dix échanges historiques", 
   assert.equal((content.match(/Échange précédent /g) ?? []).length, 10);
 });
 
-test("la requête de recherche reste bornée même avec une question longue et un historique", () => {
-  const query = buildAssistantSearchQuery("Q".repeat(300), [{ question: "Sujet", answer: "Atlas" }]);
+test("la recherche préserve la question entière quand elle atteint la limite", () => {
+  const question = "Q".repeat(300);
+  const query = buildAssistantSearchQuery(question, [{ question: "Sujet", answer: "Atlas" }]);
+  assert.equal(query, question);
+  assert.ok(query.length <= 300);
+});
+
+test("la recherche conserve la question historique avant une longue réponse", () => {
+  const query = buildAssistantSearchQuery("Et comment fonctionne cette technologie ?", [
+    { question: "Quelle technologie utilise Atlas ?", answer: "Réponse passée ".repeat(30) },
+  ]);
+  assert.ok(query.length <= 300);
+  assert.match(query, /Quelle technologie utilise Atlas/);
+  assert.match(query, /Et comment fonctionne cette technologie/);
+});
+
+test("la recherche reste bornée et inclut le contexte récent pour une question courte", () => {
+  const query = buildAssistantSearchQuery("Et cette technologie ?", [
+    { question: "Quel sujet ?", answer: "Atlas" },
+  ]);
   assert.ok(query.length <= 300);
   assert.match(query, /Contexte récent/);
   assert.match(query, /Atlas/);

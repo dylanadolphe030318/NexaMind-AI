@@ -75,8 +75,9 @@ export function AssistantForm({
           conversationMode={conversationMode}
         />
         <p className="auth-intro">
-          Votre question et des extraits de vos ressources sont envoy&eacute;s &agrave; OpenAI pour pr&eacute;parer la
-          r&eacute;ponse.
+          {conversationMode
+            ? "Votre question, jusqu'aux 10 derniers échanges de cette conversation et des extraits de vos ressources sont envoyés à OpenAI pour préparer la réponse."
+            : "Votre question et des extraits de vos ressources sont envoyés à OpenAI pour préparer la réponse."}
         </p>
         <button className="button auth-submit" disabled={pending} type="submit">
           {conversationMode ? "Poser une nouvelle question" : "Poser la question"}

@@ -64,7 +64,7 @@ export function buildAssistantSearchQuery(
   question: string,
   history: AssistantHistoryExchange[] = [],
 ): string {
-  if (!history.length) {
+  if (!history.length || question.length >= ASSISTANT_SEARCH_QUERY_MAX_LENGTH) {
     return question;
   }
 
@@ -72,23 +72,21 @@ export function buildAssistantSearchQuery(
     .slice(-ASSISTANT_CONTEXT_MAX_EXCHANGES)
     .reverse()
     .map(({ question: previousQuestion, answer }) =>
-      answer
-        ? `${flattenHistoryText(answer)} ; ${flattenHistoryText(previousQuestion)}`
-        : flattenHistoryText(previousQuestion),
+      [flattenHistoryText(previousQuestion), answer ? flattenHistoryText(answer) : ""]
+        .filter(Boolean)
+        .join(" ; "),
     )
     .join(" | ");
-  const questionPrefix = "Question actuelle : ";
-  const contextPrefix = " Contexte récent : ";
-  const availableLength = ASSISTANT_SEARCH_QUERY_MAX_LENGTH - questionPrefix.length - contextPrefix.length;
-  const contextLength = Math.min(
-    ASSISTANT_SEARCH_CONTEXT_MAX_LENGTH,
-    Math.max(24, availableLength - question.length),
-  );
-  const boundedQuestionLength = Math.max(1, availableLength - contextLength);
-  const boundedQuestion = question.slice(0, boundedQuestionLength).trimEnd();
-  const boundedContext = recentContext.slice(0, contextLength).trimEnd();
+  const queryPrefix = `${question} Contexte récent : `;
+  const availableContextLength = ASSISTANT_SEARCH_QUERY_MAX_LENGTH - queryPrefix.length;
+  if (availableContextLength < 24) {
+    return question;
+  }
 
-  return `${questionPrefix}${boundedQuestion}${contextPrefix}${boundedContext}`;
+  const boundedContext = recentContext
+    .slice(0, Math.min(ASSISTANT_SEARCH_CONTEXT_MAX_LENGTH, availableContextLength))
+    .trimEnd();
+  return boundedContext ? `${queryPrefix}${boundedContext}` : question;
 }
 
 export function buildAssistantMessages(
