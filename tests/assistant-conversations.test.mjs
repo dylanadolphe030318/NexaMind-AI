@@ -8,7 +8,12 @@ import {
   nextAssistantQuestionId,
   submitSavedAssistantQuestion,
 } from "../src/features/assistant/assistant-conversation-core.ts";
-import { buildConversationHistoryMessages, buildConversationSummaries, readConversationHistory } from "../src/features/assistant/conversations-core.ts";
+import {
+  buildConversationHistoryMessages,
+  buildConversationSummaries,
+  buildRecentConversationExchanges,
+  readConversationHistory,
+} from "../src/features/assistant/conversations-core.ts";
 
 const successfulOutcome = {
   status: "ok",
@@ -23,6 +28,41 @@ const successfulOutcome = {
     },
   ],
 };
+
+test("le contexte de suivi conserve les dix derniers échanges sans anciens extraits", () => {
+  const questions = Array.from({ length: 12 }, (_, index) => ({
+    id: `question-${index}`,
+    role: "user",
+    content: `Question ${index}`,
+    status: "complete",
+    created_at: `2026-01-${String(index + 1).padStart(2, "0")}T10:00:00Z`,
+  }));
+  const answers = questions.map((question, index) => ({
+    id: `answer-${index}`,
+    role: "assistant",
+    content: `Réponse ${index}`,
+    status: "complete",
+    question_id: question.id,
+    created_at: `2026-01-${String(index + 1).padStart(2, "0")}T10:00:01Z`,
+  }));
+  const context = buildRecentConversationExchanges(questions, answers, "current-question");
+
+  assert.equal(context.omittedCount, 2);
+  assert.equal(context.exchanges.length, 10);
+  assert.equal(context.exchanges[0].question, "Question 2");
+  assert.equal(context.exchanges.at(-1).answer, "Réponse 11");
+  assert.equal(JSON.stringify(context).includes("source"), false);
+});
+
+test("le contexte exclut la question actuelle et les demandes encore en cours", () => {
+  const context = buildRecentConversationExchanges([
+    { id: "old", role: "user", content: "Ancienne question", status: "complete", created_at: "2026-01-01T10:00:00Z" },
+    { id: "current", role: "user", content: "Question courante", status: "generating", created_at: "2026-01-02T10:00:00Z" },
+    { id: "other-pending", role: "user", content: "Question pendante", status: "generating", created_at: "2026-01-03T10:00:00Z" },
+  ], [], "current");
+
+  assert.deepEqual(context, { exchanges: [{ question: "Ancienne question" }], omittedCount: 0 });
+});
 
 test("modifier la question change son identifiant, mais une vraie relance le conserve", () => {
   const initial = { question: "Question initiale ?", questionId: "initial-id" };
@@ -227,6 +267,17 @@ test("une entrée invalide ne crée pas de question et une absence de contexte e
   ]);
 });
 
+test("la migration de continuation exige une conversation existante et son propriétaire", () => {
+  const migration = readFileSync("supabase/migrations/20261109130000_continue_conversations.sql", "utf8");
+  assert.match(migration, /claim_conversation_question_in_conversation/);
+  assert.match(migration, /v_conversation_owner <> v_user/);
+  assert.match(migration, /v_expires_at <= now\(\)/);
+  assert.match(migration, /grant execute[\s\S]*to authenticated/);
+  assert.doesNotMatch(migration, /insert into public\.conversations/i);
+  assert.match(migration, /last_question_at = now\(\)/);
+  assert.match(migration, /expires_at = now\(\) \+ interval '30 days'/);
+});
+
 test("la migration masque les expirés sous RLS et détache les références aux passages retirés", () => {
   const migration = readFileSync("supabase/migrations/20261106120000_create_conversations.sql", "utf8");
   assert.match(migration, /owner_id = \(select auth\.uid\(\)\) and expires_at > now\(\)/);
@@ -235,6 +286,17 @@ test("la migration masque les expirés sous RLS et détache les références aux
   assert.match(migration, /resource_id uuid references public\.resources \(id\) on delete set null/);
   assert.match(migration, /revoke all on public\.conversations, public\.messages, public\.message_sources/);
   assert.doesNotMatch(migration, /responsable/i);
+});
+
+test("la page de conversation propose un ajout et annonce la fenêtre de contexte", () => {
+  const page = readFileSync("src/app/assistant/conversations/[id]/page.tsx", "utf8");
+  const form = readFileSync("src/features/assistant/assistant-form.tsx", "utf8");
+  const action = readFileSync("src/features/assistant/assistant-actions.ts", "utf8");
+  assert.match(page, /Seuls les 10 derniers/);
+  assert.match(page, /conversationMode/);
+  assert.match(form, /Poser une nouvelle question/);
+  assert.match(form, /name="conversationId"/);
+  assert.match(action, /askAndSaveQuestion\(question, questionId, conversationId \|\| undefined\)/);
 });
 
 test("l'historique traduit explicitement l'état d'échec et l'état enregistré", () => {

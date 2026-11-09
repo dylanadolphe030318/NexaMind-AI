@@ -8,14 +8,25 @@ import { editAssistantQuestion, type AssistantQuestionDraft } from "./assistant-
 import { ASSISTANT_QUESTION_MAX_LENGTH } from "./assistant-core";
 import type { AssistantFormState } from "./assistant-state";
 
-function AssistantQuestionInput({ initial }: { initial: AssistantQuestionDraft }) {
+function AssistantQuestionInput({
+  initial,
+  conversationId,
+  conversationMode,
+}: {
+  initial: AssistantQuestionDraft;
+  conversationId?: string;
+  conversationMode: boolean;
+}) {
   const [draft, setDraft] = useState(initial);
 
   return (
     <>
       <input name="questionId" type="hidden" value={draft.questionId} />
+      {conversationId ? <input name="conversationId" type="hidden" value={conversationId} /> : null}
       <div className="auth-field">
-        <label htmlFor="assistant-question">Votre question</label>
+        <label htmlFor="assistant-question">
+          {conversationMode ? "Poser une nouvelle question" : "Votre question"}
+        </label>
         <textarea
           id="assistant-question"
           maxLength={ASSISTANT_QUESTION_MAX_LENGTH}
@@ -32,7 +43,15 @@ function AssistantQuestionInput({ initial }: { initial: AssistantQuestionDraft }
   );
 }
 
-export function AssistantForm({ initialQuestionId }: { initialQuestionId: string }) {
+export function AssistantForm({
+  initialQuestionId,
+  conversationId,
+  conversationMode = false,
+}: {
+  initialQuestionId: string;
+  conversationId?: string;
+  conversationMode?: boolean;
+}) {
   const initialState: AssistantFormState = {
     question: "",
     questionId: initialQuestionId,
@@ -50,13 +69,17 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
         // La clé remet la question saisie dans le champ après chaque réponse.
         key={`${state.questionId}:${state.question}:${state.submission?.status ?? ""}`}
       >
-        <AssistantQuestionInput initial={state} />
+        <AssistantQuestionInput
+          initial={state}
+          conversationId={conversationId}
+          conversationMode={conversationMode}
+        />
         <p className="auth-intro">
           Votre question et des extraits de vos ressources sont envoy&eacute;s &agrave; OpenAI pour pr&eacute;parer la
           r&eacute;ponse.
         </p>
         <button className="button auth-submit" disabled={pending} type="submit">
-          Poser la question
+          {conversationMode ? "Poser une nouvelle question" : "Poser la question"}
         </button>
         {submission?.status === "save-error" || submission?.status === "generation-error" ? (
           <button className="button" disabled={pending} type="submit">
@@ -72,7 +95,7 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
       ) : null}
 
       <section aria-label="R&eacute;sultat de l'assistant" className="category-list-section">
-        {outcome?.status === "ok" ? (
+        {!conversationMode && outcome?.status === "ok" ? (
           <>
             <h2>R&eacute;ponse</h2>
             <p className="assistant-answer">{outcome.answer}</p>
@@ -90,7 +113,7 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
             </ul>
           </>
         ) : null}
-        {outcome?.status === "unknown" || outcome?.status === "no-context" ? (
+        {!conversationMode && (outcome?.status === "unknown" || outcome?.status === "no-context") ? (
           <p className="auth-message auth-message-info" role="status">
             Je ne trouve pas cette information dans les ressources disponibles.
           </p>
@@ -124,8 +147,12 @@ export function AssistantForm({ initialQuestionId }: { initialQuestionId: string
         ) : null}
         {submission?.status === "expired" ? (
           <p className="auth-message auth-message-info" role="status">
-            Cette conversation a expir&eacute;. Vous pouvez poser de nouveau cette question pour commencer
-            un nouvel &eacute;change.
+            Cette conversation a expir&eacute; et ne peut plus &ecirc;tre poursuivie.
+          </p>
+        ) : null}
+        {submission?.status === "unavailable" ? (
+          <p className="auth-message auth-message-info" role="status">
+            Cette conversation n&apos;est pas disponible.
           </p>
         ) : null}
       </section>

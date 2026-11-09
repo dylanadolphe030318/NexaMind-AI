@@ -3,7 +3,8 @@ story: 4-12-continuer-une-conversation-précédente
 title: Continuer une conversation précédente
 epic: 4
 sprint: 8
-status: ready-for-dev
+status: in-review
+baseline_commit: 4fb21fa43b51a4a4b13222e126b9265e4845ff21
 context:
   - ../SPEC.md
 ---
@@ -47,3 +48,13 @@ Poser une question liée à l'échange précédent et retrouver tous les nouveau
 ## Vérification
 
 Scénarios S8-D, S8-E, S8-F, S8-G ; questions 1 à 10 en non-régression dans [tests-ia.md](../../../../tests-ia.md). Dépend de 4.11. Aucun partage ni mémoire globale entre conversations.
+
+## Hors périmètre
+
+Suppression (4.13), partage, mémoire entre conversations, reformulation par un second appel LLM, relance automatique, correction de `search_resource_chunks_hybrid` (recherche de ressources, hors sprint).
+
+## Autorisation de développement
+
+Dylan a demandé le 2026-11-09 de développer 4.11, 4.12 puis 4.13, une par une. 4.11 est livrée (page `/assistant/conversations/[id]`, `getMyConversation`). Implémenter seulement cette fiche, sans commencer 4.13 ni marquer `done`. Ne pas commiter depuis l'agent d'implémentation. Écrire la nouvelle migration dans `supabase/migrations/` (horodatage postérieur à `20261107100000`) mais ne jamais l'appliquer : Dylan l'appliquera. Ne pas modifier les migrations existantes. Si les tests d'intégration échouent parce que la migration n'est pas appliquée, le signaler avec le nom exact du fichier sans insister. Dans `tests/*.test.mjs`, ne jamais appeler le `t` parent depuis un sous-test (cela bloque le runner).
+
+Règles IA : appels LLM et embeddings côté serveur uniquement (`server-only`) ; clés lues depuis `.env.local`, jamais dans le code navigateur ; recherche des passages avec le client Supabase de l'utilisateur (RLS), jamais `service_role` ; la consigne système existante (réponse uniquement à partir des passages fournis, sources citées, « Je ne sais pas » si l'information manque) reste prioritaire sur les anciens messages. Conserver limites : question 300 caractères, 5 passages, seuil 0,4, 20 questions/minute, 500 jetons, 30 s, aucune relance automatique. Lire les guides Next.js pertinents dans `node_modules/next/dist/docs/` avant toute modification Next.js. Commandes : `npm run test:unit`, `npx tsc --noEmit`, `npx eslint src tests`, `node --env-file=.env.local --test --test-timeout=240000 tests/conversations-rls.test.mjs`.

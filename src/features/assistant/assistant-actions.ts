@@ -14,7 +14,8 @@ export async function submitQuestion(
 ): Promise<AssistantFormState> {
   const question = String(formData.get("question") ?? "");
   const questionId = String(formData.get("questionId") ?? "");
-  const submission = await askAndSaveQuestion(question, questionId);
+  const conversationId = String(formData.get("conversationId") ?? "");
+  const submission = await askAndSaveQuestion(question, questionId, conversationId || undefined);
   if (submission === null) {
     redirect("/login");
   }
@@ -26,6 +27,9 @@ export async function submitQuestion(
     submission.status === "in-progress"
   ) {
     revalidatePath("/assistant/conversations");
+    if (conversationId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+      revalidatePath(`/assistant/conversations/${conversationId}`);
+    }
   }
 
   return {

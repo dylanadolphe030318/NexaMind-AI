@@ -1,4 +1,5 @@
 import type { ConversationQuestionStatus } from "./assistant-conversation-core.ts";
+import type { AssistantHistoryExchange } from "./assistant-core.ts";
 import { buildPassageExcerpt } from "../resources/semantic-search-core.ts";
 
 type ConversationRow = {
@@ -92,6 +93,47 @@ export type ConversationHistoryMessage = {
   sources: ConversationHistorySource[];
   hasUnavailableSources: boolean;
 };
+
+export type ConversationContextMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  status: string;
+  created_at: string;
+  question_id?: string | null;
+};
+
+export type RecentConversationExchanges = {
+  exchanges: AssistantHistoryExchange[];
+  omittedCount: number;
+};
+
+export function buildRecentConversationExchanges(
+  questions: ConversationContextMessage[],
+  answers: ConversationContextMessage[],
+  currentQuestionId: string,
+): RecentConversationExchanges {
+  const historicalQuestions = questions
+    .filter((message) => message.role === "user" && message.id !== currentQuestionId && message.status !== "generating")
+    .sort((left, right) => {
+      const timeDifference = Date.parse(left.created_at) - Date.parse(right.created_at);
+      return timeDifference || left.id.localeCompare(right.id);
+    });
+  const selectedQuestions = historicalQuestions.slice(-10);
+  const answerByQuestionId = new Map(
+    answers
+      .filter((message) => message.role === "assistant" && message.status === "complete" && message.question_id)
+      .map((message) => [message.question_id as string, message.content]),
+  );
+
+  return {
+    exchanges: selectedQuestions.map((message) => ({
+      question: message.content,
+      ...(answerByQuestionId.has(message.id) ? { answer: answerByQuestionId.get(message.id) } : {}),
+    })),
+    omittedCount: Math.max(0, historicalQuestions.length - selectedQuestions.length),
+  };
+}
 
 export type ConversationHistoryResult =
   | { status: "ok"; messages: ConversationHistoryMessage[] }

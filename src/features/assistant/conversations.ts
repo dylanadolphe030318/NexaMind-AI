@@ -10,7 +10,9 @@ import {
 } from "./assistant-conversation-core";
 import {
   buildConversationSummaries,
+  buildRecentConversationExchanges,
   readConversationHistory,
+  type ConversationContextMessage,
   type ConversationHistoryResult,
 } from "./conversations-core";
 import { createClient } from "@/lib/supabase/server";
@@ -29,6 +31,7 @@ function logConversationError(message: string) {
 export async function askAndSaveQuestion(
   question: string,
   questionId: string,
+  conversationId?: string,
 ): Promise<AssistantSubmission | null> {
   let supabase;
   try {
@@ -44,12 +47,22 @@ export async function askAndSaveQuestion(
     return { status: "save-error" };
   }
 
+  if (conversationId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+    return { status: "unavailable" };
+  }
+
   return submitSavedAssistantQuestion(question, questionId, {
     claim: async (id, text): Promise<ConversationClaim> => {
-      const { data, error } = await supabase.rpc("claim_conversation_question", {
-        p_question_id: id,
-        p_question: text,
-      });
+      const { data, error } = conversationId
+        ? await supabase.rpc("claim_conversation_question_in_conversation", {
+          p_question_id: id,
+          p_question: text,
+          p_conversation_id: conversationId,
+        })
+        : await supabase.rpc("claim_conversation_question", {
+          p_question_id: id,
+          p_question: text,
+        });
       if (error) {
         throw error;
       }
@@ -65,7 +78,13 @@ export async function askAndSaveQuestion(
     },
     generate: async (text) => {
       const { generateAssistantAnswer } = await import("./assistant");
-      return generateAssistantAnswer(text);
+      const history = conversationId
+        ? await readRecentConversationContext(supabase, conversationId, questionId)
+        : { exchanges: [], omittedCount: 0 };
+      if (!history) {
+        return null;
+      }
+      return generateAssistantAnswer(text, history.exchanges);
     },
     finalize: async (id, generationToken, answer, sources) => {
       const { data, error } = await supabase.rpc("finalize_conversation_answer", {
@@ -96,6 +115,55 @@ export async function askAndSaveQuestion(
     },
     logError: logConversationError,
   });
+}
+
+async function readRecentConversationContext(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  conversationId: string,
+  questionId: string,
+) {
+  const { data: conversation, error: conversationError } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("id", conversationId)
+    .maybeSingle();
+  if (conversationError) {
+    throw conversationError;
+  }
+  if (!conversation) {
+    return null;
+  }
+
+  const { data: questions, error: questionsError } = await supabase
+    .from("messages")
+    .select("id, role, content, status, created_at")
+    .eq("conversation_id", conversationId)
+    .eq("role", "user")
+    .neq("id", questionId)
+    .neq("status", "generating")
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(11);
+  if (questionsError) {
+    throw questionsError;
+  }
+
+  const questionIds = questions.map((message) => message.id);
+  let answers: ConversationContextMessage[] = [];
+  if (questionIds.length) {
+    const { data, error } = await supabase
+      .from("messages")
+      .select("id, role, content, status, created_at, question_id")
+      .eq("conversation_id", conversationId)
+      .eq("role", "assistant")
+      .in("question_id", questionIds);
+    if (error) {
+      throw error;
+    }
+    answers = data;
+  }
+
+  return buildRecentConversationExchanges(questions, answers, questionId);
 }
 
 export async function listMyConversations(): Promise<ConversationListResult | null> {

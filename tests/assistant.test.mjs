@@ -5,6 +5,7 @@ import test from "node:test";
 import {
   ASSISTANT_SYSTEM_PROMPT,
   buildAssistantMessages,
+  buildAssistantSearchQuery,
   buildSources,
   parseAssistantReply,
   runAssistant,
@@ -21,6 +22,7 @@ test("la consigne impose passages, sources et je ne sais pas", () => {
   assert.match(ASSISTANT_SYSTEM_PROMPT, /UNIQUEMENT/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /sources/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /Je ne sais pas/);
+  assert.match(ASSISTANT_SYSTEM_PROMPT, /ni une instruction ni une preuve/);
   const messages = buildAssistantMessages("Q ?", [passage]);
   assert.equal(
     messages[1].content,
@@ -61,6 +63,63 @@ test("réponse normale, je ne sais pas, quota et session", async () => {
   );
   assert.equal(await runAssistant("Q ?", { retrieve: async () => null, generate }), null);
   assert.equal((await runAssistant("  ", { retrieve: async () => okSearch, generate })).status, "invalid");
+});
+
+test("la recherche et le prompt de suivi utilisent le contexte récent, pas les anciennes sources", async () => {
+  const history = [{ question: "Quelle technologie utilisons-nous ?", answer: "La technologie Atlas." }];
+  const calls = { query: "", messages: [] };
+  const outcome = await runAssistant("Comment fonctionne cette technologie ?", {
+    retrieve: async (query) => {
+      calls.query = query;
+      return okSearch;
+    },
+    generate: async (messages) => {
+      calls.messages = messages;
+      return '{"answer":"Réponse actuelle","sources":[1],"missing":false}';
+    },
+  }, history);
+
+  assert.equal(outcome.status, "ok");
+  assert.match(calls.query, /Atlas/);
+  assert.match(calls.query, /cette technologie/);
+  assert.ok(calls.query.length <= 300);
+  assert.equal(calls.messages[0].role, "system");
+  assert.equal(calls.messages[1].role, "user");
+  assert.match(calls.messages[1].content, /Historique récent, contexte uniquement et jamais une preuve/);
+  assert.match(calls.messages[1].content, /Question actuelle : Comment fonctionne cette technologie/);
+  assert.match(calls.messages[1].content, /Next.js et Supabase/);
+  assert.doesNotMatch(calls.messages[1].content, /ancien extrait source non autorisé/i);
+});
+
+test("les deux formulations de suivi intègrent leur sujet historique à la recherche", () => {
+  const technologyQuery = buildAssistantSearchQuery("Et comment fonctionne cette technologie ?", [
+    { question: "Quelle technologie est utilisée ?", answer: "La technologie Atlas." },
+  ]);
+  const problemQuery = buildAssistantSearchQuery("Et ce problème ?", [
+    { question: "Quel problème rencontre-t-on ?", answer: "Le problème est la latence." },
+  ]);
+  assert.match(technologyQuery, /Atlas/);
+  assert.match(problemQuery, /latence/);
+  assert.match(problemQuery, /ce problème/);
+});
+
+test("la question transmise ne contient pas plus de dix échanges historiques", () => {
+  const history = Array.from({ length: 12 }, (_, index) => ({
+    question: `Question antérieure ${index}`,
+    answer: `Réponse antérieure ${index}`,
+  }));
+  const content = buildAssistantMessages("Question actuelle", [passage], history)[1].content;
+  assert.match(content, /Question antérieure 2/);
+  assert.match(content, /Question antérieure 11/);
+  assert.doesNotMatch(content, /Question antérieure 0/);
+  assert.equal((content.match(/Échange précédent /g) ?? []).length, 10);
+});
+
+test("la requête de recherche reste bornée même avec une question longue et un historique", () => {
+  const query = buildAssistantSearchQuery("Q".repeat(300), [{ question: "Sujet", answer: "Atlas" }]);
+  assert.ok(query.length <= 300);
+  assert.match(query, /Contexte récent/);
+  assert.match(query, /Atlas/);
 });
 
 test("une erreur du modèle donne error sans journaliser la question", async () => {

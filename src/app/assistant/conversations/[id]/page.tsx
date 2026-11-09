@@ -1,7 +1,9 @@
+import { randomUUID } from "node:crypto";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AssistantForm } from "@/features/assistant/assistant-form";
 import { conversationQuestionStatusLabel } from "@/features/assistant/assistant-conversation-core";
 import { getMyConversation } from "@/features/assistant/conversations";
 
@@ -89,6 +91,18 @@ export default async function ConversationPage({
             ))}
           </ol>
         )}
+        {result.status === "ok" && result.messages.filter((message) => message.role === "user").length > 10 ? (
+          <p className="auth-message auth-message-info" role="status">
+            Seuls les 10 derniers &eacute;changes sont utilis&eacute;s pour cette r&eacute;ponse.
+          </p>
+        ) : null}
+        {result.status === "ok" ? (
+          <AssistantForm
+            initialQuestionId={randomUUID()}
+            conversationId={id}
+            conversationMode
+          />
+        ) : null}
       </section>
     </main>
   );

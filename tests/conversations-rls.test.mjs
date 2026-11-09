@@ -18,8 +18,10 @@ const accounts = {
 };
 
 let skipReason = "";
+let continuationSkipReason = "";
 if (!supabaseUrl || !publishableKey || Object.values(accounts).flat().some((value) => !value)) {
   skipReason = "Variables de session de test absentes.";
+  continuationSkipReason = skipReason;
 } else if (publishableKey.startsWith("sb_secret_")) {
   throw new Error("Les tests refusent toute clé Supabase privilégiée.");
 } else {
@@ -35,8 +37,20 @@ if (!supabaseUrl || !publishableKey || Object.values(accounts).flat().some((valu
   if (error?.code === "PGRST205" || error?.code === "42P01") {
     skipReason =
       "Migration requise avant ces tests : supabase/migrations/20261106120000_create_conversations.sql";
+    continuationSkipReason = skipReason;
   } else if (error) {
     throw new Error(`Impossible de vérifier la migration conversations (${error.code}).`);
+  } else {
+    const { error: continuationError } = await probe.rpc(
+      "claim_conversation_question_in_conversation",
+      { p_question_id: null, p_question: null, p_conversation_id: randomUUID() },
+    );
+    if (continuationError?.code === "PGRST202") {
+      continuationSkipReason =
+        "Migration requise avant ces tests : supabase/migrations/20261109130000_continue_conversations.sql";
+    } else if (continuationError) {
+      throw new Error(`Impossible de vérifier la migration de continuation (${continuationError.code}).`);
+    }
   }
 }
 
@@ -57,6 +71,91 @@ async function claim(client, questionId, question) {
   assert.ifError(error);
   return Array.isArray(data) ? data[0] : data;
 }
+
+async function claimInConversation(client, conversationId, questionId, question) {
+  const { data, error } = await client.rpc("claim_conversation_question_in_conversation", {
+    p_question_id: questionId,
+    p_question: question,
+    p_conversation_id: conversationId,
+  });
+  assert.ifError(error);
+  return Array.isArray(data) ? data[0] : data;
+}
+
+test(
+  "la continuation refuse les tiers, reste idempotente et prolonge seulement une nouvelle question",
+  { skip: continuationSkipReason || false },
+  async () => {
+    const owner = await login(accounts.memberA);
+    const otherMember = await login(accounts.memberB);
+    const manager = await login(accounts.manager);
+    const seedId = randomUUID();
+    const seed = await claim(owner.client, seedId, `conversation racine ${Date.now()}`);
+    assert.equal(seed.claimed, true);
+
+    const { data: before, error: beforeError } = await owner.client
+      .from("conversations")
+      .select("expires_at")
+      .eq("id", seed.conversation_id)
+      .single();
+    assert.ifError(beforeError);
+
+    const questionId = randomUUID();
+    const question = `question de suivi ${Date.now()}`;
+    const concurrentClaims = await Promise.all([
+      claimInConversation(owner.client, seed.conversation_id, questionId, question),
+      claimInConversation(owner.client, seed.conversation_id, questionId, question),
+    ]);
+    assert.equal(concurrentClaims.filter((result) => result.claimed).length, 1);
+    const accepted = concurrentClaims.find((result) => result.claimed);
+    assert.equal(accepted.conversation_id, seed.conversation_id);
+    assert.equal(accepted.question_status, "generating");
+    const concurrentDuplicate = concurrentClaims.find((result) => !result.claimed);
+    assert.equal(concurrentDuplicate.question_status, "generating");
+
+    const afterAccept = await owner.client
+      .from("conversations")
+      .select("expires_at")
+      .eq("id", seed.conversation_id)
+      .single();
+    assert.ifError(afterAccept.error);
+    assert.ok(Date.parse(afterAccept.data.expires_at) > Date.parse(before.expires_at));
+
+    const duplicate = await claimInConversation(owner.client, seed.conversation_id, questionId, question);
+    assert.equal(duplicate.claimed, false);
+    assert.equal(duplicate.question_status, "generating");
+    const afterDuplicate = await owner.client
+      .from("conversations")
+      .select("expires_at")
+      .eq("id", seed.conversation_id)
+      .single();
+    assert.ifError(afterDuplicate.error);
+    assert.equal(afterDuplicate.data.expires_at, afterAccept.data.expires_at);
+
+    for (const client of [otherMember.client, manager.client]) {
+      const deniedId = randomUUID();
+      const denied = await claimInConversation(client, seed.conversation_id, deniedId, "question tierce");
+      assert.equal(denied.claimed, false);
+      assert.equal(denied.question_status, "unavailable");
+      const { data: visibleRows, error } = await owner.client
+        .from("messages")
+        .select("id")
+        .eq("id", deniedId);
+      assert.ifError(error);
+      assert.deepEqual(visibleRows, []);
+    }
+
+    for (const [id, token] of [[seedId, seed.generation_token], [questionId, accepted.generation_token]]) {
+      const { data, error } = await owner.client.rpc("finish_conversation_question", {
+        p_question_id: id,
+        p_generation_token: token,
+        p_status: "no-context",
+      });
+      assert.ifError(error);
+      assert.equal(data, true);
+    }
+  },
+);
 
 test(
   "conversations : propriété, expiration, état idempotent et finalisation concurrente",

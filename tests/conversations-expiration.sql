@@ -4,10 +4,17 @@ declare
   v_owner uuid;
   v_active uuid := gen_random_uuid();
   v_expired uuid := gen_random_uuid();
+  v_deleted uuid := gen_random_uuid();
   v_active_question uuid := gen_random_uuid();
   v_expired_question uuid := gen_random_uuid();
   v_active_answer uuid := gen_random_uuid();
   v_expired_answer uuid := gen_random_uuid();
+  v_followup_question uuid := gen_random_uuid();
+  v_deleted_question uuid := gen_random_uuid();
+  v_followup record;
+  v_expired_claim record;
+  v_deleted_claim record;
+  v_finalized boolean;
 begin
   select id into v_owner from auth.users order by created_at limit 1;
   if v_owner is null then
@@ -17,9 +24,10 @@ begin
   begin
     insert into public.conversations (id, owner_id, created_at, last_question_at, expires_at)
     values
-      (v_active, v_owner, now(), now(), now() + interval '30 days'),
+      (v_active, v_owner, now(), now(), now() + interval '1 day'),
       (v_expired, v_owner, now() - interval '31 days',
-        now() - interval '31 days', now() - interval '1 day');
+        now() - interval '31 days', now() - interval '1 day'),
+      (v_deleted, v_owner, now(), now(), now() + interval '30 days');
 
     insert into public.messages (id, conversation_id, role, content, status)
     values
@@ -57,8 +65,49 @@ begin
       raise exception 'RLS doit masquer la conversation expiree et toutes ses dependances.';
     end if;
     if (select expires_at from public.conversations where id = v_active)
-      is distinct from now() + interval '30 days' then
+      is distinct from now() + interval '1 day' then
       raise exception 'La lecture ne doit pas prolonger la conservation.';
+    end if;
+
+    select * into v_followup
+    from public.claim_conversation_question_in_conversation(
+      v_followup_question, 'Question de suivi', v_active
+    );
+    if not v_followup.claimed or v_followup.conversation_id <> v_active then
+      raise exception 'Une nouvelle question doit prolonger la conversation active.';
+    end if;
+    if (select expires_at from public.conversations where id = v_active)
+      is distinct from now() + interval '30 days' then
+      raise exception 'Une nouvelle question doit repousser expiration de 30 jours.';
+    end if;
+
+    select * into v_expired_claim
+    from public.claim_conversation_question_in_conversation(
+      gen_random_uuid(), 'Question expirée', v_expired
+    );
+    if v_expired_claim.claimed or v_expired_claim.question_status <> 'expired' then
+      raise exception 'Une conversation expirée doit refuser tout ajout.';
+    end if;
+
+    select * into v_deleted_claim
+    from public.claim_conversation_question_in_conversation(
+      v_deleted_question, 'Question supprimée', v_deleted
+    );
+    if not v_deleted_claim.claimed then
+      raise exception 'La conversation de test doit pouvoir être revendiquée.';
+    end if;
+    execute 'reset role';
+    delete from public.conversations where id = v_deleted;
+    execute 'set local role authenticated';
+    select public.finalize_conversation_answer(
+      v_deleted_question, v_deleted_claim.generation_token, 'Réponse tardive', '[]'::jsonb
+    ) into v_finalized;
+    if v_finalized then
+      raise exception 'La réponse ne doit pas recréer une conversation supprimée.';
+    end if;
+    if exists (select 1 from public.conversations where id = v_deleted)
+      or exists (select 1 from public.messages where conversation_id = v_deleted) then
+      raise exception 'Une conversation supprimée ne doit pas réapparaître.';
     end if;
     if has_function_privilege(
       current_user, 'public.purge_expired_conversations()', 'EXECUTE'
