@@ -36,7 +36,7 @@ Poser une question liée à l'échange précédent et retrouver tous les nouveau
 
 - `src/features/assistant/assistant-core.ts`, `assistant.ts`, `assistant-actions.ts`, `assistant-form.tsx` : contexte récent, nouvelle question dans la conversation et reprise stable.
 - `src/lib/ai/openai-chat-client.ts` : types/messages adaptés si nécessaire, mêmes limites serveur et format de réponse structuré.
-- Service/migrations de 4.10 : autorisation et état de requête atomiques ; nouvelle migration seulement si le contrat l'exige.
+- Nouvelle migration Supabase requise (appliquée par Dylan) : `claim_conversation_question(p_question_id, p_question)` crée toujours une conversation ; ajouter une variante ou un paramètre conversation cible qui vérifie propriétaire et expiration avant réservation, sans modifier le comportement de 4.10. `src/features/assistant/conversations.ts` (`askAndSaveQuestion`) l'appelle.
 - Tests unitaires : question de suivi, contenu passé au fournisseur, maximum dix échanges, aucune source obsolète en contexte, quota, échec et doublon.
 - Tests RLS : ajout/refinalisation tiers refusés, expiration, suppression pendant génération sans recréation de la conversation.
 

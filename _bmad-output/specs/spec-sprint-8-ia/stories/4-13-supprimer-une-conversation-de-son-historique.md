@@ -31,7 +31,8 @@ Retirer un échange de son historique, après avoir confirmé son choix.
 
 ## Carte du code et tâches
 
-- Service serveur de conversations : suppression autorisée et transactionnelle.
+- Nouvelle migration Supabase requise (appliquée par Dylan) : les membres n'ont que SELECT ; ajouter une fonction de suppression propriétaire seulement (ou une politique DELETE), sans `service_role`. Les cascades de 4.10 retirent messages et sources ; `finalize_conversation_answer` doit échouer proprement si la conversation n'existe plus.
+- `src/features/assistant/conversations.ts` : suppression autorisée et transactionnelle.
 - Action serveur et confirmation dans la liste/détail ; clavier, focus et annulation accessibles.
 - Tests unitaires : confirmer/annuler, échec explicite, aucune suppression des ressources.
 - `tests/conversations-rls.test.mjs` : suppression tiers refusée, cascade vérifiée, finalisation après suppression refusée.

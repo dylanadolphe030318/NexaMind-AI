@@ -41,6 +41,8 @@ development_status:
   1-3-se-connecter-et-se-déconnecter: done
   1-4-accéder-à-son-espace-protégé: done
   1-5-voir-son-rôle-dans-l-espace-membre: done
+  # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
+  1-6-accéder-facilement-à-l-assistant: backlog
   epic-1-retrospective: done
 
   epic-2: in-progress
@@ -58,6 +60,8 @@ development_status:
   3-2-retrouver-ses-recherches-récentes: done
   3-3-relancer-une-recherche-enregistrée: done
   3-4-supprimer-une-recherche-de-son-historique: done
+  # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
+  3-5-améliorer-le-classement-des-recherches-de-ressources: backlog
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.

@@ -60,6 +60,8 @@ la sélection par le LLM, sous le seuil actuel.
 
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.
 
+**Nettoyage des tests RLS (proposition de changement du 2026-11-07) :** à la fin de chaque test d’intégration RLS, qu’il réussisse ou échoue, supprimer toutes les données créées par le test (conversations, messages, catégories et ressources temporaires). Vérifier que le nettoyage s’exécute aussi après une erreur et qu’il ne supprime aucune donnée réelle.
+
 ## Vérification après le test 7 — recherche de ressources
 
 Pour `/resources/search`, le seuil minimal de similarité est de 0,20 et la fenêtre

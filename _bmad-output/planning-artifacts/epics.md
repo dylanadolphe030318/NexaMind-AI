@@ -74,11 +74,11 @@ Ce document transforme le PRD, les documents UX et l’architecture de NexaMind 
 ### Carte de couverture des exigences
 
 FR1 : Epic 1 — créer un compte membre, se connecter et se déconnecter.
-FR2 : Epic 1 — arriver sur un tableau de bord donnant accès aux fonctions principales et indiquant son rôle (story 1.5).
+FR2 : Epic 1 — arriver sur un tableau de bord donnant accès aux fonctions principales et indiquant son rôle (story 1.5) ; accès visible à l’assistant (story 1.6, backlog).
 FR3 : Epic 2 — créer, modifier et supprimer des ressources selon son rôle.
 FR4 : Epic 2 — consulter, filtrer et classer les ressources dans des catégories.
 FR5 : Epic 4 — préparer les ressources pour la recherche sémantique avec une indexation persistante.
-FR6 : Epic 3 — rechercher des ressources et ouvrir les résultats.
+FR6 : Epic 3 — rechercher des ressources et ouvrir les résultats ; améliorer leur classement (story 3.5, backlog).
 FR7 : Epic 4 — poser une question et recevoir une réponse avec sources ou une abstention.
 FR8 : Epic 3 — retrouver ses recherches ; Epic 4 — retrouver et poursuivre ses conversations.
 FR9 : Epic 1 — définir les rôles et protéger les actions ; Epic 4 — préserver ces droits dans la recherche IA et les conversations.
@@ -188,6 +188,22 @@ afin de savoir ce que je peux faire sans consulter Supabase.
 **Étant donné** que mon rôle a été changé dans la base pendant que je suis connecté, **quand** je recharge le tableau de bord ou j’ouvre la page des catégories, **alors** mon nouveau rôle et les actions qui lui correspondent sont pris en compte sans me déconnecter.
 
 **Étant donné** que le rôle s’affiche, **quand** je le consulte, **alors** il vient du profil lu côté serveur avec ma session et je ne peux pas le modifier depuis l’application.
+
+### Story 1.6 : Accéder facilement à l’assistant
+
+*(Ajoutée au backlog le 2026-11-07 par la proposition de changement issue de la rétrospective du sprint 8 ; aucun sprint affecté.)*
+
+En tant que membre connecté,
+je veux trouver un lien vers l’assistant depuis mon tableau de bord,
+afin de pouvoir l’ouvrir sans devoir deviner son adresse.
+
+**Critères d’acceptation :**
+
+**Étant donné** que je suis connecté, **quand** le tableau de bord s’affiche, **alors** un lien clairement nommé vers l’assistant ouvre la page `/assistant` existante.
+
+**Étant donné** que j’utilise le clavier ou un écran mobile, **quand** je consulte le tableau de bord, **alors** le lien reste visible et utilisable.
+
+**Étant donné** qu’une personne n’est pas connectée, **quand** elle tente d’ouvrir l’assistant, **alors** les protections d’accès existantes s’appliquent et elle n’y accède pas.
 
 ## Epic 2 : Organiser les ressources partagées
 
@@ -366,6 +382,22 @@ afin de ne conserver que les recherches qui me sont utiles.
 **Étant donné** qu’une recherche appartient à un autre membre, **quand** je tente de la supprimer, **alors** l’action est refusée.
 
 **Étant donné** qu’un membre tente directement dans Supabase de supprimer la recherche d’un autre membre, **quand** l’opération est exécutée avec sa session, **alors** RLS la refuse et la recherche reste disponible pour son propriétaire.
+
+### Story 3.5 : Améliorer le classement des recherches de ressources
+
+*(Ajoutée au backlog le 2026-11-07 par la proposition de changement issue de la rétrospective du sprint 8 ; aucun sprint affecté.)*
+
+En tant que membre,
+je veux retrouver les bonnes ressources avec mes mots-clés,
+afin de trouver plus facilement l’information utile.
+
+**Critères d’acceptation :**
+
+**Étant donné** le jeu de 10 questions de référence, **quand** la recherche de ressources est évaluée, **alors** la ressource attendue apparaît dans les trois premiers résultats pour au moins 8 questions sur 10.
+
+**Étant donné** les questions 1, 3 et 5, **quand** les tests de régression sont exécutés, **alors** leurs ressources attendues sont clairement identifiées et vérifiées.
+
+**Étant donné** que je lance une recherche, **quand** les résultats s’affichent, **alors** ils restent limités aux ressources que j’ai le droit de consulter.
 
 ## Epic 4 : Questionner les connaissances avec une IA et des sources
 

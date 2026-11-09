@@ -32,8 +32,9 @@ Relire ses anciennes questions, réponses et sources sans générer une nouvelle
 
 ## Carte du code et tâches
 
-- Service serveur de conversations créé en 4.10 : lecture propriétaire/expiration, ordre des messages, disponibilité des références.
-- Nouvelle page détaillée et composants d'affichage dans `src/app/assistant/conversations/` et `src/features/assistant/`.
+- `src/features/assistant/conversations.ts` (+ `conversations-core.ts`) : ajouter la lecture d'une conversation à côté de `listMyConversations` ; ordre des messages, disponibilité des références.
+- Aucune migration attendue : les politiques SELECT de 4.10 couvrent `conversations`, `messages`, `message_sources` ; `message_sources` garde `resource_id`, `chunk_id`, `resource_revision` (mis à `null` si la ressource ou le passage disparaît), sans extrait.
+- Nouvelle page `src/app/assistant/conversations/[id]/page.tsx` ; rendre les éléments de la liste existante (`conversations/page.tsx`) cliquables.
 - `tests/conversations-rls.test.mjs` : lecture directe de messages/sources d'autrui refusée ; ressource modifiée/supprimée ; responsable ; URL expirée.
 - Tests unitaires : pas de fournisseur lors d'une lecture, erreurs distinctes, sources non disponibles sans fuite.
 
