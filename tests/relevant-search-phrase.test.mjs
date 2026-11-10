@@ -253,8 +253,10 @@ test("la recherche documente l’avis OpenAI, l’extrait pertinent et ses état
   const page = await import("node:fs/promises").then((fs) =>
     fs.readFile("src/app/resources/search/page.tsx", "utf8"),
   );
-  assert.match(page, /cinq passages complets\s*\(titre et texte\) sont envoy&eacute;s/i);
+  assert.match(page, /vingt passages complets\s*\(titre et texte\) sont envoy&eacute;s/i);
+  assert.match(page, /cinq passages retenus sont ensuite transmis/i);
   assert.match(page, /&agrave; OpenAI/);
+  assert.match(page, /d&eacute;lai et le co&ucirc;t/);
   assert.match(page, /Phrase la plus pertinente/);
   assert.match(page, /<Suspense/);
   assert.match(page, /selectRelevantSearchPhrase/);

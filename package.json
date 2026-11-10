@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:unit": "node --test tests/chunking.test.mjs tests/indexing-core.test.mjs tests/openai-embeddings.test.mjs tests/semantic-search.test.mjs tests/semantic-access.test.mjs tests/relevant-search-phrase.test.mjs tests/assistant.test.mjs tests/assistant-conversations.test.mjs tests/dashboard-assistant-navigation.test.mjs src/features/resources/resource-validation.test.mjs src/features/resources/resource-status.test.mjs",
+    "test:unit": "node --test tests/chunking.test.mjs tests/indexing-core.test.mjs tests/openai-embeddings.test.mjs tests/semantic-search.test.mjs tests/resource-passage-selection.test.mjs tests/semantic-access.test.mjs tests/relevant-search-phrase.test.mjs tests/assistant.test.mjs tests/assistant-conversations.test.mjs tests/dashboard-assistant-navigation.test.mjs src/features/resources/resource-validation.test.mjs src/features/resources/resource-status.test.mjs",
     "test:integration": "node --env-file=.env.local --test tests/supabase-rls.test.mjs tests/indexing-rls.test.mjs tests/semantic-search-rls.test.mjs tests/conversations-rls.test.mjs"
   },
   "dependencies": {

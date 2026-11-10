@@ -55,3 +55,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
   summary: Vérifier par test que les états lus en base atteignent les badges et contrôles des pages liste et détail.
   evidence: Les tests actuels couvrent les fonctions de libellé et d'autorisation, mais pas le rendu des deux pages ni le mappage des données.
+
+- source_spec: `_bmad-output/specs/spec-backlog-standard/stories/3-5-ameliorer-le-classement-des-recherches-de-ressources.md`
+  summary: Vérifier avec le fournisseur réel la sélection face à des instructions présentes dans les données (risque moyen non confirmé).
+  evidence: Les tests locaux vérifient le prompt et les identifiants autorisés, pas la résistance sémantique du modèle. Un essai contrôlé avec contenu fictif contradictoire et génération réelle permettrait de lever l'incertitude ; aucune divulgation ni instruction suivie n'a été constatée.

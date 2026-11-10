@@ -31,6 +31,7 @@ Le membre doit pouvoir trouver l'assistant sans saisir son adresse et retrouver 
 - Évaluer uniquement les passages hybrides, dans leur ordre affiché, sans fusion avec les résultats littéraux ni déduplication pour calculer le top 3. La phrase sélectionnée n'est pas une preuve de classement.
 - Q9/Q10 exigent un jeu autorisé avec ressource réellement inaccessible ; faute de prérequis, noter « non vérifié » et ne pas valider la story. Ne pas créer un second espace dans le MVP ni confondre partage du workspace et confidentialité par propriétaire.
 - Réutiliser les routes et l'architecture existantes. Tout appel IA déjà nécessaire à la recherche reste serveur, avec session membre et RLS, sans clé navigateur ni `service_role`.
+- Décision du 2026-11-10 : développement et évaluation partielle sur Q1–Q8 dans le projet actuel, sans création d'un jeu Q9/Q10. Présélection de vingt passages accessibles au maximum puis sélection/réordonnancement par le LLM serveur existant ; cinq passages affichés au maximum, ou aucun. Coût/délai et transmission de vingt passages acceptés, information utilisateur à adapter. Assistant et recherche littérale inchangés ; Q9/Q10 restent non vérifiées, sans validation complète.
 - Ne modifier ni le fournisseur IA, ni les embeddings, ni le stockage pgvector, ni les comportements de l'assistant et de ses conversations.
 
 ## Non-goals

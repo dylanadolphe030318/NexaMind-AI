@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import {
   SEMANTIC_MIN_SIMILARITY,
   SEMANTIC_RESOURCE_MIN_SIMILARITY,
+  SEMANTIC_RESOURCE_CANDIDATE_LIMIT,
   SEMANTIC_QUERY_MAX_LENGTH,
   SEMANTIC_RESULT_LIMIT,
   buildPassageExcerpt,
@@ -91,11 +92,12 @@ test("la recherche de ressources utilise son seuil réduit sans modifier celui d
   const resourceOutcome = await runSemanticSearch("question Q1 ou Q3", resourceDeps, {
     rankByText: true,
     minSimilarity: SEMANTIC_RESOURCE_MIN_SIMILARITY,
+    resultLimit: SEMANTIC_RESOURCE_CANDIDATE_LIMIT,
   });
 
   assert.deepEqual(resourceDeps.calls.search, [[
     "[0.1,0.2]",
-    SEMANTIC_RESULT_LIMIT,
+    SEMANTIC_RESOURCE_CANDIDATE_LIMIT,
     SEMANTIC_RESOURCE_MIN_SIMILARITY,
     "question Q1 ou Q3",
   ]]);
@@ -116,6 +118,36 @@ test("la recherche de ressources utilise son seuil réduit sans modifier celui d
     SEMANTIC_MIN_SIMILARITY,
   ]]);
   assert.deepEqual(assistantOutcome.passages, []);
+});
+
+test("les ressources peuvent présélectionner vingt passages sans élargir la recherche de l'assistant", async () => {
+  const rows = Array.from({ length: 24 }, (_, index) =>
+    row(`passage-${index + 1}`, 0.9 - index / 100),
+  );
+  const resourceDeps = deps({
+    search: async (...args) => {
+      resourceDeps.calls.search.push(args);
+      return { data: rows, error: null };
+    },
+  });
+  const resourceOutcome = await runSemanticSearch("question ressource", resourceDeps, {
+    rankByText: true,
+    minSimilarity: SEMANTIC_RESOURCE_MIN_SIMILARITY,
+    resultLimit: SEMANTIC_RESOURCE_CANDIDATE_LIMIT,
+  });
+
+  assert.equal(resourceDeps.calls.search[0][1], SEMANTIC_RESOURCE_CANDIDATE_LIMIT);
+  assert.equal(resourceOutcome.passages.length, SEMANTIC_RESOURCE_CANDIDATE_LIMIT);
+
+  const assistantDeps = deps({
+    search: async (...args) => {
+      assistantDeps.calls.search.push(args);
+      return { data: rows, error: null };
+    },
+  });
+  const assistantOutcome = await runSemanticSearch("question assistant", assistantDeps);
+  assert.equal(assistantDeps.calls.search[0][1], SEMANTIC_RESULT_LIMIT);
+  assert.equal(assistantOutcome.passages.length, SEMANTIC_RESULT_LIMIT);
 });
 
 test("la migration conserve la RLS et le plafond avec une fenêtre hybride de 0,20", async () => {

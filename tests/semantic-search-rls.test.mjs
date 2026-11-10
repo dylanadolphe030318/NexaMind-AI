@@ -76,6 +76,13 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       p_limit: limit,
       p_min_similarity: minSimilarity,
     });
+  const candidateSearch = (session, vector, queryText, limit = 20, minSimilarity = 0.3) =>
+    session.client.rpc("search_resource_chunk_candidates", {
+      p_query_embedding: literal(vector),
+      p_query_text: queryText,
+      p_limit: limit,
+      p_min_similarity: minSimilarity,
+    });
 
   try {
     const { data: profile, error: profileError } = await a.client
@@ -147,6 +154,58 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       const { data: far, error: farError } = await search(a, axis(1));
       assert.ifError(farError);
       assert.equal(far.some((row) => row.resource_id === ready.id), false);
+    });
+
+    await t.test("le RPC candidats est borné, réessayable et reste sous la session membre", async () => {
+      const candidateAxis = 1000;
+      for (let i = 1; i <= 21; i += 1) {
+        await createResource(
+          `candidate-limit${i}`,
+          candidateAxis,
+          true,
+          `Passage candidat de vérification ${i}.`,
+        );
+      }
+
+      const request = () => candidateSearch(a, axis(candidateAxis), "candidat vérification", 100, 0.2);
+      const first = await request();
+      assert.ifError(first.error);
+      assert.equal(first.data.length, 20, "vingt résultats sont renvoyés parmi au moins vingt et un candidats");
+      assert.ok(first.data.every((row) => row.chunk_id && Number.isInteger(row.revision)));
+      const { data: chunks, error: chunksError } = await a.client
+        .from("resource_chunks")
+        .select("id, resource_id, revision")
+        .in("id", first.data.map((row) => row.chunk_id));
+      assert.ifError(chunksError);
+      const chunkById = new Map(chunks.map((chunk) => [chunk.id, chunk]));
+      assert.ok(first.data.every((row) => {
+        const chunk = chunkById.get(row.chunk_id);
+        return chunk?.resource_id === row.resource_id && chunk.revision === row.revision;
+      }), "les références correspondent aux passages et révisions publiés");
+      const retry = await request();
+      assert.ifError(retry.error);
+      assert.equal(retry.data.length, 20, "un nouvel appel au RPC reste fonctionnel");
+      assert.ok(retry.data.every((row) => row.chunk_id && Number.isInteger(row.revision)));
+
+      const { data: memberBResults, error: memberBError } = await candidateSearch(
+        b,
+        axis(candidateAxis),
+        "candidat vérification",
+        100,
+        0.2,
+      );
+      assert.ifError(memberBError);
+      assert.ok(memberBResults.length > 0, "un autre membre du workspace partagé voit ses ressources");
+
+      const anonymous = await candidateSearch(
+        { client: newClient() },
+        axis(candidateAxis),
+        "candidat vérification",
+        20,
+        0.2,
+      );
+      assert.ok(anonymous.error, "un visiteur sans session ne peut pas appeler le RPC candidats");
+      assert.equal(anonymous.data, null);
     });
 
     await t.test("la recherche de ressources accepte le seuil 0,20 dans la fenêtre hybride 0,20", async () => {

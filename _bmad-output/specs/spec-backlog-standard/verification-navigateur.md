@@ -6,6 +6,13 @@
 
 **Ordre :** story 1.6, puis story 3.5. Les deux fiches sont prêtes pour une future demande de développement ; rien n'est développé par cette préparation.
 
+**Reprise autorisée le 2026-11-10 :** vérifier uniquement Q1–Q8 sur le projet
+actuel, après application de la nouvelle migration de présélection et livraison
+du code. Noter le résultat partiel sur huit cas ; Q9/Q10 restent « non vérifiées ».
+Cela ne valide pas le protocole complet ni la story. La liste hybride est
+désormais filtrée et réordonnée côté serveur par le LLM parmi vingt candidats
+accessibles au maximum ; cinq passages au maximum sont affichés, ou aucun.
+
 | Repère | Manipulation | Résultat attendu |
 |---|---|---|
 | STD-1 — accès | Se connecter comme membre, ouvrir le tableau de bord et choisir « Assistant » ; recommencer comme responsable. | La page existante de l'assistant s'ouvre sans saisir l'URL et sans génération automatique. |

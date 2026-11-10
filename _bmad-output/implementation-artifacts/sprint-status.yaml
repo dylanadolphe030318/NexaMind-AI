@@ -63,9 +63,9 @@ development_status:
   3-4-supprimer-une-recherche-de-son-historique: done
   # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
   # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
-  # Bloquée avant modification : aucun jeu autorisé réellement inaccessible pour Q9/Q10.
-  # Diagnostic seulement ; classement non modifié, note qualité non mesurée.
-  3-5-améliorer-le-classement-des-recherches-de-ressources: in-progress
+  # Reprise autorisée Q1–Q8 : présélection 20 puis sélection LLM serveur, 5 affichés maximum.
+  # Q9/Q10 non vérifiées ; migration manuelle et évaluation humaine requises avant validation.
+  3-5-améliorer-le-classement-des-recherches-de-ressources: review
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.

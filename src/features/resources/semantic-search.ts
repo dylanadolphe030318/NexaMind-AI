@@ -1,10 +1,13 @@
 import "server-only";
 
+import { generateChatReply } from "@/lib/ai/chat";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
 import { createClient } from "@/lib/supabase/server";
+import { runResourcePassageSearch } from "./resource-passage-selection-core";
 import {
   runSemanticSearch,
   SEMANTIC_MAX_SEARCHES_PER_MINUTE,
+  SEMANTIC_RESOURCE_CANDIDATE_LIMIT,
   SEMANTIC_RESOURCE_MIN_SIMILARITY,
   type SemanticSearchOutcome,
 } from "./semantic-search-core";
@@ -13,6 +16,7 @@ import {
 async function search(
   question: string,
   rankByText: boolean,
+  selectResourceCandidates = false,
 ): Promise<SemanticSearchOutcome | null> {
   const supabase = await createClient();
   const {
@@ -37,12 +41,17 @@ async function search(
       embed: generateEmbeddings,
       search: async (queryEmbedding, limit, minSimilarity, queryText) => {
         const { data, error } = queryText
-          ? await supabase.rpc("search_resource_chunks_hybrid", {
-            p_query_embedding: queryEmbedding,
-            p_query_text: queryText,
-            p_limit: limit,
-            p_min_similarity: minSimilarity,
-          })
+          ? await supabase.rpc(
+            selectResourceCandidates
+              ? "search_resource_chunk_candidates"
+              : "search_resource_chunks_hybrid",
+            {
+              p_query_embedding: queryEmbedding,
+              p_query_text: queryText,
+              p_limit: limit,
+              p_min_similarity: minSimilarity,
+            },
+          )
           : await supabase.rpc("search_resource_chunks", {
             p_query_embedding: queryEmbedding,
             p_limit: limit,
@@ -55,6 +64,9 @@ async function search(
     {
       rankByText,
       minSimilarity: rankByText ? SEMANTIC_RESOURCE_MIN_SIMILARITY : undefined,
+      resultLimit: selectResourceCandidates
+        ? SEMANTIC_RESOURCE_CANDIDATE_LIMIT
+        : undefined,
     },
   );
 }
@@ -66,5 +78,10 @@ export function searchPassages(question: string): Promise<SemanticSearchOutcome 
 
 /** Classement hybride réservé à la recherche de ressources. */
 export function searchResourcePassages(question: string): Promise<SemanticSearchOutcome | null> {
-  return search(question, true);
+  return runResourcePassageSearch(question, {
+    searchCandidates: (query) => search(query, true, true),
+    generate: generateChatReply,
+    logError: () =>
+      console.error("[recherche sémantique] Impossible de sélectionner les passages pertinents."),
+  });
 }

@@ -98,8 +98,9 @@ export default async function SearchResourcesPage({
           </button>
         </form>
         <p className="auth-intro">
-          Pour choisir une phrase pertinente, votre question et jusqu&apos;&agrave; cinq passages complets
-          (titre et texte) sont envoy&eacute;s &agrave; OpenAI.
+          Pour s&eacute;lectionner les passages pertinents, votre question et jusqu&apos;&agrave; vingt passages complets
+          (titre et texte) sont envoy&eacute;s &agrave; OpenAI. Jusqu&apos;&agrave; cinq passages retenus sont ensuite transmis
+          pour choisir une phrase. Cela peut augmenter le d&eacute;lai et le co&ucirc;t.
         </p>
 
         <section aria-label="R&eacute;sultats de la recherche" className="category-list-section">

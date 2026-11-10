@@ -46,7 +46,9 @@ test("seule la recherche de ressources active le classement hybride", () => {
   const resourcePage = readFileSync("src/app/resources/search/page.tsx", "utf8");
   const assistant = readFileSync("src/features/assistant/assistant.ts", "utf8");
   assert.match(search, /queryText[\s\S]*search_resource_chunks_hybrid/);
+  assert.match(search, /selectResourceCandidates[\s\S]*search_resource_chunk_candidates/);
   assert.match(search, /: await supabase\.rpc\("search_resource_chunks"/);
+  assert.match(search, /searchCandidates:\s*\(query\)\s*=>\s*search\(query, true, true\)/);
   assert.match(resourcePage, /searchResourcePassages\(raw\)/);
   assert.match(assistant, /retrieve:\s*searchPassages/);
 });
@@ -57,7 +59,7 @@ test("seule la recherche de ressources transmet le seuil dédié", () => {
     search,
     /minSimilarity:\s*rankByText\s*\?\s*SEMANTIC_RESOURCE_MIN_SIMILARITY\s*:\s*undefined/,
   );
-  assert.match(search, /searchResourcePassages\(question: string\)[\s\S]*search\(question, true\)/);
+  assert.match(search, /searchResourcePassages\(question: string\)[\s\S]*search\(query, true, true\)/);
   assert.match(search, /searchPassages\(question: string\)[\s\S]*search\(question, false\)/);
 });
 

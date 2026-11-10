@@ -1,5 +1,6 @@
 export const SEMANTIC_QUERY_MAX_LENGTH = 300;
 export const SEMANTIC_RESULT_LIMIT = 5;
+export const SEMANTIC_RESOURCE_CANDIDATE_LIMIT = 20;
 export const SEMANTIC_MAX_SEARCHES_PER_MINUTE = 20;
 // Seuil de proximité cosinus : en dessous, le passage est considéré hors sujet.
 export const SEMANTIC_MIN_SIMILARITY = 0.4;
@@ -72,13 +73,14 @@ export function buildPassageExcerpt(content: string, maxLength = EXCERPT_LENGTH)
 export async function runSemanticSearch(
   rawQuestion: string,
   deps: SemanticSearchDeps,
-  options: { rankByText?: boolean; minSimilarity?: number } = {},
+  options: { rankByText?: boolean; minSimilarity?: number; resultLimit?: number } = {},
 ): Promise<SemanticSearchOutcome> {
   const question = normalizeQuestion(rawQuestion);
   if (!question) {
     return { status: "invalid" };
   }
   const minSimilarity = options.minSimilarity ?? SEMANTIC_MIN_SIMILARITY;
+  const resultLimit = options.resultLimit ?? SEMANTIC_RESULT_LIMIT;
 
   try {
     if (!(await deps.consumeQuota())) {
@@ -92,7 +94,7 @@ export async function runSemanticSearch(
 
     const searchArgs: [string, number, number] = [
       formatVector(embedding),
-      SEMANTIC_RESULT_LIMIT,
+      resultLimit,
       minSimilarity,
     ];
     const { data, error } = options.rankByText
@@ -107,7 +109,7 @@ export async function runSemanticSearch(
       ? eligibleRows
       : eligibleRows.sort((a, b) => b.similarity - a.similarity);
     const passages = orderedRows
-      .slice(0, SEMANTIC_RESULT_LIMIT)
+      .slice(0, resultLimit)
       .map((row) => ({
         chunkId: row.chunk_id,
         revision: row.revision,
