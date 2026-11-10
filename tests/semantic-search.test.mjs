@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 
 import {
   SEMANTIC_MIN_SIMILARITY,
@@ -17,6 +18,33 @@ const row = (id, similarity) => ({
   title: `Titre ${id}`,
   content: `Passage ${id}`,
   similarity,
+});
+
+test("le correctif hybride rétablit les références sans modifier le classement ou les droits", async () => {
+  const [previous, migration] = await Promise.all([
+    readFile("supabase/migrations/20261107100000_search_resource_chunks_hybrid_window.sql", "utf8"),
+    readFile("supabase/migrations/20261110143000_restore_hybrid_chunk_references.sql", "utf8"),
+  ]);
+  assert.match(migration, /begin;\s+drop function/i);
+  assert.match(migration, /commit;\s*$/i);
+  assert.match(migration, /returns table \(\s+chunk_id uuid,\s+resource_id uuid,\s+revision integer,/);
+  assert.match(migration, /select\s+chunk\.id as chunk_id,\s+chunk\.resource_id,\s+chunk\.revision,/);
+  assert.match(migration, /select\s+normalized\.chunk_id,\s+normalized\.resource_id,\s+normalized\.revision,/);
+
+  const normalize = (sql) => sql
+    .replace(/^--.*$/gm, "")
+    .replace(/^\s*(begin|commit);\s*$/gim, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const withoutReferences = migration
+    .replace(/\r\n/g, "\n")
+    .replace("  chunk_id uuid,\n", "")
+    .replace("  revision integer,\n", "")
+    .replace("      chunk.id as chunk_id,\n", "")
+    .replace("      chunk.revision,\n", "")
+    .replace("    normalized.chunk_id,\n", "")
+    .replace("    normalized.revision,\n", "");
+  assert.equal(normalize(withoutReferences), normalize(previous));
 });
 
 function deps(overrides = {}) {

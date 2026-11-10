@@ -100,6 +100,29 @@ Une fois la migration appliquée, lancez
 Le scénario de suppression ignoré pour migration absente ne constitue pas une validation.
 Contrôle manuel : scénarios S8-H et S8-F de `tests-ia.md`.
 
+### Correctif des références de recherche hybride
+
+Après les migrations précédentes, ouvrez
+`supabase/migrations/20261110143000_restore_hybrid_chunk_references.sql`.
+Copiez tout le fichier dans une nouvelle requête du **Supabase → SQL Editor**,
+puis cliquez sur **Run** (`begin` et `commit` compris).
+Cette migration rétablit `chunk_id` et `revision`, retirés par la migration de
+fenêtre hybride du 7 novembre. Elle ne modifie ni les données, ni le classement,
+ni les droits d'accès. La recréation de la fonction et de ses permissions est
+transactionnelle et sans `CASCADE`. En cas d'erreur, arrêtez-vous et conservez
+le message complet ; ne supprimez pas les protections pour forcer l'application.
+Ne rejouez pas les anciennes migrations après ce correctif.
+
+Après succès, lancez :
+
+```bash
+node --env-file=.env.local --test --test-timeout=240000 tests/semantic-search-rls.test.mjs
+```
+
+Le test compare les identifiants et révisions réellement renvoyés aux passages
+enregistrés. Aucun échec ni test ignoré ne doit subsister. Les tests locaux sur
+le texte SQL ne remplacent pas cette vérification dans Supabase.
+
 ### Expiration et purge des conversations
 
 Une conversation expire 30 jours après sa dernière nouvelle question. RLS la masque dès l'expiration, même si la purge n'est pas encore planifiée. La migration fournit `public.purge_expired_conversations()` ; elle ne planifie pas elle-même de tâche.
