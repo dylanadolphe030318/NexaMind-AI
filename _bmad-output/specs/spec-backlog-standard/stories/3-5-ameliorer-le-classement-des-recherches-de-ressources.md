@@ -229,6 +229,37 @@ pas validé : diagnostic isolé de l'erreur Q1 requis. Pas de nouvelle migration
 aucune mutation de ressource ou de droit. Statut en revue conservé, Q9/Q10
 non vérifiées, aucune note globale annoncée.
 
+## Correction des frontières titres/listes — 2026-11-10, après 21 h 21
+
+Correction autorisée par Dylan après le diagnostic Q1 isolé. Dans cet essai,
+OpenAI renvoyait une phrase exacte du passage 2, mais le contrôle la collait
+au titre Markdown et au marqueur d'hypothèse précédent après suppression
+des retours à la ligne.
+
+- Le découpage respecte maintenant les titres Markdown, les débuts de listes
+  à puces ou numérotées et les paragraphes séparés par une ligne vide avant
+  normalisation des espaces. Les lignes de continuation d'un même élément
+  restent réunies. Les titres ne deviennent pas des phrases sélectionnables.
+- Le contrôle de phrase complète, source unique, copie exacte du contenu,
+  tolérance limitée au gras et limite de 300 caractères sont conservés.
+  Aucun changement de prompt, fournisseur, embeddings, RPC ou droits.
+- 26 tests ciblés réussis, aucun ignoré ; TypeScript et lint ciblé réussis.
+  Régressions couvrant LF/CRLF, plusieurs puces/numérotations, continuations,
+  titres, paragraphes, reformulations et troncatures refusées.
+- Rejeux locaux des réponses réelles Q1 et Q3 auparavant rejetées : acceptées,
+  phrase originale restituée. Ces rejeux n'utilisent aucun nouvel appel IA.
+- Nouvel essai réel : RPC toujours conforme (vingt candidats, références,
+  réessai, ancien RPC cinq, anonyme refusé). Q1 retient deux passages, mais
+  la sélection de phrase renvoie encore `error`. Arrêt avant Q2–Q8, sans
+  réessai automatique ni nouvelle modification pour contourner l'erreur.
+  La réponse brute de cet essai n'a pas été capturée ; sa cause reste inconnue.
+
+Le défaut reproduit des frontières est corrigé, mais il n'explique pas encore
+tous les échecs possibles du parcours. Avant la prochaine reprise, capturer
+la réponse et l'échec au sein du même essai pour éviter un diagnostic fondé
+sur une génération différente. Aucune validation complète ni note annoncée ;
+story en revue, Q9/Q10 non vérifiées et évaluation humaine encore requise.
+
 ## Review Triage Log
 
 | Repère | Verdict | Preuve et décision |

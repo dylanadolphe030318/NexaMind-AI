@@ -125,6 +125,57 @@ test("les phrases sont comparées en ignorant uniquement les espaces de mise en 
   );
 });
 
+test("Q1 sépare les titres et les listes sans perdre les lignes de continuation", () => {
+  const phrase = "Construire l’application avec Next.js ; Next.js affiche les pages, traite les demandes côté serveur, applique les règles métier et appelle le fournisseur IA.";
+  for (const newline of ["\n", "\r\n"]) {
+    for (const marker of ["- ", "* ", "• ", "1. ", "2) "]) {
+      const content = [
+        "Une introduction. **[ASSUMPTION]**",
+        "### Exigences complémentaires de l’architecture",
+        `${marker}Construire l’application avec Next.js ; Next.js affiche les pages,`,
+        "  traite les demandes côté serveur, applique les règles métier et appelle le fournisseur IA.",
+        `${marker}Utiliser Supabase pour les données.`,
+      ].join(newline);
+      const passages = [passage("architecture", "Architecture", content)];
+      const parse = (answer) => parseRelevantPhraseReply(
+        JSON.stringify({ answer, sources: [1], missing: false }), passages,
+      );
+      assert.deepEqual(parse(phrase), {
+        status: "selected", phrase, resourceId: "architecture", title: "Architecture",
+      });
+      for (const invalid of [
+        "Next.js affiche les pages, traite les demandes côté serveur, applique les règles métier et appelle le fournisseur IA.",
+        "traite les demandes côté serveur, applique les règles métier et appelle le fournisseur IA.",
+        phrase.replace("Next.js", "React"),
+        "Exigences complémentaires de l’architecture",
+        `${phrase} Utiliser Supabase pour les données.`,
+      ]) {
+        assert.deepEqual(parse(invalid), { status: "error" });
+      }
+    }
+  }
+});
+
+test("un titre ne se colle pas au paragraphe suivant et les paragraphes restent distincts", () => {
+  const passages = [passage("guide", "Guide", [
+    "# Titre",
+    "Une phrase complète.",
+    "",
+    "Autre paragraphe sans ponctuation",
+    "",
+    "Encore un paragraphe.",
+  ].join("\n"))];
+  for (const answer of ["Une phrase complète.", "Encore un paragraphe."]) {
+    assert.equal(parseRelevantPhraseReply(JSON.stringify({
+      answer, sources: [1], missing: false,
+    }), passages).status, "selected");
+  }
+  assert.deepEqual(parseRelevantPhraseReply(JSON.stringify({
+    answer: "Autre paragraphe sans ponctuation Encore un paragraphe.",
+    sources: [1], missing: false,
+  }), passages), { status: "error" });
+});
+
 test("Q3 accepte le gras omis mais restitue exclusivement la phrase originale", () => {
   const original = "**RAG** — méthode où l’application retrouve des passages utiles, les donne à l’IA comme contexte, puis présente une réponse liée à ces passages.";
   for (const prefix of ["- ", "", "* "]) {

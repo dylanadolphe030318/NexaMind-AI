@@ -64,7 +64,7 @@ development_status:
   # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
   # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
   # Reprise autorisée Q1–Q8 : présélection 20 puis sélection LLM serveur, 5 affichés maximum.
-  # Migration et RPC vérifiés ; copie Markdown Q3 corrigée et testée.
+  # Migration et RPC vérifiés ; gras Q3 et frontières titres/listes Q1 corrigés et testés.
   # Reprise arrêtée sur erreur de phrase Q1 ; Q2–Q8 non rejouées dans cet essai.
   # Q9/Q10 non vérifiées ; évaluation humaine requise.
   3-5-améliorer-le-classement-des-recherches-de-ressources: review

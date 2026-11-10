@@ -46,6 +46,13 @@ function normalizeWhitespace(value: string): string {
 }
 
 function sentenceCandidates(content: string): string[] {
+  const blocks = content.split(
+    /^[ \t]*#{1,6}[ \t]+[^\r\n]*(?:\r?\n|$)|\r?\n[ \t]*(?=(?:[-*•]|\d+[.)])[ \t]+)|\r?\n[ \t]*\r?\n/gm,
+  );
+  return blocks.flatMap(sentencesInBlock);
+}
+
+function sentencesInBlock(content: string): string[] {
   const normalized = normalizeWhitespace(content);
   const sentences: string[] = [];
   let start = 0;
@@ -80,7 +87,7 @@ function sentenceCandidates(content: string): string[] {
 
   return sentences
     .map((sentence) => {
-      const clean = sentence.replace(/^(?:[-*•]\s+)+/, "").trim();
+      const clean = sentence.replace(/^(?:(?:[-*•]|\d+[.)])\s+)+/, "").trim();
       return /^[«“"'‘]/u.test(clean)
         ? clean.replace(/^[«“"'‘]+|[»”"'’]+$/gu, "").trim()
         : clean;
