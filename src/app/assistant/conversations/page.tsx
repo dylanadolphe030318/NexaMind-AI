@@ -25,7 +25,12 @@ function displayDate(value: string): string {
   }).format(new Date(value));
 }
 
-export default async function ConversationsPage() {
+export default async function ConversationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string | string[]; deleteError?: string | string[] }>;
+}) {
+  const { deleted, deleteError } = await searchParams;
   const result = await listMyConversations();
   if (result === null) {
     redirect("/login");
@@ -38,6 +43,15 @@ export default async function ConversationsPage() {
         <p>
           <Link href="/assistant">Retour &agrave; l&apos;assistant</Link>
         </p>
+        {deleteError === "1" ? (
+          <p className="auth-message auth-message-error" role="alert">
+            La conversation n&apos;a pas pu &ecirc;tre supprim&eacute;e ou n&apos;est plus disponible.
+          </p>
+        ) : deleted === "1" ? (
+          <p className="auth-message auth-message-info" role="status">
+            La conversation a &eacute;t&eacute; supprim&eacute;e.
+          </p>
+        ) : null}
         {result.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             Les conversations n&apos;ont pas pu &ecirc;tre charg&eacute;es.{" "}
@@ -60,6 +74,14 @@ export default async function ConversationsPage() {
                 <time dateTime={conversation.lastQuestionAt}>
                   {displayDate(conversation.lastQuestionAt)}
                 </time>
+                <p>
+                  <Link
+                    aria-label={`Supprimer la conversation « ${displayTitle(conversation.firstQuestion)} »`}
+                    href={`/assistant/conversations/${conversation.id}?delete=confirm`}
+                  >
+                    Supprimer
+                  </Link>
+                </p>
               </li>
             ))}
           </ul>

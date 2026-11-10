@@ -82,6 +82,24 @@ where extension.extname = 'vector';
 
 Si la requête ne retourne aucune ligne, la migration crée l'extension dans `extensions`. Si elle retourne un autre schéma que `extensions`, arrêtez-vous et faites vérifier la migration avant de l'exécuter.
 
+### Suppression d'une conversation (story 4.13)
+
+Après les migrations de continuation `20261109130000_continue_conversations.sql` et
+`20261110123000_fix_conversation_generation_token.sql`, appliquez
+`supabase/migrations/20261110140000_delete_owned_conversation.sql` dans une nouvelle
+requête du SQL Editor, en copiant tout le fichier (`begin` et `commit` compris).
+Cette migration ajoute une fonction, sans supprimer de conversation à son installation.
+En cas d'erreur, arrêtez-vous et conservez le message complet.
+
+Dans « Mes conversations », « Supprimer » ouvre une confirmation nommant l'échange.
+« Annuler » ne change rien ; confirmer supprime définitivement la conversation,
+ses messages et ses références de sources, mais conserve les ressources citées.
+Seul le propriétaire peut supprimer, y compris face au rôle responsable.
+Une fois la migration appliquée, lancez
+`node --env-file=.env.local --test --test-timeout=240000 tests/conversations-rls.test.mjs`.
+Le scénario de suppression ignoré pour migration absente ne constitue pas une validation.
+Contrôle manuel : scénarios S8-H et S8-F de `tests-ia.md`.
+
 ### Expiration et purge des conversations
 
 Une conversation expire 30 jours après sa dernière nouvelle question. RLS la masque dès l'expiration, même si la purge n'est pas encore planifiée. La migration fournit `public.purge_expired_conversations()` ; elle ne planifie pas elle-même de tâche.

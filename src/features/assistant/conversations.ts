@@ -9,6 +9,7 @@ import {
   type ConversationQuestionStatus,
 } from "./assistant-conversation-core";
 import {
+  deleteConversationWith,
   buildConversationSummaries,
   buildRecentConversationExchanges,
   readConversationHistory,
@@ -115,6 +116,43 @@ export async function askAndSaveQuestion(
     },
     logError: logConversationError,
   });
+}
+
+export async function deleteMyConversation(
+  conversationId: string,
+): Promise<Exclude<Awaited<ReturnType<typeof deleteConversationWith>>, "unauthenticated"> | null> {
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch (error) {
+    unstable_rethrow(error);
+    logConversationError("Impossible de supprimer la conversation.");
+    return "error";
+  }
+
+  const result = await deleteConversationWith(conversationId, {
+    isAuthenticated: async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        throw error;
+      }
+      return Boolean(data.user);
+    },
+    deleteOwnedConversation: async (id) => {
+      const { data, error } = await supabase.rpc("delete_owned_conversation", {
+        p_conversation_id: id,
+      });
+      if (error) {
+        throw error;
+      }
+      return data === true;
+    },
+  });
+
+  if (result === "error") {
+    logConversationError("Impossible de supprimer la conversation.");
+  }
+  return result === "unauthenticated" ? null : result;
 }
 
 async function readRecentConversationContext(

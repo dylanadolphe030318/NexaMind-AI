@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { AssistantForm } from "@/features/assistant/assistant-form";
 import { conversationQuestionStatusLabel } from "@/features/assistant/assistant-conversation-core";
 import { getMyConversation } from "@/features/assistant/conversations";
+import { deleteConversationAction } from "@/features/assistant/assistant-actions";
 
 export const metadata: Metadata = {
   title: "Conversation - NexaMind AI",
@@ -16,10 +17,13 @@ export const instant = false;
 
 export default async function ConversationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ delete?: string | string[]; error?: string | string[] }>;
 }) {
   const { id } = await params;
+  const { delete: deleteMode, error } = await searchParams;
   const result = await getMyConversation(id);
   if (result === null) {
     redirect("/login");
@@ -41,6 +45,30 @@ export default async function ConversationPage({
             La conversation n&apos;a pas pu &ecirc;tre charg&eacute;e.{" "}
             <Link href={"/assistant/conversations/" + id}>R&eacute;essayez.</Link>
           </p>
+        ) : deleteMode === "confirm" ? (
+          <>
+            <h2>Supprimer la conversation</h2>
+            <p>
+              Supprimer la conversation &laquo;&nbsp;
+              {result.messages.find((message) => message.role === "user")?.content ?? "Conversation sans titre"}
+              &nbsp;&raquo; ?
+            </p>
+            <p>Cette action est d&eacute;finitive.</p>
+            {error === "1" ? (
+              <p className="auth-message auth-message-error" role="alert">
+                La conversation n&apos;a pas pu &ecirc;tre supprim&eacute;e. R&eacute;essayez.
+              </p>
+            ) : null}
+            <form action={deleteConversationAction} className="resource-delete-actions">
+              <input name="conversationId" type="hidden" value={id} />
+              <button className="button auth-submit" type="submit">
+                Supprimer
+              </button>
+              <Link className="button button-secondary" href={`/assistant/conversations/${id}`}>
+                Annuler
+              </Link>
+            </form>
+          </>
         ) : result.messages.length === 0 ? (
           <p className="auth-message auth-message-info" role="status">
             Aucun message enregistr&eacute;.
@@ -97,11 +125,25 @@ export default async function ConversationPage({
           </p>
         ) : null}
         {result.status === "ok" ? (
-          <AssistantForm
-            initialQuestionId={randomUUID()}
-            conversationId={id}
-            conversationMode
-          />
+          <>
+            {deleteMode === "confirm" ? null : (
+              <>
+                <p>
+                  <Link
+                    className="button button-secondary"
+                    href={`/assistant/conversations/${id}?delete=confirm`}
+                  >
+                    Supprimer la conversation
+                  </Link>
+                </p>
+                <AssistantForm
+                  initialQuestionId={randomUUID()}
+                  conversationId={id}
+                  conversationMode
+                />
+              </>
+            )}
+          </>
         ) : null}
       </section>
     </main>

@@ -81,7 +81,7 @@ development_status:
   4-10-consulter-la-liste-de-ses-conversations: done
   4-11-rouvrir-une-conversation: review
   4-12-continuer-une-conversation-précédente: done
-  4-13-supprimer-une-conversation-de-son-historique: ready-for-dev
+  4-13-supprimer-une-conversation-de-son-historique: review
   4-14-relier-les-affirmations-aux-sources: backlog
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
@@ -99,7 +99,9 @@ sprint_8_preparation:
   development_started: true
   blocked_on: "Évaluation Dylan du 2026-11-10 : tous les contrôles manuels proposés
     pour 4.12 réussis ; story acceptée. Tests de conversations : 6/6 réussis après
-    correctif SQL appliqué. 4.11 reste en revue ; prochaine story à développer : 4.13.
+    correctif SQL appliqué. 4.11 reste en revue ; 4.13 implémentée en revue, en attente
+    de la migration 20261110140000_delete_owned_conversation.sql puis des tests de suppression
+    et de l'évaluation manuelle.
     La cible de qualité de l'epic (8/10) reste à atteindre ; échec préexistant du test
     de recherche hybride sur chunk_id/révision manquants non résolu."
 sprint_9_planned:

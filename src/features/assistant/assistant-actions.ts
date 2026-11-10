@@ -4,8 +4,9 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { askAndSaveQuestion } from "./conversations";
+import { askAndSaveQuestion, deleteMyConversation } from "./conversations";
 import { nextAssistantQuestionId } from "./assistant-conversation-core";
+import { processConversationDeletion } from "./conversations-core";
 import type { AssistantFormState } from "./assistant-state";
 
 export async function submitQuestion(
@@ -37,4 +38,12 @@ export async function submitQuestion(
     questionId: nextAssistantQuestionId(questionId, submission, randomUUID),
     submission,
   };
+}
+
+export async function deleteConversationAction(formData: FormData): Promise<void> {
+  const destination = await processConversationDeletion(formData, {
+    deleteConversation: deleteMyConversation,
+    revalidate: revalidatePath,
+  });
+  redirect(destination);
 }

@@ -215,6 +215,61 @@ export async function readConversationHistory(
   }
 }
 
+export type DeleteConversationResult =
+  | "unauthenticated"
+  | "deleted"
+  | "unavailable"
+  | "error";
+
+export type DeleteConversationDeps = {
+  isAuthenticated: () => Promise<boolean>;
+  deleteOwnedConversation: (conversationId: string) => Promise<boolean>;
+};
+
+export async function processConversationDeletion(
+  formData: FormData,
+  deps: {
+    deleteConversation: (id: string) => Promise<Exclude<DeleteConversationResult, "unauthenticated"> | null>;
+    revalidate: (path: string) => void;
+  },
+): Promise<string> {
+  const id = formData.get("conversationId");
+  if (typeof id !== "string" || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return "/assistant/conversations?deleteError=1";
+  }
+  const result = await deps.deleteConversation(id);
+  if (result === null) {
+    return "/login";
+  }
+  if (result === "deleted") {
+    deps.revalidate("/assistant/conversations");
+    deps.revalidate(`/assistant/conversations/${id}`);
+    return "/assistant/conversations?deleted=1";
+  }
+  if (result === "error") {
+    return `/assistant/conversations/${id}?delete=confirm&error=1`;
+  }
+  return "/assistant/conversations?deleteError=1";
+}
+
+export async function deleteConversationWith(
+  conversationId: string,
+  deps: DeleteConversationDeps,
+): Promise<DeleteConversationResult> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+    return "unavailable";
+  }
+
+  try {
+    if (!await deps.isAuthenticated()) {
+      return "unauthenticated";
+    }
+    return await deps.deleteOwnedConversation(conversationId) ? "deleted" : "unavailable";
+  } catch {
+    return "error";
+  }
+}
+
 export function buildConversationHistoryMessages(
   messages: ConversationMessageRow[],
   sources: ConversationSourceRow[],

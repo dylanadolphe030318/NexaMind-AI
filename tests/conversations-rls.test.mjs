@@ -19,9 +19,11 @@ const accounts = {
 
 let skipReason = "";
 let continuationSkipReason = "";
+let deletionSkipReason = "";
 if (!supabaseUrl || !publishableKey || Object.values(accounts).flat().some((value) => !value)) {
   skipReason = "Variables de session de test absentes.";
   continuationSkipReason = skipReason;
+  deletionSkipReason = skipReason;
 } else if (publishableKey.startsWith("sb_secret_")) {
   throw new Error("Les tests refusent toute clé Supabase privilégiée.");
 } else {
@@ -38,6 +40,7 @@ if (!supabaseUrl || !publishableKey || Object.values(accounts).flat().some((valu
     skipReason =
       "Migration requise avant ces tests : supabase/migrations/20261106120000_create_conversations.sql";
     continuationSkipReason = skipReason;
+    deletionSkipReason = skipReason;
   } else if (error) {
     throw new Error(`Impossible de vérifier la migration conversations (${error.code}).`);
   } else {
@@ -50,6 +53,16 @@ if (!supabaseUrl || !publishableKey || Object.values(accounts).flat().some((valu
         "Migration requise avant ces tests : supabase/migrations/20261109130000_continue_conversations.sql";
     } else if (continuationError) {
       throw new Error(`Impossible de vérifier la migration de continuation (${continuationError.code}).`);
+    }
+
+    const { error: deletionError } = await probe.rpc("delete_owned_conversation", {
+      p_conversation_id: randomUUID(),
+    });
+    if (deletionError?.code === "PGRST202") {
+      deletionSkipReason =
+        "Migration requise avant ces tests : supabase/migrations/20261110140000_delete_owned_conversation.sql";
+    } else if (deletionError) {
+      throw new Error(`Impossible de vérifier la migration de suppression (${deletionError.code}).`);
     }
   }
 }
@@ -256,6 +269,7 @@ test(
             p_status: status,
           },
         );
+
         assert.ifError(finishError);
         assert.equal(finished, true);
 
@@ -506,5 +520,271 @@ test(
     assert.ifError(managerRowsError);
     assert.ok(managerRows.some((row) => row.id === managerClaim.conversation_id));
     assert.ok(!managerRows.some((row) => row.id === created.conversation_id));
+  },
+);
+
+test(
+  "suppression : propriétaire seulement, cascade des enfants et préservation des ressources",
+  { skip: deletionSkipReason || continuationSkipReason || false },
+  async (t) => {
+    const anonymous = createClient(supabaseUrl, publishableKey, {
+      auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
+    });
+    const { error: anonymousError } = await anonymous.rpc("delete_owned_conversation", {
+      p_conversation_id: randomUUID(),
+    });
+    assert.ok(anonymousError, "Le rôle anonyme ne doit pas pouvoir exécuter la suppression.");
+    const owner = await login(accounts.memberA);
+    const otherMember = await login(accounts.memberB);
+    const manager = await login(accounts.manager);
+    const resourceQuestionId = randomUUID();
+    const pendingQuestionId = randomUUID();
+    const otherConversationQuestionId = randomUUID();
+    const question = `S8 suppression ${Date.now()}`;
+    const conversationIds = new Set();
+    let resourceId;
+    let categoryCreatedId;
+
+    t.after(async () => {
+      for (const id of conversationIds) {
+        const { error } = await owner.client.rpc("delete_owned_conversation", {
+          p_conversation_id: id,
+        });
+        assert.ifError(error);
+      }
+      if (resourceId) {
+        const { error } = await owner.client.from("resources").delete().eq("id", resourceId);
+        assert.ifError(error);
+      }
+      if (categoryCreatedId) {
+        const { error } = await manager.client.from("categories").delete().eq("id", categoryCreatedId);
+        assert.ifError(error);
+      }
+    });
+
+    const { data: profile, error: profileError } = await owner.client
+      .from("profiles")
+      .select("workspace_id")
+      .eq("id", owner.userId)
+      .single();
+    assert.ifError(profileError);
+
+    const { data: existingCategory, error: categoryError } = await owner.client
+      .from("categories")
+      .select("id")
+      .eq("workspace_id", profile.workspace_id)
+      .limit(1)
+      .maybeSingle();
+    assert.ifError(categoryError);
+    let categoryId = existingCategory?.id;
+    if (!categoryId) {
+      const { data: createdCategory, error: createCategoryError } = await manager.client
+        .from("categories")
+        .insert({ workspace_id: profile.workspace_id, name: `S8 suppression ${Date.now()}` })
+        .select("id")
+        .single();
+      assert.ifError(createCategoryError);
+      categoryId = createdCategory.id;
+      categoryCreatedId = createdCategory.id;
+    }
+
+    const { data: resource, error: resourceError } = await owner.client
+      .from("resources")
+      .insert({
+        workspace_id: profile.workspace_id,
+        category_id: categoryId,
+        owner_id: owner.userId,
+        title: `S8 suppression source ${Date.now()}`,
+        body: "Contenu source de test.",
+      })
+      .select("id, revision")
+      .single();
+    assert.ifError(resourceError);
+    resourceId = resource.id;
+
+    const sourceEmbedding = Array(1536).fill(0);
+    sourceEmbedding[1535] = 1;
+    const { data: published, error: publishError } = await owner.client.rpc("publish_resource_chunks", {
+      p_resource_id: resource.id,
+      p_revision: resource.revision,
+      p_chunks: [{
+        content: "Contenu du passage à préserver.",
+        embedding: sourceEmbedding,
+      }],
+    });
+    assert.ifError(publishError);
+    assert.equal(published, true);
+    const { data: chunks, error: chunksError } = await owner.client
+      .from("resource_chunks")
+      .select("id")
+      .eq("resource_id", resource.id)
+      .single();
+    assert.ifError(chunksError);
+
+    const initial = await claim(owner.client, resourceQuestionId, question);
+    assert.equal(initial.claimed, true);
+    conversationIds.add(initial.conversation_id);
+    const { data: finalized, error: finalizeError } = await owner.client.rpc(
+      "finalize_conversation_answer",
+      {
+        p_question_id: resourceQuestionId,
+        p_generation_token: initial.generation_token,
+        p_answer: "Réponse avec une source.",
+        p_sources: [{
+          resourceId: resource.id,
+          chunkId: chunks.id,
+          revision: resource.revision,
+        }],
+      },
+    );
+    assert.ifError(finalizeError);
+    assert.equal(finalized, true);
+
+    const pending = await claimInConversation(
+      owner.client,
+      initial.conversation_id,
+      pendingQuestionId,
+      "Question encore en génération",
+    );
+    assert.equal(pending.claimed, true);
+
+    const otherConversation = await claim(
+      owner.client,
+      otherConversationQuestionId,
+      "Conversation indépendante",
+    );
+    assert.equal(otherConversation.claimed, true);
+    conversationIds.add(otherConversation.conversation_id);
+    const { data: otherFinished, error: otherFinishError } = await owner.client.rpc(
+      "finish_conversation_question",
+      {
+        p_question_id: otherConversationQuestionId,
+        p_generation_token: otherConversation.generation_token,
+        p_status: "no-context",
+      },
+    );
+    assert.ifError(otherFinishError);
+    assert.equal(otherFinished, true);
+
+    for (const client of [otherMember.client, manager.client]) {
+      const { data: denied, error } = await client.rpc("delete_owned_conversation", {
+        p_conversation_id: initial.conversation_id,
+      });
+      assert.ifError(error);
+      assert.equal(denied, false);
+    }
+
+    const { error: directDeleteError } = await owner.client
+      .from("conversations")
+      .delete()
+      .eq("id", initial.conversation_id);
+    assert.ok(directDeleteError, "La suppression directe ne doit pas être autorisée.");
+
+    const { data: stillPresent, error: stillPresentError } = await owner.client
+      .from("conversations")
+      .select("id")
+      .eq("id", initial.conversation_id)
+      .single();
+    assert.ifError(stillPresentError);
+    assert.equal(stillPresent.id, initial.conversation_id);
+
+    const { data: answers, error: answersError } = await owner.client
+      .from("messages")
+      .select("id")
+      .eq("question_id", resourceQuestionId)
+      .single();
+    assert.ifError(answersError);
+    const { data: sources, error: sourcesError } = await owner.client
+      .from("message_sources")
+      .select("id")
+      .eq("answer_message_id", answers.id)
+      .single();
+    assert.ifError(sourcesError);
+
+    const { data: deleted, error: deleteError } = await owner.client.rpc(
+      "delete_owned_conversation",
+      { p_conversation_id: initial.conversation_id },
+    );
+    assert.ifError(deleteError);
+    assert.equal(deleted, true);
+    conversationIds.delete(initial.conversation_id);
+
+    const { data: lateAnswer, error: lateAnswerError } = await owner.client.rpc(
+      "finalize_conversation_answer",
+      {
+        p_question_id: pendingQuestionId,
+        p_generation_token: pending.generation_token,
+        p_answer: "Réponse tardive.",
+        p_sources: [],
+      },
+    );
+    assert.ifError(lateAnswerError);
+    assert.equal(lateAnswer, false);
+    const { data: lateFinish, error: lateFinishError } = await owner.client.rpc(
+      "finish_conversation_question",
+      {
+        p_question_id: pendingQuestionId,
+        p_generation_token: pending.generation_token,
+        p_status: "failed",
+      },
+    );
+    assert.ifError(lateFinishError);
+    assert.equal(lateFinish, false);
+
+    const { data: deletedConversation, error: deletedConversationError } = await owner.client
+      .from("conversations")
+      .select("id")
+      .eq("id", initial.conversation_id);
+    assert.ifError(deletedConversationError);
+    assert.deepEqual(deletedConversation, []);
+    const { data: deletedMessages, error: deletedMessagesError } = await owner.client
+      .from("messages")
+      .select("id")
+      .eq("conversation_id", initial.conversation_id);
+    assert.ifError(deletedMessagesError);
+    assert.deepEqual(deletedMessages, []);
+    const { data: deletedSources, error: deletedSourcesError } = await owner.client
+      .from("message_sources")
+      .select("id")
+      .eq("id", sources.id);
+    assert.ifError(deletedSourcesError);
+    assert.deepEqual(deletedSources, []);
+
+    const { data: preservedResource, error: preservedResourceError } = await owner.client
+      .from("resources")
+      .select("id")
+      .eq("id", resource.id)
+      .single();
+    assert.ifError(preservedResourceError);
+    assert.equal(preservedResource.id, resource.id);
+    const { data: preservedChunk, error: preservedChunkError } = await owner.client
+      .from("resource_chunks")
+      .select("id")
+      .eq("id", chunks.id)
+      .single();
+    assert.ifError(preservedChunkError);
+    assert.equal(preservedChunk.id, chunks.id);
+
+    const { data: preservedConversation, error: preservedConversationError } = await owner.client
+      .from("conversations")
+      .select("id")
+      .eq("id", otherConversation.conversation_id)
+      .single();
+    assert.ifError(preservedConversationError);
+    assert.equal(preservedConversation.id, otherConversation.conversation_id);
+    const { data: preservedMessage, error: preservedMessageError } = await owner.client
+      .from("messages")
+      .select("id")
+      .eq("id", otherConversationQuestionId)
+      .single();
+    assert.ifError(preservedMessageError);
+    assert.equal(preservedMessage.id, otherConversationQuestionId);
+
+    const { data: missingDeletion, error: missingDeletionError } = await owner.client.rpc(
+      "delete_owned_conversation",
+      { p_conversation_id: initial.conversation_id },
+    );
+    assert.ifError(missingDeletionError);
+    assert.equal(missingDeletion, false);
   },
 );

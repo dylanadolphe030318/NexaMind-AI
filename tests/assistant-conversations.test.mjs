@@ -12,6 +12,8 @@ import {
   buildConversationHistoryMessages,
   buildConversationSummaries,
   buildRecentConversationExchanges,
+  deleteConversationWith,
+  processConversationDeletion,
   readConversationHistory,
 } from "../src/features/assistant/conversations-core.ts";
 
@@ -401,4 +403,112 @@ test("la relecture distingue une conversation indisponible d'une erreur de charg
     readChunks: async () => ({ status: "ok", data: [] }),
   });
   assert.deepEqual(failure, { status: "error" });
+});
+
+test("la suppression appelle le RPC propriétaire seulement après authentification", async () => {
+  const calls = [];
+  const result = await deleteConversationWith("f43560ae-f2fc-4d7b-bf0f-d1f69f33d968", {
+    isAuthenticated: async () => true,
+    deleteOwnedConversation: async (id) => {
+      calls.push(id);
+      return true;
+    },
+  });
+
+  assert.equal(result, "deleted");
+  assert.deepEqual(calls, ["f43560ae-f2fc-4d7b-bf0f-d1f69f33d968"]);
+
+  const unauthenticated = await deleteConversationWith("f43560ae-f2fc-4d7b-bf0f-d1f69f33d968", {
+    isAuthenticated: async () => false,
+    deleteOwnedConversation: async () => assert.fail("Un utilisateur déconnecté ne doit pas supprimer."),
+  });
+  assert.equal(unauthenticated, "unauthenticated");
+});
+
+test("une cible refusée ou une erreur de suppression ne devient jamais un succès", async () => {
+  const unavailable = await deleteConversationWith("f43560ae-f2fc-4d7b-bf0f-d1f69f33d968", {
+    isAuthenticated: async () => true,
+    deleteOwnedConversation: async () => false,
+  });
+  assert.equal(unavailable, "unavailable");
+
+  const failed = await deleteConversationWith("f43560ae-f2fc-4d7b-bf0f-d1f69f33d968", {
+    isAuthenticated: async () => true,
+    deleteOwnedConversation: async () => { throw new Error("database error"); },
+  });
+  assert.equal(failed, "error");
+
+  let called = false;
+  assert.equal(await deleteConversationWith("not-a-uuid", {
+    isAuthenticated: async () => true,
+    deleteOwnedConversation: async () => { called = true; return true; },
+  }), "unavailable");
+  assert.equal(called, false);
+});
+
+test("la confirmation est un formulaire explicite et Annuler n'appelle aucune mutation", () => {
+  const action = readFileSync("src/features/assistant/assistant-actions.ts", "utf8");
+  const service = readFileSync("src/features/assistant/conversations.ts", "utf8");
+  const list = readFileSync("src/app/assistant/conversations/page.tsx", "utf8");
+  const detail = readFileSync("src/app/assistant/conversations/[id]/page.tsx", "utf8");
+
+  assert.ok(list.includes("?delete=confirm"));
+  assert.ok(detail.includes("Supprimer la conversation"));
+  assert.ok(detail.includes("<form action={deleteConversationAction}"));
+  assert.ok(detail.includes('<button className="button auth-submit" type="submit">'));
+  assert.ok(detail.includes('href={`/assistant/conversations/${id}`}'));
+  assert.ok(detail.includes("Annuler"));
+  assert.ok(action.includes("processConversationDeletion(formData"));
+  assert.ok(detail.includes("La conversation n&apos;a pas pu &ecirc;tre supprim&eacute;e"));
+  assert.ok(service.includes("supabase.auth.getUser()"));
+  assert.ok(service.includes('supabase.rpc("delete_owned_conversation"'));
+});
+
+test("le formulaire transmet son identifiant au service et traite chaque résultat sans faux succès", async () => {
+  const id = "f43560ae-f2fc-4d7b-bf0f-d1f69f33d968";
+  for (const [result, destination] of [
+    ["deleted", "/assistant/conversations?deleted=1"],
+    ["unavailable", "/assistant/conversations?deleteError=1"],
+    ["error", `/assistant/conversations/${id}?delete=confirm&error=1`],
+    [null, "/login"],
+  ]) {
+    const form = new FormData();
+    form.set("conversationId", id);
+    const calls = [];
+    const invalidations = [];
+    assert.equal(await processConversationDeletion(form, {
+      deleteConversation: async (target) => { calls.push(target); return result; },
+      revalidate: (path) => invalidations.push(path),
+    }), destination);
+    assert.deepEqual(calls, [id]);
+    assert.deepEqual(invalidations, result === "deleted"
+      ? ["/assistant/conversations", `/assistant/conversations/${id}`] : []);
+  }
+  for (const value of [null, "invalid", new Blob(["invalid"])]) {
+    const form = new FormData();
+    if (value !== null) form.set("conversationId", value);
+    assert.equal(await processConversationDeletion(form, {
+      deleteConversation: async () => assert.fail("Aucune mutation sur une saisie invalide"),
+      revalidate: () => assert.fail("Aucune invalidation sur une saisie invalide"),
+    }), "/assistant/conversations?deleteError=1");
+  }
+});
+
+test("la migration autorise une suppression propriétaire atomique sans toucher aux ressources", () => {
+  const migration = readFileSync(
+    "supabase/migrations/20261110140000_delete_owned_conversation.sql",
+    "utf8",
+  );
+  const schema = readFileSync("supabase/migrations/20261106120000_create_conversations.sql", "utf8");
+
+  assert.ok(migration.includes("security definer"));
+  assert.ok(migration.includes("set search_path = ''"));
+  assert.ok(migration.includes("auth.uid()"));
+  assert.ok(migration.includes("conversation.owner_id = v_user"));
+  assert.ok(migration.includes("revoke all on function public.delete_owned_conversation(uuid) from public, anon"));
+  assert.ok(migration.includes("grant execute on function public.delete_owned_conversation(uuid) to authenticated"));
+  assert.doesNotMatch(migration, /service_role|public\.resources|resource_chunks|message_sources/i);
+  assert.ok(schema.includes("for update of message, conversation"));
+  assert.ok(schema.includes("if not found then"));
+  assert.ok(schema.includes("return false;"));
 });
