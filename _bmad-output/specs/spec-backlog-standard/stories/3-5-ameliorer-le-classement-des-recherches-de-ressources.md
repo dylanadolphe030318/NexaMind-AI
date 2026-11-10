@@ -122,9 +122,10 @@ supplémentaire possible et l'envoi de jusqu'à vingt passages au fournisseur.
   assistant, contrat de session membre et information utilisateur par tests locaux.
   Les tests RPC réels ajoutés ne sont pas exécutés avant la migration.
 - [x] Documenter les étapes SQL et les contrôles Q1–Q8 inchangés.
-- [ ] Après application manuelle par Dylan : vérifier le RPC réel (limite,
-  références, session membre, anonyme refusé, réessai), puis rejouer Q1–Q8.
-  Un test de structure SQL seul ne remplace pas ce contrôle réel.
+- [x] Après application manuelle par Dylan : vérifier le RPC réel (limite,
+  références, session membre, anonyme refusé, réessai). Contrôle sans création
+  de ressources le 2026-11-10, voir le résultat ci-dessous.
+- [ ] Terminer les essais Q1–Q8 : arrêt à Q3 sur une erreur de sélection de phrase.
 - [ ] Évaluation navigateur de Dylan avant toute clôture ; Q9/Q10 non vérifiées.
 
 Les quatre premières tâches peuvent être livrées avant application SQL, sans
@@ -163,6 +164,39 @@ Ne jamais marquer la fiche ou le suivi `done` : évaluation humaine requise.
   ils créent temporairement des ressources et nécessitent une autorisation.
 - Statuts `in-review` / `review` : code à évaluer, pas story terminée.
   Déploiement SQL manuel et contrôle réel Q1–Q8 restent à faire.
+
+## Vérification réelle après application SQL — 2026-11-10, vers 21 h 03
+
+Dylan confirme l'application de la nouvelle migration. Contrôle exécuté avec
+la clé publique et la session réelle du membre A, sans clé privilégiée,
+sans modification des ressources ni des droits. Les questions sont lues
+exactement dans `tests-ia.md`. Les appels d'embeddings, de sélection de passages
+et de phrase utilisent les cœurs et clients fournisseur de l'application,
+avec modèle configuré et quota normal. Aucun contrôle navigateur effectué.
+
+- Nouveau RPC : une demande de cent candidats en retourne vingt ; références
+  `chunk_id`/ressource/révision comparées aux passages lisibles avec la même
+  session, toutes concordantes. Réessai réussi. Cela vérifie le RPC après
+  application, pas la réexécution de la migration SQL elle-même.
+- Ancien RPC hybride : cinq passages retournés pour une demande de cent.
+- Appel anonyme du nouveau RPC : refus `42501`, aucune donnée retournée.
+  Ce refus ne prouve pas l'isolement inter-workspaces ni Q9/Q10.
+
+| Cas | Observation après sélection serveur | Résultat partiel |
+|---|---|---|
+| Q1 | Architecture 1 au rang 1, avec Next.js et les services Supabase dans le passage. Deux passages retenus parmi vingt ; phrase sélectionnée sans erreur. | Critère de classement/contenu conforme sur cet essai. |
+| Q2 | Passage du PRD indiquant titre, texte et catégorie obligatoire au rang 1. Quatre passages retenus parmi vingt ; phrase sélectionnée sans erreur. | Critère de classement/contenu conforme sur cet essai. |
+| Q3 | Glossaire définissant le RAG au rang 1, remonté depuis le candidat 5. Deux passages retenus parmi vingt. La sélection de phrase renvoie `error`. | Classement/contenu améliorés ; parcours complet non validé, erreur à diagnostiquer. |
+| Q4–Q8 | Non exécutées après l'erreur Q3. | Non vérifiées sur le nouveau parcours. |
+| Q9/Q10 | Pas de jeu interdit créé, conformément au choix de Dylan. | Non vérifiées. |
+
+Arrêt des essais après Q3, sans réessai automatique, repli sur les candidats
+ou modification du parseur. Le résultat `error` ne permet pas de distinguer
+à lui seul un refus/échec fournisseur d'une réponse rejetée par le contrôle
+de copie exacte ; ne pas inventer la cause. Diagnostic de la sélection de
+phrase requis avant reprise Q4–Q8. Aucun score global ni validation finale.
+Le détail privé et le script sont conservés dans les fichiers de session,
+pas dans le dépôt. La story reste en revue, non terminée.
 
 ## Review Triage Log
 

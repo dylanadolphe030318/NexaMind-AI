@@ -64,7 +64,8 @@ development_status:
   # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
   # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
   # Reprise autorisée Q1–Q8 : présélection 20 puis sélection LLM serveur, 5 affichés maximum.
-  # Q9/Q10 non vérifiées ; migration manuelle et évaluation humaine requises avant validation.
+  # Migration appliquée et RPC vérifié ; essais arrêtés sur erreur de phrase Q3.
+  # Q4–Q8 pas encore rejouées ; Q9/Q10 non vérifiées ; évaluation humaine requise.
   3-5-améliorer-le-classement-des-recherches-de-ressources: review
   epic-3-retrospective: done
 
