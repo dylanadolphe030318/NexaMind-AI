@@ -65,6 +65,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
    Un numéro invalide, du texte généré ou une erreur fournisseur restent des erreurs
    explicites, sans repli. Aucun appel n'est effectué sans candidate admissible.
    Ce contrat est réservé à la recherche de ressources ; l'assistant reste inchangé.
+   Les deux sélections de ressources (passages puis phrase) disposent chacune d'un
+   budget de 2 048 tokens, raisonnement interne compris ; l'assistant conserve
+   500 tokens. Ce plafond plus large peut augmenter le coût et le délai, sans
+   garantir la disponibilité du fournisseur. Le délai maximal reste de 30 secondes
+   par appel, sans réessai automatique. Les erreurs de réponse journalisent
+   uniquement une catégorie (`length`, `refusal`, `incomplete`), jamais la question,
+   les passages, le contenu du refus ou la clé. Aucun SQL ni réindexage supplémentaire
+   n'est nécessaire pour ce changement.
 4. Dans Authentication -> Providers, vérifiez que le fournisseur Email est activé.
 5. Pour créer le responsable initial, inscrivez d’abord son compte comme membre puis, dans SQL Editor, remplacez l’adresse ci-dessous et exécutez cette promotion manuelle :
 

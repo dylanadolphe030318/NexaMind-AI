@@ -1,6 +1,6 @@
 import "server-only";
 
-import { generateChatReply } from "@/lib/ai/chat";
+import { generateResourceSelectionReply } from "@/lib/ai/chat";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
 import { createClient } from "@/lib/supabase/server";
 import { runResourcePassageSearch } from "./resource-passage-selection-core";
@@ -80,7 +80,7 @@ export function searchPassages(question: string): Promise<SemanticSearchOutcome 
 export function searchResourcePassages(question: string): Promise<SemanticSearchOutcome | null> {
   return runResourcePassageSearch(question, {
     searchCandidates: (query) => search(query, true, true),
-    generate: generateChatReply,
+    generate: generateResourceSelectionReply,
     logError: () =>
       console.error("[recherche sémantique] Impossible de sélectionner les passages pertinents."),
   });

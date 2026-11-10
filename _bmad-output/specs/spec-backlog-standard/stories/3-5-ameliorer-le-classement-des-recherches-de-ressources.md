@@ -307,6 +307,33 @@ Le parcours reste bloqué sur la génération de phrase Q1. Les corrections
 Q5/Q6/Q8 ne constituent ni un score Q1–Q8 complet ni une clôture de la story.
 Q9/Q10 restent non vérifiées ; assistant conversationnel inchangé.
 
+## Budget de génération des sélections — reprise du 2026-11-10
+
+- Diagnostic : douze essais isolés ont réussi avec le budget initial de 500.
+  Jusqu'à 468 tokens ont été consommés, dont 445 pour le raisonnement interne :
+  le JSON court ne représente donc pas tout le budget. Aucun nouvel essai
+  n'a reproduit `finish_reason=length` ; la cause exacte de l'ancien échec
+  générique n'est pas prouvée.
+- Les sélections de passages et de phrase disposent désormais de 2 048 tokens
+  chacune, avec validation serveur du budget. L'assistant reste à 500 ; modèle,
+  embeddings, RLS et délai de 30 secondes sont inchangés. Aucun réessai caché,
+  aucune phrase inventée ni liste vide présentée comme succès après une erreur.
+- Le client distingue limite, refus et réponse incomplète. Le wrapper serveur
+  des ressources journalise seulement une catégorie technique, sans contenu
+  utilisateur, clé ni texte du refus.
+- Vérifications : 47 tests ciblés, TypeScript, ESLint ciblé et build réussis.
+  Deux séries réelles Q1–Q8 ont abouti sans erreur fournisseur. Les passages
+  probants Q1–Q6 figurent parmi les trois premiers ; Q7/Q8 restent vides.
+  Première série : aucune phrase pour Q1, phrases Q2–Q6 sélectionnées.
+  Deuxième série : phrases Q1–Q6 sélectionnées ; celle de Q1 décrit seulement
+  le backend Supabase, pas toute la stack. Le choix reste variable et nécessite
+  l'évaluation humaine : ne pas assimiler absence d'erreur à qualité parfaite.
+- Sur la seconde série, les quatorze appels capturés se terminent par `stop`,
+  sans refus, avec 18 à 401 tokens de completion dont 0 à 377 de raisonnement.
+  Ces mesures ne garantissent pas l'absence future de panne ou de refus OpenAI.
+- Aucune migration, réindexation ou modification des droits nécessaire.
+  Story maintenue en review ; Q9/Q10 toujours non vérifiées et sprint 9 non démarré.
+
 ## Choix de phrase par numéro — autorisé le 2026-11-10, après 21 h 51
 
 Dylan approuve le remplacement de la recopie par un choix de phrase numérotée,

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { generateChatReply } from "@/lib/ai/chat";
+import { generateResourceSelectionReply } from "@/lib/ai/chat";
 import type { SemanticPassage } from "./semantic-search-core";
 import {
   runRelevantPhraseSelection,
@@ -12,7 +12,7 @@ export async function selectRelevantSearchPhrase(
   passages: SemanticPassage[],
 ): Promise<RelevantPhraseResult> {
   return runRelevantPhraseSelection(question, passages, {
-    generate: generateChatReply,
+    generate: generateResourceSelectionReply,
     logError: () => console.error("[recherche sémantique] Impossible de sélectionner une phrase pertinente."),
   });
 }
