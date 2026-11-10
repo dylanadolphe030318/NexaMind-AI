@@ -38,6 +38,26 @@ Les dix questions ci-dessus restent inchangées pour vérifier que les réponses
 | S9-I — catégories (sprint 9) | Sur Ressources, choisir une catégorie puis « Toutes les catégories ». Sur Catégories avec le responsable, sélectionner et renommer une catégorie de test ; vérifier aussi au clavier et sur mobile. | Deux menus déroulants clairement nommés, filtre inchangé, création et renommage conservés. Aucun bouton de gestion supplémentaire pour un simple membre ; erreur et liste vide compréhensibles. |
 | S9-J — cartes (sprint 9) | Examiner la liste Ressources, les deux types de résultats de recherche, une réponse et ses sources sur Assistant puis dans une conversation ; tester mobile et zoom 200 %. | Cartes mauve pâle sur fond blanc ; liens/textes lisibles, focus visible. Les messages d'erreur/succès gardent leurs couleurs. Les contrastes sont mesurés par le développeur, pas seulement appréciés à l'œil. |
 
+### Grille S8-D — précision validée pour le sprint 9
+
+Après la question 5, demander « Quel était le numéro de la story concernée ? ».
+Noter séparément :
+
+| Vérification | Résultat à noter |
+|---|---|
+| Numéro correct : story 3.1 | Réussi / à corriger / abstention |
+| Source actuelle accessible qui confirme ce numéro | Réussi / à corriger / aucune source |
+| Lien ouvrant la bonne ressource justificative | Réussi / à corriger / aucun lien |
+
+Comparer dans une nouvelle conversation avec la question autonome :
+« Lors du test de la story 3.1, que s'est-il passé quand la recherche était vide ? ».
+Conserver les réponses et leurs sources pour distinguer une difficulté de contexte,
+de recherche ou de présentation. Le lien ouvre la ressource, pas une page de story
+ni un passage précis. Si les nouveaux passages ne permettent pas de répondre,
+« Je ne sais pas » reste le comportement sûr, mais ne compte pas comme une réponse
+documentée correcte. Cette grille précise les tests du sprint 9 ; elle ne prétend
+pas que l'amélioration de présentation est déjà développée.
+
 Complément S8-G, correction R1 de 4.10 : après une erreur sur une question fictive,
 « Réessayer » sans modifier le texte doit reprendre la même question sans doublon.
 Modifier ensuite le texte doit permettre une nouvelle question, sans erreur de conflit

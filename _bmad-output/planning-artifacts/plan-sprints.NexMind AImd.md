@@ -40,6 +40,16 @@ Les cinq fiches actives sont enregistrées dans [le dossier du sprint 8](../spec
 
 Les scénarios S8-A à S8-H vérifient le sprint 8 ; S9-I et S9-J concernent les améliorations visuelles reportées au sprint 9, dans le [fichier de questions de test](../../tests-ia.md). Les dix questions de non-régression restent conservées.
 
+## Précisions du sprint 9 validées le 2026-11-10
+
+Après la [rétrospective finale du sprint 8](../implementation-artifacts/sprint-8-retro-2026-11-10.md), Dylan valide ces trois améliorations. Le sprint 9 conserve ses cinq stories dans l'ordre 4.14, 4.15, 4.16, S8-2, S8-3 ; aucune story supplémentaire ni aucun développement ne sont lancés.
+
+1. **4.14 — preuve de la question de suivi.** Pour S8-D, rendre explicite « La story concernée est 3.1 » et proposer un lien vers la ressource accessible qui le confirme, uniquement si les nouveaux passages le prouvent. Sinon conserver l'abstention. Réutiliser le lien de ressource existant ; pas d'URL de story inventée ni d'ancre de passage supplémentaire.
+2. **Livraison — contrôle des migrations.** Si une fonction SQL est modifiée, fournir les contrôles première utilisation, réessai et refus d'un tiers. Après application par Dylan, les tests dépendants doivent passer sans être ignorés avant l'évaluation manuelle. L'installation réussie seule ne suffit pas.
+3. **4.16 — grille de vérification S8-D.** Noter séparément numéro correct, source qui confirme et lien ouvrable ; comparer avec une question autonome précisant « story 3.1 ». Distinguer réponse documentée correcte et abstention prudente.
+
+Responsables : développeur pour la preuve ouvrable et les tests automatisés ; Dylan pour l'application SQL et la vérification manuelle. Ces précisions seront reprises dans les fiches du sprint 9 lors de leur préparation.
+
 ## Points encore ouverts
 
 - Choisir l’hébergement de Next.js.
