@@ -59,6 +59,10 @@ Dylan autorise cette story après validation manuelle de 4.12. Développer uniqu
 
 ## Livraison — en attente de migration et d'évaluation
 
+### Validation après application — 2026-11-10
+
+Dylan confirme l'application de la migration. Les tests d'intégration de conversations sont relancés : **7/7 réussis, aucun ignoré ni échec**. Suppression par propriétaire, refus membre tiers/responsable et rôle anonyme, cascade messages/références, préservation ressources/passages/autre conversation, finalisation tardive refusée vérifiés. Les 100 tests unitaires avaient réussi avant le commit de livraison. Seule l'évaluation manuelle S8-H/S8-F reste attendue pour cette story ; conserver le statut en revue.
+
 - Suppression depuis la liste ou le détail : confirmation nommée, annulation par lien sans mutation, action serveur authentifiée, invalidation de la liste et du détail, retour avec succès uniquement après réponse positive de la base. Erreurs techniques et cibles indisponibles signalées explicitement.
 - [Migration à appliquer](../../../../supabase/migrations/20261110140000_delete_owned_conversation.sql) : fonction propriétaire seulement, aucune clé privilégiée, suppression atomique avec les cascades existantes. Aucun changement de fournisseur IA, d'embeddings ou de recherche.
 - Vérifications locales : 99/99 tests unitaires avant corrections de revue, puis 25/25 tests ciblés après corrections ; TypeScript, ESLint et build de production réussis après corrections.

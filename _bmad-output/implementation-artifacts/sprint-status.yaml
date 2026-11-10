@@ -99,9 +99,9 @@ sprint_8_preparation:
   development_started: true
   blocked_on: "Évaluation Dylan du 2026-11-10 : tous les contrôles manuels proposés
     pour 4.12 réussis ; story acceptée. Tests de conversations : 6/6 réussis après
-    correctif SQL appliqué. 4.11 reste en revue ; 4.13 implémentée en revue, en attente
-    de la migration 20261110140000_delete_owned_conversation.sql puis des tests de suppression
-    et de l'évaluation manuelle.
+    correctif SQL appliqué. 4.11 reste en revue ; migration de suppression appliquée
+    et tests de conversations 7/7 réussis le 2026-11-10. 4.13 reste en revue,
+    en attente de l'évaluation manuelle S8-H/S8-F.
     La cible de qualité de l'epic (8/10) reste à atteindre ; échec préexistant du test
     de recherche hybride sur chunk_id/révision manquants non résolu."
 sprint_9_planned:
