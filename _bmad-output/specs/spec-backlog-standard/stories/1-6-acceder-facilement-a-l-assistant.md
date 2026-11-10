@@ -2,7 +2,8 @@
 story: 1-6-accéder-facilement-à-l-assistant
 title: Accéder facilement à l'assistant
 epic: 1
-status: ready-for-dev
+status: in-review
+baseline_commit: f716b1d8d7ac8e16303466c537b43c82233e69f2
 context:
   - ../SPEC.md
 ---
@@ -47,3 +48,29 @@ Voir [contrôles STD-1 à STD-3](../verification-navigateur.md). Les tests de na
 ## Périmètre et statut
 
 Fiche préparée le 2026-11-10, hors sprint. Aucune migration attendue. Aucune modification du modèle LLM, des embeddings ou des conversations. Préparation uniquement ; accord de développement distinct et évaluation de Dylan nécessaires avant `done`.
+
+## Consignes d'exécution validées
+
+Développement autorisé le 2026-11-10 pour cette story puis 3.5, séquentiellement.
+Ne pas commiter ni pousser depuis l'implémentation déléguée : le commit de story est
+réalisé après vérification par le workflow appelant. Ne pas modifier les documents
+de rétrospective, le plan IA, les questions de test ou les fichiers personnels.
+Ne jamais marquer la fiche ou le suivi `done` : les laisser en évaluation.
+Expliquer en une phrase française l'utilité de chaque commande exécutée ; ne pas
+installer de paquet sans nécessité démontrée. Ajouter une preuve automatisée ciblée
+du lien et des protections avec les outils existants, sans nouvelle dépendance.
+Relire la grille de contrôle manuel ; ne pas déclarer un contrôle navigateur
+réalisé s'il n'a pas été exécuté.
+
+## Implementation Notes
+
+- Lien `Assistant` ajouté au tableau de bord avec le même composant `Link` et
+  les mêmes classes que les autres accès ; route et protections inchangées.
+- Test `tests/dashboard-assistant-navigation.test.mjs` inscrit dans `test:unit`.
+  Les trois contrôles ciblés passent ; contrôle TypeScript sans erreur. L'implémentation
+  a également passé les tests unitaires, ESLint ciblé et la compilation Next.js.
+- Relecture directe : aucun changement de rôle, d'autorisation ou d'appel IA.
+  Les assertions de texte source vérifient le câblage, pas le rendu navigateur.
+- À évaluer par Dylan : STD-1 à STD-3, en membre et responsable, au clavier et
+  sur écran étroit. Aucune action Supabase ni installation nécessaire.
+- Développement réalisé, fiche `in-review` et suivi `review`, jamais `done`.
