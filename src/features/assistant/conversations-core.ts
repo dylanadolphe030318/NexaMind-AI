@@ -1,5 +1,9 @@
 import type { ConversationQuestionStatus } from "./assistant-conversation-core.ts";
-import type { AssistantHistoryExchange } from "./assistant-core.ts";
+import {
+  ASSISTANT_CONTEXT_MAX_EXCHANGES,
+  type AssistantHistoryExchange,
+  type AssistantOutcome,
+} from "./assistant-core.ts";
 import { buildPassageExcerpt } from "../resources/semantic-search-core.ts";
 
 type ConversationRow = {
@@ -94,6 +98,14 @@ export type ConversationHistoryMessage = {
   hasUnavailableSources: boolean;
 };
 
+export function hasOmittedConversationExchanges(
+  messages: Pick<ConversationMessageRow, "role" | "status">[],
+): boolean {
+  return messages.filter(
+    (message) => message.role === "user" && message.status !== "generating",
+  ).length > ASSISTANT_CONTEXT_MAX_EXCHANGES;
+}
+
 export type ConversationContextMessage = {
   id: string;
   role: "user" | "assistant";
@@ -108,6 +120,65 @@ export type RecentConversationExchanges = {
   omittedCount: number;
 };
 
+export type RecentConversationContextReader = {
+  findConversation: (conversationId: string) => Promise<boolean>;
+  readQuestions: (
+    conversationId: string,
+    currentQuestionId: string,
+    limit: number,
+  ) => Promise<ConversationContextMessage[]>;
+  readAnswers: (
+    conversationId: string,
+    questionIds: string[],
+  ) => Promise<ConversationContextMessage[]>;
+};
+
+export async function loadRecentConversationContext(
+  conversationId: string,
+  currentQuestionId: string,
+  reader: RecentConversationContextReader,
+): Promise<RecentConversationExchanges | null> {
+  if (!await reader.findConversation(conversationId)) {
+    return null;
+  }
+  const questions = await reader.readQuestions(
+    conversationId,
+    currentQuestionId,
+    ASSISTANT_CONTEXT_MAX_EXCHANGES + 1,
+  );
+  const questionIds = questions.map((message) => message.id);
+  const answers = questionIds.length
+    ? await reader.readAnswers(conversationId, questionIds)
+    : [];
+  return buildRecentConversationExchanges(questions, answers, currentQuestionId);
+}
+
+export type ConversationFollowupDeps = {
+  readRecentContext: (
+    conversationId: string,
+    questionId: string,
+  ) => Promise<RecentConversationExchanges | null>;
+  generate: (
+    question: string,
+    history: AssistantHistoryExchange[],
+  ) => Promise<AssistantOutcome | null>;
+};
+
+export async function generateConversationFollowup(
+  question: string,
+  conversationId: string | undefined,
+  questionId: string,
+  deps: ConversationFollowupDeps,
+): Promise<AssistantOutcome | null> {
+  const context = conversationId
+    ? await deps.readRecentContext(conversationId, questionId)
+    : { exchanges: [], omittedCount: 0 };
+  if (!context) {
+    return null;
+  }
+  return deps.generate(question, context.exchanges);
+}
+
 export function buildRecentConversationExchanges(
   questions: ConversationContextMessage[],
   answers: ConversationContextMessage[],
@@ -119,11 +190,17 @@ export function buildRecentConversationExchanges(
       const timeDifference = Date.parse(left.created_at) - Date.parse(right.created_at);
       return timeDifference || left.id.localeCompare(right.id);
     });
-  const selectedQuestions = historicalQuestions.slice(-10);
+  const selectedQuestions = historicalQuestions.slice(-ASSISTANT_CONTEXT_MAX_EXCHANGES);
   const answerByQuestionId = new Map(
     answers
-      .filter((message) => message.role === "assistant" && message.status === "complete" && message.question_id)
-      .map((message) => [message.question_id as string, message.content]),
+      .filter(
+        (message): message is ConversationContextMessage & { question_id: string } =>
+          message.role === "assistant" &&
+          message.status === "complete" &&
+          typeof message.question_id === "string" &&
+          message.question_id.length > 0,
+      )
+      .map((message) => [message.question_id, message.content]),
   );
 
   return {

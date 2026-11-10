@@ -12,6 +12,9 @@ import {
   buildConversationHistoryMessages,
   buildConversationSummaries,
   buildRecentConversationExchanges,
+  generateConversationFollowup,
+  hasOmittedConversationExchanges,
+  loadRecentConversationContext,
   readConversationHistory,
 } from "../src/features/assistant/conversations-core.ts";
 
@@ -41,6 +44,7 @@ test("le contexte de suivi conserve les dix derniers échanges sans anciens extr
     id: `answer-${index}`,
     role: "assistant",
     content: `Réponse ${index}`,
+    sourceExcerpt: "ANCIEN EXTRAIT SOURCE NON AUTORISÉ",
     status: "complete",
     question_id: question.id,
     created_at: `2026-01-${String(index + 1).padStart(2, "0")}T10:00:01Z`,
@@ -51,7 +55,107 @@ test("le contexte de suivi conserve les dix derniers échanges sans anciens extr
   assert.equal(context.exchanges.length, 10);
   assert.equal(context.exchanges[0].question, "Question 2");
   assert.equal(context.exchanges.at(-1).answer, "Réponse 11");
-  assert.equal(JSON.stringify(context).includes("source"), false);
+  assert.doesNotMatch(JSON.stringify(context), /ANCIEN EXTRAIT SOURCE NON AUTORISÉ/);
+});
+
+test("la continuation transmet au générateur le contexte chargé de la conversation", async () => {
+  const selectedConversationId = "conversation-selected";
+  const currentQuestionId = "question-current";
+  const messages = [
+    {
+      id: "question-selected",
+      conversation_id: selectedConversationId,
+      role: "user",
+      content: "Quelle technologie ?",
+      status: "complete",
+      created_at: "2026-01-01T10:00:00Z",
+    },
+    {
+      id: "answer-selected",
+      conversation_id: selectedConversationId,
+      role: "assistant",
+      content: "Atlas.",
+      status: "complete",
+      created_at: "2026-01-01T10:00:01Z",
+      question_id: "question-selected",
+    },
+    {
+      id: "question-other",
+      conversation_id: "conversation-other",
+      role: "user",
+      content: "Private other conversation",
+      status: "complete",
+      created_at: "2026-01-02T10:00:00Z",
+    },
+    {
+      id: "question-current",
+      conversation_id: selectedConversationId,
+      role: "user",
+      content: "Comment fonctionne cette technologie ?",
+      status: "generating",
+      created_at: "2026-01-03T10:00:00Z",
+    },
+  ];
+  const calls = [];
+  const outcome = await generateConversationFollowup(
+    "Comment fonctionne cette technologie ?",
+    selectedConversationId,
+    currentQuestionId,
+    {
+      readRecentContext: async (conversationId, questionId) =>
+        loadRecentConversationContext(conversationId, questionId, {
+          findConversation: async (id) => id === selectedConversationId,
+          readQuestions: async (id, currentId, limit) => {
+            assert.equal(id, selectedConversationId);
+            assert.equal(currentId, currentQuestionId);
+            assert.equal(limit, 11);
+            return messages.filter(
+              (message) =>
+                message.conversation_id === id &&
+                message.role === "user" &&
+                message.id !== currentId &&
+                message.status !== "generating",
+            );
+          },
+          readAnswers: async (id, questionIds) => {
+            assert.equal(id, selectedConversationId);
+            assert.deepEqual(questionIds, ["question-selected"]);
+            return messages.filter(
+              (message) => message.conversation_id === id && message.role === "assistant",
+            );
+          },
+        }),
+      generate: async (...args) => {
+        calls.push(args);
+        return { status: "unknown" };
+      },
+    },
+  );
+
+  assert.deepEqual(calls, [[
+    "Comment fonctionne cette technologie ?",
+    [{ question: "Quelle technologie ?", answer: "Atlas." }],
+  ]]);
+  assert.deepEqual(outcome, { status: "unknown" });
+});
+
+test("la continuation arrêtée avant génération ne transmet pas de contexte", async () => {
+  let generated = false;
+  const outcome = await generateConversationFollowup(
+    "Question de suivi ?",
+    "conversation-supprimée",
+    "question-id",
+    {
+      readRecentContext: async () => null,
+      generate: async () => {
+        generated = true;
+        return { status: "unknown" };
+      },
+    },
+  );
+
+  assert.equal(outcome, null);
+  assert.equal(generated, false);
 });
 
 test("le contexte exclut la question actuelle et les demandes encore en cours", () => {
@@ -62,6 +166,24 @@ test("le contexte exclut la question actuelle et les demandes encore en cours", 
   ], [], "current");
 
   assert.deepEqual(context, { exchanges: [{ question: "Ancienne question" }], omittedCount: 0 });
+});
+
+test("l'avis d'exclusion ne compte pas les questions encore en cours", () => {
+  const completedQuestions = Array.from({ length: 10 }, () => ({ role: "user", status: "complete" }));
+  assert.equal(
+    hasOmittedConversationExchanges([
+      ...completedQuestions,
+      { role: "user", status: "generating" },
+    ]),
+    false,
+  );
+  assert.equal(
+    hasOmittedConversationExchanges([
+      ...completedQuestions,
+      { role: "user", status: "failed" },
+    ]),
+    true,
+  );
 });
 
 test("modifier la question change son identifiant, mais une vraie relance le conserve", () => {
@@ -295,6 +417,7 @@ test("la page de conversation propose un ajout et annonce la fenêtre de context
   assert.match(page, /Seuls les 10 derniers/);
   assert.match(page, /conversationMode/);
   assert.match(form, /Poser une nouvelle question/);
+  assert.match(form, /jusqu'aux 10 derniers échanges de cette conversation/i);
   assert.match(form, /name="conversationId"/);
   assert.match(action, /askAndSaveQuestion\(question, questionId, conversationId \|\| undefined\)/);
 });

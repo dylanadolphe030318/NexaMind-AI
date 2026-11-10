@@ -55,3 +55,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/4-3-suivre-l-état-de-préparation-d-une-ressource.md`
   summary: Vérifier par test que les états lus en base atteignent les badges et contrôles des pages liste et détail.
   evidence: Les tests actuels couvrent les fonctions de libellé et d'autorisation, mais pas le rendu des deux pages ni le mappage des données.
+- source_spec: `_bmad-output/specs/spec-sprint-8-ia/stories/4-12-continuer-une-conversation-precedente.md`
+  summary: Automatiser dans le test d'intégration Node la vérification du statut `expired` retourné par le RPC de continuation.
+  evidence: `tests/conversations-expiration.sql` vérifie le refus d'une conversation expirée, mais `tests/conversations-rls.test.mjs` ne peut pas créer une fixture expirée avec le client RLS ; l'automatisation exige un dispositif de fixture SQL privilégié.

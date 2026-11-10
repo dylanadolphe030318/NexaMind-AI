@@ -10,9 +10,9 @@ import {
 } from "./assistant-conversation-core";
 import {
   buildConversationSummaries,
-  buildRecentConversationExchanges,
+  generateConversationFollowup,
+  loadRecentConversationContext,
   readConversationHistory,
-  type ConversationContextMessage,
   type ConversationHistoryResult,
 } from "./conversations-core";
 import { createClient } from "@/lib/supabase/server";
@@ -78,13 +78,11 @@ export async function askAndSaveQuestion(
     },
     generate: async (text) => {
       const { generateAssistantAnswer } = await import("./assistant");
-      const history = conversationId
-        ? await readRecentConversationContext(supabase, conversationId, questionId)
-        : { exchanges: [], omittedCount: 0 };
-      if (!history) {
-        return null;
-      }
-      return generateAssistantAnswer(text, history.exchanges);
+      return generateConversationFollowup(text, conversationId, questionId, {
+        readRecentContext: (id, currentQuestionId) =>
+          readRecentConversationContext(supabase, id, currentQuestionId),
+        generate: generateAssistantAnswer,
+      });
     },
     finalize: async (id, generationToken, answer, sources) => {
       const { data, error } = await supabase.rpc("finalize_conversation_answer", {
@@ -122,48 +120,47 @@ async function readRecentConversationContext(
   conversationId: string,
   questionId: string,
 ) {
-  const { data: conversation, error: conversationError } = await supabase
-    .from("conversations")
-    .select("id")
-    .eq("id", conversationId)
-    .maybeSingle();
-  if (conversationError) {
-    throw conversationError;
-  }
-  if (!conversation) {
-    return null;
-  }
-
-  const { data: questions, error: questionsError } = await supabase
-    .from("messages")
-    .select("id, role, content, status, created_at")
-    .eq("conversation_id", conversationId)
-    .eq("role", "user")
-    .neq("id", questionId)
-    .neq("status", "generating")
-    .order("created_at", { ascending: false })
-    .order("id", { ascending: false })
-    .limit(11);
-  if (questionsError) {
-    throw questionsError;
-  }
-
-  const questionIds = questions.map((message) => message.id);
-  let answers: ConversationContextMessage[] = [];
-  if (questionIds.length) {
-    const { data, error } = await supabase
-      .from("messages")
-      .select("id, role, content, status, created_at, question_id")
-      .eq("conversation_id", conversationId)
-      .eq("role", "assistant")
-      .in("question_id", questionIds);
-    if (error) {
-      throw error;
-    }
-    answers = data;
-  }
-
-  return buildRecentConversationExchanges(questions, answers, questionId);
+  return loadRecentConversationContext(conversationId, questionId, {
+    findConversation: async (id) => {
+      const { data, error } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) {
+        throw error;
+      }
+      return Boolean(data);
+    },
+    readQuestions: async (id, currentQuestionId, limit) => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id, role, content, status, created_at")
+        .eq("conversation_id", id)
+        .eq("role", "user")
+        .neq("id", currentQuestionId)
+        .neq("status", "generating")
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .limit(limit);
+      if (error) {
+        throw error;
+      }
+      return data;
+    },
+    readAnswers: async (id, questionIds) => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id, role, content, status, created_at, question_id")
+        .eq("conversation_id", id)
+        .eq("role", "assistant")
+        .in("question_id", questionIds);
+      if (error) {
+        throw error;
+      }
+      return data;
+    },
+  });
 }
 
 export async function listMyConversations(): Promise<ConversationListResult | null> {

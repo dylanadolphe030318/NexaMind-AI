@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { AssistantForm } from "@/features/assistant/assistant-form";
 import { conversationQuestionStatusLabel } from "@/features/assistant/assistant-conversation-core";
+import { hasOmittedConversationExchanges } from "@/features/assistant/conversations-core";
 import { getMyConversation } from "@/features/assistant/conversations";
 
 export const metadata: Metadata = {
@@ -91,7 +92,7 @@ export default async function ConversationPage({
             ))}
           </ol>
         )}
-        {result.status === "ok" && result.messages.filter((message) => message.role === "user").length > 10 ? (
+        {result.status === "ok" && hasOmittedConversationExchanges(result.messages) ? (
           <p className="auth-message auth-message-info" role="status">
             Seuls les 10 derniers &eacute;changes sont utilis&eacute;s pour cette r&eacute;ponse.
           </p>
