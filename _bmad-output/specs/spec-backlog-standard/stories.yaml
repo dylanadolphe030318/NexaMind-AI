@@ -1,0 +1,16 @@
+- id: "1-6"
+  title: Accéder facilement à l'assistant
+  description: >-
+    Réaliser CAP-1 selon stories/1-6-acceder-facilement-a-l-assistant.md.
+    Ajouter uniquement un accès de navigation vers la page existante.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Préparation seulement, sans sprint affecté. Ne pas développer maintenant ; évaluation humaine requise avant done."
+- id: "3-5"
+  title: Améliorer le classement des recherches de ressources
+  description: >-
+    Réaliser CAP-2 selon stories/3-5-ameliorer-le-classement-des-recherches-de-ressources.md.
+    Évaluer uniquement la liste hybride sur dix cas selon leur type, avec au moins huit conformes et aucune fuite.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: "Préparation seulement, sans sprint affecté. Ne pas développer maintenant ; relecture humaine puis évaluation avant done. Conserver les dix questions ; droits réellement vérifiés obligatoires."

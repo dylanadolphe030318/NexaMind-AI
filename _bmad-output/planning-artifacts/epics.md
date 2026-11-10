@@ -393,7 +393,9 @@ afin de trouver plus facilement l’information utile.
 
 **Critères d’acceptation :**
 
-**Étant donné** le jeu de 10 questions de référence, **quand** la recherche de ressources est évaluée, **alors** la ressource attendue apparaît dans les trois premiers résultats pour au moins 8 questions sur 10.
+**Étant donné** le jeu de 10 questions de référence inchangées, **quand** la liste « Passages trouvés par le sens » est évaluée, **alors** au moins 8 cas sur 10 sont conformes à leur type : Q1 à Q6 retrouvent la source attendue dans les trois premiers passages affichés, Q7/Q8 n'affichent aucun passage pertinent, Q9/Q10 ne révèlent aucune information des ressources réellement interdites. La mesure porte sur des cas conformes, pas sur huit ressources retrouvées ; les résultats littéraux et la phrase sélectionnée ne comptent pas dans le top 3.
+
+**Étant donné** une fuite d'accès ou l'absence de preuve réelle pour Q9/Q10, **quand** la story est évaluée, **alors** elle n'est pas validée, même avec 8 cas conformes. Ce protocole a été précisé par Dylan le 2026-11-10 ; il ne modifie pas les critères de l'epic IA.
 
 **Étant donné** les questions 1, 3 et 5, **quand** les tests de régression sont exécutés, **alors** leurs ressources attendues sont clairement identifiées et vérifiées.
 
