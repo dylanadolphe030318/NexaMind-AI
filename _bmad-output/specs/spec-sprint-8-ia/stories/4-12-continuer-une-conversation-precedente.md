@@ -3,13 +3,17 @@ story: 4-12-continuer-une-conversation-précédente
 title: Continuer une conversation précédente
 epic: 4
 sprint: 8
-status: in-review
+status: done
 baseline_commit: 4fb21fa43b51a4a4b13222e126b9265e4845ff21
 context:
   - ../SPEC.md
 ---
 
 # Story 4.12 — continuer une conversation
+
+## Acceptation manuelle — 2026-11-10
+
+Dylan confirme « réussie pour tous les tests » après le protocole proposé : reprise et conservation sans doublon, deux questions de suivi contextualisées avec sources, abstention sur une question hors sujet, confidentialité entre comptes et limite des dix derniers échanges. La migration corrective est appliquée et les six tests d'intégration de conversations passent. Story 4.12 acceptée ; cette validation ne clôture pas la story 4.13 ni l'epic IA.
 
 ## Ce que cela permet
 
