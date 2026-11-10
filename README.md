@@ -108,35 +108,40 @@ Cette procédure est destinée à ton propre téléphone de test, pas à la prod
 Elle ajoute une autorité de confiance : ne l'installer que si tu contrôles le PC
 et le téléphone ; la retirer après les tests.
 
-1. Installer **mkcert** depuis ses [versions officielles](https://github.com/FiloSottile/mkcert/releases).
-   Pour Windows, choisir le binaire adapté au processeur (habituellement
-   `windows-amd64`), le renommer `mkcert.exe` et le placer hors du dépôt, par
-   exemple dans `C:\Tools\mkcert`. Aucune installation automatique n'est effectuée
-   par ce projet. Voir la [documentation mkcert](https://github.com/FiloSottile/mkcert).
-2. Dans le terminal PowerShell du projet, exécuter :
+1. Installer **mkcert** via Windows Package Manager :
 
    ```powershell
-   & C:\Tools\mkcert\mkcert.exe -install
-   New-Item -ItemType Directory -Force certificates
-   & C:\Tools\mkcert\mkcert.exe -cert-file certificates\local.pem -key-file certificates\local-key.pem localhost 127.0.0.1 192.168.1.180
+   winget install --id FiloSottile.mkcert --exact --source winget --scope user
    ```
 
-   La première commande ajoute l'autorité locale au magasin de confiance du PC
-   (Windows peut demander confirmation) ; la deuxième crée le dossier ; la
-   troisième génère le certificat et sa clé pour les trois adresses indiquées.
-   Les fichiers `.pem` sont déjà exclus de Git. Ne jamais copier ou partager
+   Cette commande installe l'outil officiel dont winget vérifie le téléchargement.
+   Voir la [documentation mkcert](https://github.com/FiloSottile/mkcert).
+2. Dans PowerShell, créer les certificats **hors du dépôt et de OneDrive** :
+
+   ```powershell
+   $tls = Join-Path $env:LOCALAPPDATA 'NexaMind\local-https'
+   $env:CAROOT = Join-Path $tls 'ca'
+   $env:TRUST_STORES = 'system'
+   $mkcert = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links\mkcert.exe'
+   New-Item -ItemType Directory -Force -Path $tls,$env:CAROOT
+   & $mkcert -install
+   & $mkcert -cert-file "$tls\local.pem" -key-file "$tls\local-key.pem" localhost 127.0.0.1 192.168.1.180
+   ```
+
+   Ces commandes choisissent un dossier local non synchronisé, ajoutent l'autorité
+   au magasin de confiance Windows (confirmation possible), puis génèrent le
+   certificat et sa clé pour les adresses indiquées. Arrêter si une commande échoue.
+   Ne jamais copier ou partager
    `local-key.pem` ni `rootCA-key.pem`.
-3. Trouver le certificat public de l'autorité :
+3. Créer une copie du certificat **public** pour Android, dans le même terminal :
 
    ```powershell
-   & C:\Tools\mkcert\mkcert.exe -CAROOT
+   Copy-Item -LiteralPath "$env:CAROOT\rootCA.pem" -Destination "$tls\nexamind-local-ca.crt"
    ```
 
-   Cette commande affiche son dossier, pas une clé. Depuis ce dossier, transférer
-   **uniquement `rootCA.pem`** sur le téléphone, de préférence par câble USB.
-   Ne pas placer le dossier d'autorité ni une clé dans `public`.
-   Si Android exige une extension `.crt`, renommer uniquement la copie publique
-   en `nexamind-local-ca.crt`.
+   Transférer **uniquement `nexamind-local-ca.crt`** sur le téléphone par câble USB.
+   Ce fichier public est dans `%LOCALAPPDATA%\NexaMind\local-https`.
+   Ne pas copier le dossier entier, le dossier d'autorité ni une clé dans `public`.
 4. Sur Android : **Paramètres → Sécurité** (ou **Sécurité et confidentialité**)
    **→ Autres paramètres de sécurité → Chiffrement et identifiants
    → Installer un certificat → Certificat d'autorité de certification**.
@@ -147,11 +152,14 @@ et le téléphone ; la retirer après les tests.
 5. Après avoir arrêté l'ancien serveur avec Ctrl+C, lancer :
 
    ```powershell
-   npm run dev -- --hostname 0.0.0.0 --experimental-https --experimental-https-key certificates\local-key.pem --experimental-https-cert certificates\local.pem
+   $tls = Join-Path $env:LOCALAPPDATA 'NexaMind\local-https'
+   $env:NODE_EXTRA_CA_CERTS = "$tls\ca\rootCA.pem"
+   npm run dev -- --hostname 0.0.0.0 --port 3000 --experimental-https --experimental-https-key "$tls\local-key.pem" --experimental-https-cert "$tls\local.pem"
    ```
 
    Cette commande démarre Next.js en HTTPS pour le réseau local avec le certificat
-   fourni ; elle ne publie pas l'application sur Internet. Si Windows demande
+   fourni ; Node utilise l'autorité locale pour ses propres vérifications TLS.
+   Elle ne publie pas l'application sur Internet. Si Windows demande
    l'accès réseau, autoriser uniquement le réseau privé. Ne pas ouvrir de port
    sur la box ; ne pas désactiver le pare-feu. Vérifier le port annoncé dans le
    terminal ; les liens ci-dessous supposent le port 3000.
@@ -169,8 +177,9 @@ et le téléphone ; la retirer après les tests.
    les erreurs du terminal sans inclure les identifiants.
 8. À la fin des tests, arrêter le serveur et retirer cette autorité dans les
    certificats utilisateur Android. Supprimer la copie publique transférée.
-   Garder toutes les clés privées sur le PC ; `mkcert -uninstall` avec le même
-   outil permet de retirer aussi la confiance locale du PC si elle n'est plus utile.
+   Garder toutes les clés privées sur le PC. Pour retirer aussi la confiance
+   Windows, définir `CAROOT` sur `%LOCALAPPDATA%\NexaMind\local-https\ca` puis
+   exécuter `mkcert -uninstall` avec le même outil.
 
 ### Suppression d'une conversation (story 4.13)
 

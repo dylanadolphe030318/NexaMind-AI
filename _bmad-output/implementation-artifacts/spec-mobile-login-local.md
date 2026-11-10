@@ -50,3 +50,14 @@ Laisser les modifications documentaires préexistantes intactes.
   des certificats et parcours HTTPS sur téléphone. Aucun diagnostic définitif
   d'effacement des champs ni validation de story n'est annoncé. Pas de modification
   des stories standard ou IA. Aucun paquet installé.
+- Suite autorisée par Dylan : mkcert installé via winget, téléchargement vérifié ;
+  autorité dédiée créée et reconnue dans le magasin Windows. Certificat pour
+  localhost, 127.0.0.1 et l'adresse Wi-Fi généré sous
+  `%LOCALAPPDATA%\NexaMind\local-https`, hors dépôt et OneDrive. Seul le certificat
+  public est proposé au transfert Android ; aucune clé n'est affichée ou transférée.
+- HTTPS vérifié sur `/login` avec Node et l'autorité explicite : HTTP 200,
+  `TLS authorized: true`. Le serveur HTTP précédent identifié a été arrêté.
+  Les tentatives de serveur détaché s'arrêtent dans cet environnement ; un serveur
+  temporaire attaché a permis la vérification puis a été arrêté. Dylan doit lancer
+  le serveur dans son terminal pour le garder disponible et installer lui-même
+  le certificat public dans Android. Le guide est adapté aux chemins réels.
