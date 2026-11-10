@@ -3,13 +3,17 @@ story: 4-11-rouvrir-une-conversation
 title: Rouvrir une conversation
 epic: 4
 sprint: 8
-status: in-review
+status: done
 baseline_commit: 70011ad3436f3b0e3e16f56df0bccf459d581799
 context:
   - ../SPEC.md
 ---
 
 # Story 4.11 — rouvrir une conversation
+
+## Acceptation finale — 2026-11-10
+
+Dylan confirme que tous les résultats du sprint IA sont satisfaisants et demande la clôture des stories. Story 4.11 acceptée après évaluation ; les notes de revue ci-dessous décrivent l'historique de livraison.
 
 ## Ce que cela permet
 

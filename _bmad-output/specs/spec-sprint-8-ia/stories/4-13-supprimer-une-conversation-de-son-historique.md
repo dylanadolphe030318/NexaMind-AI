@@ -3,13 +3,17 @@ story: 4-13-supprimer-une-conversation-de-son-historique
 title: Supprimer une conversation de son historique
 epic: 4
 sprint: 8
-status: in-review
+status: done
 baseline_commit: f77a7440595186ba5a90d271ff6009af83475524
 context:
   - ../SPEC.md
 ---
 
 # Story 4.13 — supprimer une conversation
+
+## Acceptation finale — 2026-11-10
+
+Dylan confirme les tests manuels de suppression réussis et tous les résultats du sprint satisfaisants. Story 4.13 acceptée après migration appliquée et 7/7 tests d'intégration de conversations réussis. Les mentions d'attente ci-dessous décrivent l'historique de livraison, désormais levées. Aucun score qualité global supplémentaire n'est déduit de cette acceptation.
 
 ## Ce que cela permet
 

@@ -79,9 +79,9 @@ development_status:
   # Fiches du sprint 8 : _bmad-output/specs/spec-sprint-8-ia/stories/
   # Relire chaque fiche avant développement ; évaluer chaque story avant done.
   4-10-consulter-la-liste-de-ses-conversations: done
-  4-11-rouvrir-une-conversation: review
+  4-11-rouvrir-une-conversation: done
   4-12-continuer-une-conversation-précédente: done
-  4-13-supprimer-une-conversation-de-son-historique: review
+  4-13-supprimer-une-conversation-de-son-historique: done
   4-14-relier-les-affirmations-aux-sources: backlog
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
@@ -97,13 +97,13 @@ sprint_8_preparation:
   complements:
     s8-1: done
   development_started: true
-  blocked_on: "Évaluation Dylan du 2026-11-10 : tous les contrôles manuels proposés
-    pour 4.12 réussis ; story acceptée. Tests de conversations : 6/6 réussis après
-    correctif SQL appliqué. 4.11 reste en revue ; migration de suppression appliquée
-    et tests de conversations 7/7 réussis le 2026-11-10. 4.13 reste en revue,
-    en attente de l'évaluation manuelle S8-H/S8-F.
-    La cible de qualité de l'epic (8/10) reste à atteindre ; échec préexistant du test
-    de recherche hybride sur chunk_id/révision manquants non résolu."
+  evaluation: "2026-11-10 : Dylan confirme tous les résultats du sprint satisfaisants.
+    S8-1 et 4.10 à 4.13 acceptées et terminées. Tests de conversations : 7/7 réussis,
+    aucun ignoré ; 100/100 tests unitaires réussis lors de la livraison de 4.13."
+  blocked_on: null
+  remaining_epic_warning: "Le score qualité chiffré de 8/10 n'a pas été remesuré ;
+    la validation du sprint ne clôture pas l'epic. Échec préexistant du test de recherche
+    hybride sur chunk_id/révision manquants non résolu."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
