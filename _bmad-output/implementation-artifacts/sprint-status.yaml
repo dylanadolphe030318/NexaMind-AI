@@ -62,9 +62,10 @@ development_status:
   3-3-relancer-une-recherche-enregistrée: done
   3-4-supprimer-une-recherche-de-son-historique: done
   # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
-  # Fiche prête dans spec-backlog-standard : liste hybride, 8 cas conformes sur 10 selon leur type.
-  # Toute fuite bloque ; hors sprint, préparation seulement, aucun développement.
-  3-5-améliorer-le-classement-des-recherches-de-ressources: ready-for-dev
+  # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
+  # Bloquée avant modification : aucun jeu autorisé réellement inaccessible pour Q9/Q10.
+  # Diagnostic seulement ; classement non modifié, note qualité non mesurée.
+  3-5-améliorer-le-classement-des-recherches-de-ressources: in-progress
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.

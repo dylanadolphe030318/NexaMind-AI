@@ -2,7 +2,8 @@
 story: 3-5-améliorer-le-classement-des-recherches-de-ressources
 title: Améliorer le classement des recherches de ressources
 epic: 3
-status: ready-for-dev
+status: in-progress
+baseline_commit: e01b64ec7636350008f84fbd630fdf7f9d6ee912
 context:
   - ../SPEC.md
 ---
@@ -57,3 +58,41 @@ Conserver « Rechercher une ressource », « Passages trouvés par le sens », �
 ## Vérification et statut
 
 Voir [STD-4 à STD-6 et grille des dix cas](../verification-navigateur.md). Fiche actualisée hors sprint le 2026-11-10, prête pour développement après clarification humaine du protocole et de la liste évaluée. Relecture de fiche et évaluation finale de Dylan requises ; aucun développement n'est lancé, aucune question de test modifiée.
+
+## Consignes d'exécution validées
+
+Développement autorisé le 2026-11-10 après le commit de la story 1.6.
+Diagnostiquer d'abord la chaîne hybride existante et les données de référence :
+ne pas inventer un défaut ni modifier le classement déjà livré pour produire
+artificiellement un changement. Les tests synthétiques ne prouvent pas le seuil
+sur les dix questions réelles. En cas de prérequis absent ou d'erreur persistante,
+arrêter et expliquer le blocage, sans contournement ou fonctionnalité supplémentaire.
+Ne pas appliquer de migration distante, créer d'espace, installer de paquet sans
+nécessité démontrée, modifier les ressources réelles ou exposer de secrets.
+Les requêtes de diagnostic utilisent uniquement les sessions de test autorisées,
+jamais de clé privilégiée ; ne pas inscrire les textes privés dans les logs.
+Expliquer en une phrase française l'utilité de chaque commande exécutée.
+Ne pas commiter ni pousser depuis l'implémentation déléguée ; le workflow appelant
+vérifie et réalise le commit. Ne pas modifier le plan IA, les questions de test,
+les documents de rétrospective, les fichiers personnels ou la story 1.6.
+Ne jamais marquer la fiche ou le suivi `done` : évaluation humaine requise.
+
+## Implementation Notes
+
+- Diagnostic du 2026-11-10 avec les sessions de test configurées : les deux
+  membres et le responsable partagent le même workspace. Aucun jeu autorisé
+  de ressource réellement inaccessible pour Q9/Q10 n'a été identifié.
+- Blocage avant modification du code : le protocole impose ce prérequis avant
+  l'évaluation des dix cas. Ni classement ni données modifiés, aucune migration,
+  aucun paquet installé. La conformité 8/10 n'a pas été mesurée.
+- Les tests RLS déjà réussis ne sont pas une preuve d'isolation entre espaces
+  distincts. Un autre propriétaire au sein du workspace ne constitue pas un
+  cas interdit ; une source absente ne valide pas non plus ce contrôle.
+- Arrêt demandé par la règle de travail : fiche et suivi restent `in-progress`,
+  avec blocage explicite, jamais `done` ni `review`. Le commit de diagnostic
+  ne représente pas une implémentation de la story.
+- Reprise : disposer d'un environnement de test autorisé et de comptes/ressources
+  couvrant réellement Q9/Q10, ou faire valider par Dylan une autre organisation
+  du protocole avant de continuer. Ne pas créer un second espace dans le MVP,
+  modifier les politiques RLS ou partager des identifiants pour contourner ce
+  prérequis. Les secrets éventuels restent dans la configuration locale.
