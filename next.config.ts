@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Adresse Wi-Fi autorisée pour les tests mobiles locaux, sans ouvrir d'autres origines.
+  allowedDevOrigins: ["192.168.1.180"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {

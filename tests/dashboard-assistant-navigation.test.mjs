@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import nextConfig from "../next.config.ts";
 
 const dashboard = readFileSync("src/app/dashboard/page.tsx", "utf8");
 const assistant = readFileSync("src/app/assistant/page.tsx", "utf8");
 const styles = readFileSync("src/app/globals.css", "utf8");
+
+test("le développement mobile autorise uniquement l'adresse Wi-Fi déclarée", () => {
+  assert.deepEqual(nextConfig.allowedDevOrigins, ["192.168.1.180"]);
+});
 
 test("le tableau de bord propose un lien Assistant vers la route existante", () => {
   assert.match(dashboard, /import Link from "next\/link"/);

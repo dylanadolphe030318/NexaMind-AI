@@ -82,6 +82,96 @@ where extension.extname = 'vector';
 
 Si la requête ne retourne aucune ligne, la migration crée l'extension dans `extensions`. Si elle retourne un autre schéma que `extensions`, arrêtez-vous et faites vérifier la migration avant de l'exécuter.
 
+### Tester la connexion sur Android Chrome et le réseau local
+
+Le téléphone et le PC doivent utiliser le même réseau privé de confiance.
+`localhost` sur le téléphone désigne le téléphone, pas le PC.
+L'adresse Wi-Fi du PC au moment de ce diagnostic est `192.168.1.180`.
+`next.config.ts` autorise précisément cet hôte dans `allowedDevOrigins`, pour
+que Next.js accepte ses connexions de développement (`/_next/hmr`). Aucun joker
+ni contournement des vérifications d'origine des actions serveur n'est nécessaire.
+Si l'adresse Wi-Fi change, remplacer cette entrée par la nouvelle adresse et
+adapter le certificat ci-dessous, puis redémarrer le serveur.
+
+Après une modification de configuration, arrêter le serveur dans son terminal
+avec **Ctrl+C** puis le relancer. Fermer les anciens onglets du téléphone.
+Un blocage HMR a été observé ; l'effacement pendant la saisie n'a pas été
+reproduit dans le navigateur automatisé. Ne pas considérer le test Android comme
+validé avant d'avoir retesté sur le téléphone.
+
+#### HTTPS local avec un certificat reconnu sur Android
+
+Le simple préfixe `https://` ne suffit pas : le serveur doit utiliser un
+certificat couvrant son adresse IP, et le téléphone doit reconnaître son autorité.
+Ne pas ignorer les avertissements de certificat et ne pas désactiver TLS.
+Cette procédure est destinée à ton propre téléphone de test, pas à la production.
+Elle ajoute une autorité de confiance : ne l'installer que si tu contrôles le PC
+et le téléphone ; la retirer après les tests.
+
+1. Installer **mkcert** depuis ses [versions officielles](https://github.com/FiloSottile/mkcert/releases).
+   Pour Windows, choisir le binaire adapté au processeur (habituellement
+   `windows-amd64`), le renommer `mkcert.exe` et le placer hors du dépôt, par
+   exemple dans `C:\Tools\mkcert`. Aucune installation automatique n'est effectuée
+   par ce projet. Voir la [documentation mkcert](https://github.com/FiloSottile/mkcert).
+2. Dans le terminal PowerShell du projet, exécuter :
+
+   ```powershell
+   & C:\Tools\mkcert\mkcert.exe -install
+   New-Item -ItemType Directory -Force certificates
+   & C:\Tools\mkcert\mkcert.exe -cert-file certificates\local.pem -key-file certificates\local-key.pem localhost 127.0.0.1 192.168.1.180
+   ```
+
+   La première commande ajoute l'autorité locale au magasin de confiance du PC
+   (Windows peut demander confirmation) ; la deuxième crée le dossier ; la
+   troisième génère le certificat et sa clé pour les trois adresses indiquées.
+   Les fichiers `.pem` sont déjà exclus de Git. Ne jamais copier ou partager
+   `local-key.pem` ni `rootCA-key.pem`.
+3. Trouver le certificat public de l'autorité :
+
+   ```powershell
+   & C:\Tools\mkcert\mkcert.exe -CAROOT
+   ```
+
+   Cette commande affiche son dossier, pas une clé. Depuis ce dossier, transférer
+   **uniquement `rootCA.pem`** sur le téléphone, de préférence par câble USB.
+   Ne pas placer le dossier d'autorité ni une clé dans `public`.
+   Si Android exige une extension `.crt`, renommer uniquement la copie publique
+   en `nexamind-local-ca.crt`.
+4. Sur Android : **Paramètres → Sécurité** (ou **Sécurité et confidentialité**)
+   **→ Autres paramètres de sécurité → Chiffrement et identifiants
+   → Installer un certificat → Certificat d'autorité de certification**.
+   Les noms varient selon le fabricant. Sélectionner la copie publique et
+   confirmer uniquement si elle provient de ton PC. Ne pas choisir un certificat
+   client « VPN et applications ». Si le téléphone est géré et interdit
+   l'installation, arrêter : ne pas contourner cette restriction.
+5. Après avoir arrêté l'ancien serveur avec Ctrl+C, lancer :
+
+   ```powershell
+   npm run dev -- --hostname 0.0.0.0 --experimental-https --experimental-https-key certificates\local-key.pem --experimental-https-cert certificates\local.pem
+   ```
+
+   Cette commande démarre Next.js en HTTPS pour le réseau local avec le certificat
+   fourni ; elle ne publie pas l'application sur Internet. Si Windows demande
+   l'accès réseau, autoriser uniquement le réseau privé. Ne pas ouvrir de port
+   sur la box ; ne pas désactiver le pare-feu. Vérifier le port annoncé dans le
+   terminal ; les liens ci-dessous supposent le port 3000.
+6. Fermer puis rouvrir Chrome sur le téléphone et ouvrir
+   `https://192.168.1.180:3000/login`. Vérifier l'absence d'avertissement de
+   certificat **avant** d'utiliser le compte de test. L'ancienne adresse HTTP
+   ne convient plus. Aucun réglage Supabase n'est requis pour la connexion
+   e-mail/mot de passe actuelle ; les parcours par lien e-mail ne sont pas
+   couverts par ce test.
+7. Saisir d'abord une adresse fictive et un faux mot de passe **sans envoyer le
+   formulaire**. Changer de champ, ouvrir/fermer le clavier et attendre trente
+   secondes : rien ne doit s'effacer. Tester ensuite la connexion avec le compte
+   de test seulement si HTTPS est reconnu. Si l'effacement persiste, noter s'il
+   survient pendant la saisie ou après « Se connecter », et relever l'heure et
+   les erreurs du terminal sans inclure les identifiants.
+8. À la fin des tests, arrêter le serveur et retirer cette autorité dans les
+   certificats utilisateur Android. Supprimer la copie publique transférée.
+   Garder toutes les clés privées sur le PC ; `mkcert -uninstall` avec le même
+   outil permet de retirer aussi la confiance locale du PC si elle n'est plus utile.
+
 ### Suppression d'une conversation (story 4.13)
 
 Après les migrations de continuation `20261109130000_continue_conversations.sql` et
