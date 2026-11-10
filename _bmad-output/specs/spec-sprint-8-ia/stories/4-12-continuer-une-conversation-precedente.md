@@ -49,6 +49,12 @@ Poser une question liée à l'échange précédent et retrouver tous les nouveau
 
 Scénarios S8-D, S8-E, S8-F, S8-G ; questions 1 à 10 en non-régression dans [tests-ia.md](../../../../tests-ia.md). Dépend de 4.11. Aucun partage ni mémoire globale entre conversations.
 
+## Correctif SQL du 2026-11-10
+
+- Après application de la migration initiale, le test de continuation échoue avec `42702: column reference "generation_token" is ambiguous` : les deux clauses `RETURNING` confondent la colonne et le paramètre de sortie.
+- Appliquer ensuite [20261110123000_fix_conversation_generation_token.sql](../../../../supabase/migrations/20261110123000_fix_conversation_generation_token.sql) dans SQL Editor. Cette migration remplace la fonction en qualifiant les deux colonnes par un alias ; elle conserve les contrôles d'accès, les verrous, les permissions et le comportement de reprise. Aucune suppression de données.
+- Comparaison avec la migration initiale vérifiée : seuls les alias et les deux `RETURNING` changent (hors commentaire). Validation sur Supabase en attente de l'application par Dylan ; relancer ensuite `node --env-file=.env.local --test --test-timeout=240000 tests/conversations-rls.test.mjs`. La story n'est pas terminée.
+
 ## Hors périmètre
 
 Suppression (4.13), partage, mémoire entre conversations, reformulation par un second appel LLM, relance automatique, correction de `search_resource_chunks_hybrid` (recherche de ressources, hors sprint).
