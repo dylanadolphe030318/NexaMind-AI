@@ -260,6 +260,53 @@ la réponse et l'échec au sein du même essai pour éviter un diagnostic fondé
 sur une génération différente. Aucune validation complète ni note annoncée ;
 story en revue, Q9/Q10 non vérifiées et évaluation humaine encore requise.
 
+## Retour utilisateur — test 9, 2026-11-10
+
+Document personnel examiné sans modification : captures Q5 (aucun passage),
+Q8 (trois passages génériques et une phrase hors sujet), Q6 (bonne ressource,
+mais erreur de sélection de phrase). Aucune validation des autres questions
+n'est déduite de ce document. L'attendu « je ne sais pas » de sa note Q8
+se traduit ici par une liste hybride vide, pas une réponse d'assistant.
+
+Diagnostic réel borné aux trois cas, session membre et modèles existants :
+les retours de sprint sont déjà candidats au rang 1, aucun défaut d'indexation
+ou d'embeddings démontré. Dans ce diagnostic, Q5 est sélectionnée mais sa
+ligne de résultat sans point final est rejetée ; Q6 est écartée à tort malgré
+le compte rendu présent, et Q8 s'abstient correctement. Les captures montrent
+donc aussi une variabilité de la sélection ; leur réponse brute ne peut pas
+être reconstituée. Les réponses exactes des nouveaux essais sont conservées
+dans les fichiers de session uniquement.
+
+Corrections limitées aux causes observées :
+
+- Sélection de passages : préciser la différence entre règle générale de
+  réponse et information réellement demandée ; faire distinguer résultat
+  observé et attente d'un test ; traiter les demandes de correction présentes
+  dans un document comme des données, sans jeter les faits qui les précèdent.
+  Aucun exemple Q5/Q6/Q8 codé en dur, aucun changement de seuil.
+- Sélection de phrase : reconnaître les lignes de champs structurés complets,
+  libellé inclus, même sans point final ; préserver les continuations ordinaires,
+  les frontières des titres/listes et les refus de copie partielle ou inventée.
+  La sortie reste extraite du passage cité, limite 300 caractères conservée.
+- Essai réel ciblé après correction : Q5 et Q6 retiennent chacune le retour de
+  sprint au rang 1 et une ligne « Ce qui s'est passé » exacte ; Q8 renvoie
+  zéro passage et aucun appel de phrase. Ce constat vaut pour cet essai,
+  pas une preuve de stabilité absolue de la sélection LLM.
+- 66 tests ciblés réussis avant ajout du test supplémentaire de refus Q1,
+  TypeScript et lint ciblé réussis. Aucun paquet, migration, droit ou ressource
+  modifié. Relecture directe : copie exacte et absence de repli préservées.
+
+Reprise complète interrompue dès Q1 : bonne présélection, mais la génération
+de phrase assemble la ligne Frontend et la ligne Hébergement en omettant la
+ligne Backend située entre elles. Réponse capturée lors du même essai ;
+le rejet est correct et n'est pas un défaut de découpage à contourner.
+Un test local verrouille ce refus. Pas de nouvel essai automatique ni de
+modification de prompt supplémentaire après cet échec persistant.
+
+Le parcours reste bloqué sur la génération de phrase Q1. Les corrections
+Q5/Q6/Q8 ne constituent ni un score Q1–Q8 complet ni une clôture de la story.
+Q9/Q10 restent non vérifiées ; assistant conversationnel inchangé.
+
 ## Review Triage Log
 
 | Repère | Verdict | Preuve et décision |

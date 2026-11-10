@@ -176,6 +176,50 @@ test("un titre ne se colle pas au paragraphe suivant et les paragraphes restent 
   }), passages), { status: "error" });
 });
 
+test("les comptes rendus conservent leurs champs complets sans point final (Q5/Q6)", () => {
+  for (const observed of [
+    "Ce qui s'est passé : Me demander de saisir au moins un mot",
+    "Ce qui s'est passé : les deux recherches ont été regroupés en une seule avec la même date",
+  ]) {
+    const passages = [passage("retour", "Retour de test", [
+      "Un test du sprint ne fonctionne pas comme prévu.",
+      "Story concernée : story 3.2",
+      "Ce que j'ai fait : faire une recherche",
+      "Ce que j'attendais : avoir deux recherches distinctes",
+      observed,
+      "Message d'erreur éventuel :",
+      "« Saisissez au moins un mot pour lancer la recherche. »",
+      "Trouve la cause, explique-la simplement, puis corrige uniquement ce problème avec un commit.",
+    ].join("\n"))];
+    const parse = (answer) => parseRelevantPhraseReply(JSON.stringify({
+      answer, sources: [1], missing: false,
+    }), passages);
+    assert.deepEqual(parse(observed), {
+      status: "selected", phrase: observed, resourceId: "retour", title: "Retour de test",
+    });
+    for (const invalid of [
+      observed.split(" : ")[1],
+      observed.replace("passé", "produit"),
+      `${observed}.`,
+      `${observed} Message d'erreur éventuel :`,
+    ]) {
+      assert.deepEqual(parse(invalid), { status: "error" });
+    }
+  }
+});
+
+test("Q1 refuse l'assemblage de deux lignes non contiguës observé en génération réelle", () => {
+  const passages = [passage("architecture", "Architecture", [
+    "- Frontend : Next.js (App Router, TypeScript) ;",
+    "- Backend et base de données : Supabase (PostgreSQL, authentification, stockage de fichiers, Row Level Security).",
+    "Hébergement prévu : GitHub",
+  ].join("\n"))];
+  assert.deepEqual(parseRelevantPhraseReply(JSON.stringify({
+    answer: "- Frontend : Next.js (App Router, TypeScript) ;\nHébergement prévu : GitHub",
+    sources: [1], missing: false,
+  }), passages), { status: "error" });
+});
+
 test("Q3 accepte le gras omis mais restitue exclusivement la phrase originale", () => {
   const original = "**RAG** — méthode où l’application retrouve des passages utiles, les donne à l’IA comme contexte, puis présente une réponse liée à ces passages.";
   for (const prefix of ["- ", "", "* "]) {

@@ -65,7 +65,8 @@ development_status:
   # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
   # Reprise autorisée Q1–Q8 : présélection 20 puis sélection LLM serveur, 5 affichés maximum.
   # Migration et RPC vérifiés ; gras Q3 et frontières titres/listes Q1 corrigés et testés.
-  # Reprise arrêtée sur erreur de phrase Q1 ; Q2–Q8 non rejouées dans cet essai.
+  # Test 9 : Q5/Q6/Q8 passent l'essai ciblé après correction des champs/consignes.
+  # Reprise complète arrêtée Q1 : phrase assemblée non contiguë capturée, rejet correct.
   # Q9/Q10 non vérifiées ; évaluation humaine requise.
   3-5-améliorer-le-classement-des-recherches-de-ressources: review
   epic-3-retrospective: done
