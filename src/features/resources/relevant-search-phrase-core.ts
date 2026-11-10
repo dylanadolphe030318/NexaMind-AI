@@ -80,7 +80,7 @@ function sentenceCandidates(content: string): string[] {
 
   return sentences
     .map((sentence) => {
-      const clean = sentence.replace(/^(?:[-*•]\s*)+/, "").trim();
+      const clean = sentence.replace(/^(?:[-*•]\s+)+/, "").trim();
       return /^[«“"'‘]/u.test(clean)
         ? clean.replace(/^[«“"'‘]+|[»”"'’]+$/gu, "").trim()
         : clean;
@@ -144,13 +144,17 @@ export function parseRelevantPhraseReply(
     return { status: "error" };
   }
   const passage = passages[sourceNumber - 1];
-  if (!passage || !sentenceCandidates(passage.content).includes(phrase)) {
+  const withoutBold = (text: string) => text.replace(/\*\*([^*]+)\*\*/g, "$1");
+  const originalPhrase = passage && sentenceCandidates(passage.content).find(
+    (candidate) => withoutBold(candidate) === withoutBold(phrase),
+  );
+  if (!passage || !originalPhrase || originalPhrase.length > RELEVANT_PHRASE_MAX_LENGTH) {
     return { status: "error" };
   }
 
   return {
     status: "selected",
-    phrase,
+    phrase: originalPhrase,
     resourceId: passage.resourceId,
     title: passage.title,
   };

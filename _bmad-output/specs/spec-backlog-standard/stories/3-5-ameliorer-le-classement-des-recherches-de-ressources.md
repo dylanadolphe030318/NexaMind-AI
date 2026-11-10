@@ -198,6 +198,37 @@ phrase requis avant reprise Q4–Q8. Aucun score global ni validation finale.
 Le détail privé et le script sont conservés dans les fichiers de session,
 pas dans le dépôt. La story reste en revue, non terminée.
 
+## Correction de la copie de phrase — 2026-11-10, après 21 h 16
+
+Correction autorisée par Dylan après diagnostic isolé Q3 : le fournisseur
+avait renvoyé la bonne définition sans les marqueurs `**` de gras, provoquant
+son rejet. La suppression des puces pouvait aussi consommer les étoiles
+du début d'une phrase en gras.
+
+- Les puces ne sont retirées que si leur marqueur est suivi d'un espace.
+  La comparaison tolère les paires `**…**` mais aucun changement de mots,
+  casse ou ponctuation. La phrase rendue est toujours celle extraite du
+  passage cité, jamais le texte généré ; sa limite de 300 caractères est
+  vérifiée après restitution du texte original.
+- Tests : régression Q3 (avec/sans puce et gras), refus des reformulations,
+  troncatures, autre source et dépassement de longueur original. 24 tests
+  ciblés réussis, TypeScript et lint ciblé réussis. Relecture directe du diff :
+  limites, numéros de source et erreurs existantes conservés.
+- Rejeu local de la réponse réelle Q3 auparavant rejetée, avec ses deux
+  passages sauvegardés : succès, phrase originale avec `**RAG**` conservée,
+  sans nouvel appel fournisseur.
+- Tentative de reprise réelle Q1–Q8 : RPC à nouveau conforme (vingt candidats,
+  références vérifiées, ancien RPC cinq, anonyme refusé). Q1 retient deux
+  passages, mais la sélection de phrase renvoie cette fois `error`.
+  Arrêt immédiat avant Q2–Q8, sans réessai ni assouplissement supplémentaire.
+  La cause de cet échec Q1 n'est pas déterminée par le résultat générique ;
+  ne pas l'attribuer automatiquement au gras. Le détail reste en session.
+
+Le défaut de format Q3 est corrigé et testé, mais le parcours complet n'est
+pas validé : diagnostic isolé de l'erreur Q1 requis. Pas de nouvelle migration,
+aucune mutation de ressource ou de droit. Statut en revue conservé, Q9/Q10
+non vérifiées, aucune note globale annoncée.
+
 ## Review Triage Log
 
 | Repère | Verdict | Preuve et décision |

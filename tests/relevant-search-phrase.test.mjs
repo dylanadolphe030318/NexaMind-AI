@@ -125,6 +125,43 @@ test("les phrases sont comparées en ignorant uniquement les espaces de mise en 
   );
 });
 
+test("Q3 accepte le gras omis mais restitue exclusivement la phrase originale", () => {
+  const original = "**RAG** — méthode où l’application retrouve des passages utiles, les donne à l’IA comme contexte, puis présente une réponse liée à ces passages.";
+  for (const prefix of ["- ", "", "* "]) {
+    const passages = [passage("prd", "Glossaire", `Une autre définition.\n${prefix}${original}\n- **Source** — permet de vérifier une réponse.`)];
+    for (const answer of [original, original.replaceAll("**", "")]) {
+      assert.deepEqual(
+        parseRelevantPhraseReply(JSON.stringify({ answer, sources: [1], missing: false }), passages),
+        { status: "selected", phrase: original, resourceId: "prd", title: "Glossaire" },
+      );
+    }
+    for (const answer of [
+      original.replaceAll("**", "").replace("retrouve", "invente"),
+      "RAG — méthode où l’application retrouve des passages utiles.",
+      original.replaceAll("**", "").replace("RAG", "Rag"),
+    ]) {
+      assert.deepEqual(
+        parseRelevantPhraseReply(JSON.stringify({ answer, sources: [1], missing: false }), passages),
+        { status: "error" },
+      );
+    }
+  }
+});
+
+test("le texte original avec gras doit aussi respecter la limite et la source citée", () => {
+  const original = `**${"a".repeat(297)}**.`;
+  const passages = [
+    passage("long", "Long", original),
+    passage("short", "Autre", "Une autre phrase."),
+  ];
+  assert.deepEqual(parseRelevantPhraseReply(JSON.stringify({
+    answer: original.replaceAll("**", ""), sources: [1], missing: false,
+  }), passages), { status: "error" });
+  assert.deepEqual(parseRelevantPhraseReply(JSON.stringify({
+    answer: "Une autre phrase.", sources: [1], missing: false,
+  }), passages), { status: "error" });
+});
+
 test("une phrase exacte reste reconnue quand elle est citée dans le passage", () => {
   const passages = [
     passage("resource-1", "Guide", "« La réponse est précise ! » Puis vient une autre phrase."),
