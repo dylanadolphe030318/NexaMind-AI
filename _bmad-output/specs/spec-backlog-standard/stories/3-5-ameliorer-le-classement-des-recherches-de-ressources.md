@@ -307,6 +307,50 @@ Le parcours reste bloqué sur la génération de phrase Q1. Les corrections
 Q5/Q6/Q8 ne constituent ni un score Q1–Q8 complet ni une clôture de la story.
 Q9/Q10 restent non vérifiées ; assistant conversationnel inchangé.
 
+## Choix de phrase par numéro — autorisé le 2026-11-10, après 21 h 51
+
+Dylan approuve le remplacement de la recopie par un choix de phrase numérotée,
+sans changer la sélection des passages, l'assistant ou Supabase. Cette décision
+remplace le contrat de réponse textuelle de la sélection de phrase seulement.
+
+- Le serveur construit les candidates à partir des cinq premiers passages
+  retenus, avec le découpage existant (titres/listes/champs/paragraphes).
+  Les candidates dépassant 300 caractères sont exclues, jamais tronquées.
+  La numérotation globale suit la liste filtrée, avec correspondance serveur
+  phrase/ressource/titre. Gras et contenu source sont conservés.
+- Le LLM ne renvoie plus du texte à comparer : schéma fournisseur inchangé,
+  `answer` strictement vide, un seul entier dans `sources` désignant la
+  candidate, `missing=false`. Une absence cohérente exige `sources=[]`,
+  `missing=true`. Champs supplémentaires, anciens textes recopiés, numéros
+  inconnus, multiples, dupliqués ou mal typés sont refusés explicitement.
+- Le serveur rend uniquement la candidate associée ; aucune concaténation,
+  reformulation ou restauration approximative du texte reçu du LLM.
+  La construction des messages et le contrôle utilisent la même liste
+  dans l'orchestrateur. Sans candidate, aucun appel fournisseur.
+- Les tests de copie ont été adaptés au nouveau contrat, avec conservation
+  des régressions de découpage Q1/Q3/Q5/Q6, citations, limites, sources,
+  erreurs et absence d'appel ; refus du texte assemblé capturé sur Q1.
+  44 tests ciblés réussis (sélection, droits structurels, assistant),
+  TypeScript, lint ciblé et build de production réussis.
+- Relecture directe : le changement ne touche ni le client fournisseur
+  partagé, ni le modèle configuré, ni les RPC, ni les quotas. Une absence
+  et une erreur restent distinctes, sans retour des candidats en repli.
+
+Tentative réelle Q1–Q8 avec capture des réponses : RPC conforme, vingt candidats
+et deux passages retenus pour Q1 ; la génération de phrase échoue avant parsing
+avec « La réponse OpenAI est incomplète ou refusée. ». Aucune réponse de phrase
+exploitable retournée par le client fournisseur, aucune candidate présentée
+comme un succès. Le motif détaillé (`finish_reason`, refus ou autre format)
+n'est pas distingué par ce message ; ne pas conclure automatiquement à une
+limite de tokens. Arrêt sans nouvel essai avant Q2–Q8, conformément à la règle
+sur les erreurs persistantes.
+
+Le choix par numéro est implémenté et vérifié localement, pas validé avec le
+fournisseur réel dans cet essai. Prochaine investigation : diagnostic des
+métadonnées de cette réponse fournisseur dans un essai capturé, sans modifier
+globalement les limites du client partagé ni l'assistant par supposition.
+Q9/Q10 restent non vérifiées et la story reste en revue, non terminée.
+
 ## Review Triage Log
 
 | Repère | Verdict | Preuve et décision |

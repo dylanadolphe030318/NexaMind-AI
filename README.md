@@ -57,6 +57,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
    Pour une installation neuve, appliquez ensuite `20261110143000_restore_hybrid_chunk_references.sql` pour conserver les références de passages dans l'ancien RPC hybride. Ce correctif est déjà appliqué au projet actuel : ne le rejouez pas.
    Pour la story 3.5 sur le projet actuel, appliquez manuellement dans une nouvelle requête SQL Editor le seul nouveau fichier `20261110210000_search_resource_chunk_candidates.sql`. Il ajoute un RPC distinct qui reprend le classement hybride et les références `chunk_id`/révision, sous RLS (`security invoker`), avec un plafond serveur de vingt candidats et une permission `authenticated` uniquement. Ne modifiez ni ne remplacez l'ancien RPC à cinq passages. La recherche appelle ce RPC avec la session du membre ; OpenAI sélectionne ensuite au plus cinq passages originaux, qui seuls peuvent être affichés ou transmis à la sélection de phrase. La question et jusqu'à vingt passages (titre et contenu) sont envoyés à OpenAI, ce qui peut augmenter le délai et le coût.
    Avant l'application manuelle, le nouveau parcours n'est pas opérationnel en base : ne lancez pas d'essais distants. Après application, vérifiez avec une session membre autorisée la limite de vingt et les références de passages, le maintien de la RLS avec cette session, le refus d'un appel anonyme et le réessai. Rejouez ensuite sans modifier les dix questions de `tests-ia.md` et évaluez Q1–Q8 selon la grille de la story. Q9/Q10 restent non vérifiées faute de ressource réellement interdite ; ne revendiquez ni validation complète ni score 8/10 validé avant leur vérification. L'évaluation navigateur finale reste à effectuer par Dylan.
+   La « Phrase la plus pertinente » utilise désormais des phrases candidates numérotées,
+   extraites côté serveur des cinq passages retenus (300 caractères maximum chacune).
+   OpenAI choisit un seul numéro global (`answer` vide, `sources` avec ce numéro,
+   `missing=false`), ou aucun (`sources` vide, `missing=true`). Le serveur restitue
+   le texte et la source de la candidate, jamais une phrase rédigée par le modèle.
+   Un numéro invalide, du texte généré ou une erreur fournisseur restent des erreurs
+   explicites, sans repli. Aucun appel n'est effectué sans candidate admissible.
+   Ce contrat est réservé à la recherche de ressources ; l'assistant reste inchangé.
 4. Dans Authentication -> Providers, vérifiez que le fournisseur Email est activé.
 5. Pour créer le responsable initial, inscrivez d’abord son compte comme membre puis, dans SQL Editor, remplacez l’adresse ci-dessous et exécutez cette promotion manuelle :
 
