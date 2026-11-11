@@ -91,7 +91,7 @@ pas que le code ou les migrations correspondants sont déjà livrés.
   la migration `20261111103000_cleanup_rls_test_category.sql` n’ajoute qu’un RPC
   responsable, borné à l’espace, l’identifiant exact, un nom de fixture strict et
   une catégorie inutilisée. Le test d’intégration a réussi sans scénario ignoré
-  (16/16) avec des sessions réelles et la clé publishable. Les onze identifiants
+  (17/17) avec des sessions réelles et la clé publishable. Les onze identifiants
   approuvés ont été inventoriés, vérifiés inutilisés, puis retirés individuellement
   via ce RPC ; chaque réessai et lecture d’absence a été confirmé.
   La ressource autorisée `24f359d7-5869-4eac-beb9-a58ff599f98c` a été déplacée

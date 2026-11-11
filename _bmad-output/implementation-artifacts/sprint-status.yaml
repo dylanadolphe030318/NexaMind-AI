@@ -116,7 +116,7 @@ action_items:
   - id: "cc-2026-11-11-a"
     epic: 2
     action: "Hors sprint, avant le sprint 9 : A est implemente et applique ; tests
-      RLS 16/16, inventaire approuve retire par IDs exacts et ressource autorisee
+      RLS 17/17, inventaire approuve retire par IDs exacts et ressource autorisee
       deplacee sans changement de contenu. Evaluation Dylan en attente ; conserver
       l'action ouverte. Aucun DELETE general ni cle privilegiee dans les tests."
     owner: "Dylan + développeur"

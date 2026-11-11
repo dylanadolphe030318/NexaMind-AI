@@ -332,6 +332,32 @@ test(
         assert.equal(renamedCategory?.name, renamedCategoryName);
       });
 
+      await t.test("les fixtures sont nettoyées après un échec simulé", async () => {
+        const { data: category, error: createError } = await manager
+          .from("categories")
+          .insert({
+            name: "RLS-" + randomUUID(),
+            workspace_id: managerProfile.workspace_id,
+          })
+          .select("id")
+          .single();
+        assert.ifError(createError);
+        const fixture = trackCategory(category.id, managerProfile.workspace_id);
+        const simulatedFailure = new Error("échec simulé après création");
+
+        await assert.rejects(
+          runWithRlsCleanup({
+            action: async () => {
+              throw simulatedFailure;
+            },
+            cleanup: [categoryCleanup.at(-1)],
+          }),
+          (error) => error === simulatedFailure,
+        );
+        assert.equal(fixture.deleted, true);
+        assert.equal(fixture.verified, true);
+      });
+
       await t.test("le RPC de nettoyage est borné, refuse les catégories interdites et permet le réessai", async () => {
         const categoryName = "RLS-" + randomUUID();
         const { data: category, error: createError } = await manager
@@ -542,10 +568,12 @@ test(
           })
           .select("id, owner_id, title")
           .single();
-        assert.ifError(createError);
-        assert.equal(created.owner_id, sessionA.user.id);
-        assert.equal(created.title, marker);
-        trackResource(created.id);
+          if (created?.id) {
+            trackResource(created.id);
+          }
+          assert.ifError(createError);
+          assert.equal(created.owner_id, sessionA.user.id);
+          assert.equal(created.title, marker);
 
         const { error: otherOwnerError } = await memberA.from("resources").insert({
           workspace_id: profileA.workspace_id,

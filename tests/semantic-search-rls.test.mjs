@@ -587,9 +587,9 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
         assert.ifError(currentError);
         const newRows = current.filter((row) => !knownIds.has(row.id));
         if (data) {
+          createdIds.push(...newRows.map((row) => row.id));
           assert.equal(newRows.length, 1, "un seul nouvel appel exact est ajouté");
           knownIds.add(newRows[0].id);
-          createdIds.push(newRows[0].id);
         } else {
           assert.equal(newRows.length, 0, "un refus n'ajoute aucun appel");
         }
