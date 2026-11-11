@@ -3,13 +3,33 @@ story: 4-15-empecher-la-divulgation-de-ressources-non-autorisees
 title: Empêcher la divulgation de ressources non autorisées
 epic: 4
 sprint: 9
-status: ready-for-dev
+status: in-review
+baseline_commit: bf495c245ffd1661275675abadf98089c9467456
 context:
   - ../SPEC.md
   - ../conventions.md
 ---
 
 # Story 4.15 — ne pas révéler une ressource interdite
+
+## Direction de réalisation du 2026-11-11
+
+Dylan autorise l'enchaînement 4.15, 4.16, S8-2, S8-3 sans pause
+d'évaluation entre les stories ; ses tests manuels sont reportés à la fin.
+Cette direction remplace les pauses de préparation pour ce lot, sans changer
+les critères d'acceptation. Garder les contrôles automatiques, un commit par
+story et aucun statut `done`. La fiche 4.14 est implémentée, non évaluée.
+
+Réaliser seulement cette fiche ; le pilote enchaînera les suivantes. Ne pas
+commiter, pousser, appliquer de migration ou exécuter le SQL privilégié distant.
+Préparer le scénario SQL isolé et documenter son état « non exécuté » ainsi
+que les étapes manuelles précises. Ce contrôle différé empêche l'acceptation,
+pas la préparation des stories suivantes autorisée par Dylan.
+Exécuter les tests automatisés pertinents disponibles ; aucune nouvelle
+génération réelle ni donnée privée transmise au fournisseur. Arrêter si un
+défaut technique ou une erreur persistante bloque l'implémentation.
+Tous les appels IA restent serveur, clés depuis `.env.local`, pgvector,
+embeddings et budgets existants conservés, récupération sous session et RLS.
 
 ## Ce que cela permet
 
@@ -61,29 +81,30 @@ droit de consulter, y compris en poursuivant un ancien échange.
 
 ## Carte du code et tâches de développement
 
-- [ ] `src/features/resources/semantic-search.ts` et `semantic-search-core.ts` :
+- [x] `src/features/resources/semantic-search.ts` et `semantic-search-core.ts` :
   vérifier propagation de session, refus d'anonyme, absence de repli, uniquement
   passages `ready` accessibles, cinq passages assistant.
-- [ ] `src/features/assistant/assistant.ts`, `assistant-core.ts`,
+- [x] `src/features/assistant/assistant.ts`, `assistant-core.ts`,
   `conversations.ts` et `conversations-core.ts` : vérifier question initiale,
   continuation, reprise et réouverture ; les sources anciennes ne deviennent
   jamais preuves actuelles.
-- [ ] `tests/semantic-access.test.mjs` et `assistant.test.mjs` : exécuter une
+- [x] `tests/semantic-access.test.mjs` et `assistant.test.mjs` : exécuter une
   capture de l'appel de génération, marqueur interdit absent de tous les
   messages et des références, témoin autorisé présent ; ne pas se limiter à
   une recherche textuelle du code.
-- [ ] `tests/semantic-search-rls.test.mjs`, `conversations-rls.test.mjs` :
+- [x] `tests/semantic-search-rls.test.mjs`, `conversations-rls.test.mjs` :
   maintenir partage autorisé, refus anonyme et historique privé.
-- [ ] Nouveau `tests/assistant-access-rls.sql` : fixture fictive isolée,
+- [x] Nouveau `tests/assistant-access-rls.sql` : fixture fictive isolée,
   assertions RLS sur ressource/passages/RPC avec identités distinctes, preuve
   positive d'existence par le montage et preuve négative par la session cible ;
   rollback transactionnel sans données persistantes. Documenter l'exécution
   manuelle SQL dans `README.md`, sans installer d'outil supplémentaire par défaut.
-- [ ] `tests-ia.md` : consigner preuve/fichier de résultat de S9-B et Q9/Q10,
+- [x] `tests-ia.md` : consigner preuve/fichier de résultat de S9-B et Q9/Q10,
   limites de l'essai, comptes anonymisés et erreurs visibles.
-- [ ] Si un défaut SQL est démontré : nouvelle migration additive seulement,
+- [x] Si un défaut SQL est démontré : nouvelle migration additive seulement,
   tests première utilisation/réessai/refus de tiers après application. Ne pas
-  modifier une ancienne migration.
+  modifier une ancienne migration. Aucun défaut SQL n'ayant été démontré, aucune
+  migration n'est nécessaire.
 
 ## Vérification après développement
 
@@ -95,3 +116,22 @@ droit de consulter, y compris en poursuivant un ancien échange.
   du contexte. S'il manque l'environnement SQL isolé, signaler le blocage :
   ne pas déclarer la story validée avec une simple abstention.
 - Dépend de 4.14. Un commit de livraison, état en revue, puis évaluation de Dylan.
+
+## Vérification et revue de livraison
+
+L'historique transmis au fournisseur pour une suite contient désormais seulement
+les anciennes questions, ni les réponses générées ni leurs références. Ce choix
+vaut pour la requête d'embeddings comme pour le prompt de génération : une ancienne
+réponse peut citer une ressource retirée depuis. Le texte reste visible dans
+l'historique privé, mais le sujet d'une suite doit être retrouvé par les questions
+et confirmé par des passages actuels autorisés.
+
+Revue directe : le premier changement excluait les anciennes réponses du prompt
+mais les conservait dans la requête vectorisée. Ce chemin aurait retransmis
+l'ancien contenu au fournisseur d'embeddings ; corrigé avec assertions sur la
+requête effectivement remise à la récupération, avec et sans passage témoin.
+Le SQL isole le montage privilégié des assertions `authenticated`, préserve
+un témoin positif et annule les données transactionnelles. Il reste non exécuté,
+donc Q9/Q10 restent non vérifiées et ne comptent pas comme acceptées.
+Nettoyage des conversations par identifiants exacts, erreurs agrégées visibles ;
+aucune migration, changement de modèle, budget ou partage du workspace.

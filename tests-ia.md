@@ -98,17 +98,45 @@ Le produit a un seul workspace partagé ; une ressource d'un autre membre de cet
 espace n'est pas interdite. Ne pas créer de second workspace persistant dans la
 démo et ne pas changer les droits réels pour fabriquer une réussite.
 
-Le développeur préparera pour 4.15 un scénario SQL transactionnel sur environnement
-isolé, avec ressource interdite existante et témoin autorisé. Les assertions sont
-exécutées sous les sessions/rôles testés avec RLS ; le montage privilégié ne sert
-pas à la récupération testée. Rollback obligatoire et confirmé même après erreur.
-Compléter par une capture exécutable du contexte de génération qui exclut le
-marqueur interdit. Ne pas envoyer de données privées au fournisseur pour ce test.
+Pour 4.15, le scénario `tests/assistant-access-rls.sql` prépare une fixture SQL
+fictive transactionnelle sur environnement isolé, avec ressource interdite
+existante et témoin autorisé. Les assertions s'exécutent avec le rôle
+`authenticated`, des identités de session distinctes et RLS ; le montage
+privilégié ne sert pas à la récupération testée. Le script se termine par
+`ROLLBACK`; en cas d'erreur, l'opérateur doit annuler explicitement la session.
+La capture unitaire exécutable des messages remis au générateur vérifie aussi
+l'absence du marqueur interdit. Aucun appel réel au fournisseur IA n'est requis.
 
 Sans cette preuve, noter Q9/Q10 **non vérifiées** : ni absence d'information ni
 simulation de récupération vide ne prouve l'isolation réelle. Les résultats
 restent séparés des scores D1–D10 et A1–A3 et des conversations privées S8-F.
 Le rapport de 4.16 doit signaler toute précondition manquante, sans clôture fictive.
+
+#### État de la preuve S9-B (story 4.15)
+
+- Exécution SQL : **non exécutée** ; aucune base de test isolée n'a été désignée
+  pour cette réalisation. Ne pas traiter une simulation ou un résultat vide
+  comme preuve d'interdiction.
+- Identités SQL prévues : fictives et anonymisées. Le scénario SQL n'ayant pas
+  été exécuté, il n'a créé ni modifié de compte, profil, espace ou ressource.
+- Tests automatisés exécutés le 2026-11-11 :
+  ```text
+  node --test tests/assistant.test.mjs tests/semantic-access.test.mjs
+  # 29/29 réussis
+  node --env-file=.env.local --test --test-timeout=240000 tests/semantic-search-rls.test.mjs tests/conversations-rls.test.mjs
+  # 20/20 réussis, aucun ignoré
+  npm run test:unit
+  # réussi
+  ```
+  Ces tests confirment le témoin partagé, le refus anonyme, les conversations
+  privées et le nettoyage des fixtures créées par les tests d'intégration.
+- Q9/Q10 : **non vérifiées** jusqu'à preuve que chaque ressource existe dans la
+  fixture, que le compte source y accède et que la session cible ne peut ni la
+  lire ni la récupérer. Le témoin doit rester accessible.
+- Ce bilan dans `tests-ia.md` constitue le relevé des résultats ; aucun fichier
+  de logs autonome n'a été créé. Aucun échec n'a été visible ; Node a affiché
+  son avertissement existant `MODULE_TYPELESS_PACKAGE_JSON`. Aucun contenu privé
+  ni identifiant de compte réel n'apparaît dans les résultats.
 
 ## Vérification du sprint 8 — conversations et recherche
 

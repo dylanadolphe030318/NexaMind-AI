@@ -96,15 +96,43 @@ async function claimInConversation(client, conversationId, questionId, question)
   return Array.isArray(data) ? data[0] : data;
 }
 
+async function cleanupOwnedConversations(client, conversationIds) {
+  const errors = [];
+  for (const id of conversationIds) {
+    try {
+      const { data, error } = await client.rpc("delete_owned_conversation", {
+        p_conversation_id: id,
+      });
+      assert.ifError(error);
+      assert.equal(data, true, `la conversation de test exacte ${id} doit être supprimée`);
+      const { data: remaining, error: verifyError } = await client
+        .from("conversations")
+        .select("id")
+        .eq("id", id);
+      assert.ifError(verifyError);
+      assert.deepEqual(remaining, [], `la conversation de test exacte ${id} doit être absente`);
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length) {
+    throw new AggregateError(errors, "Échec du nettoyage des conversations de test.");
+  }
+}
+
 test(
   "la continuation refuse les tiers, reste idempotente et prolonge seulement une nouvelle question",
-  { skip: continuationSkipReason || false },
-  async () => {
+  { skip: continuationSkipReason || deletionSkipReason || false },
+  async (t) => {
     const owner = await login(accounts.memberA);
     const otherMember = await login(accounts.memberB);
     const manager = await login(accounts.manager);
+    const conversationIds = new Set();
+    t.after(() => cleanupOwnedConversations(owner.client, conversationIds));
+
     const seedId = randomUUID();
     const seed = await claim(owner.client, seedId, `conversation racine ${Date.now()}`);
+    if (seed.conversation_id) conversationIds.add(seed.conversation_id);
     assert.equal(seed.claimed, true);
 
     const { data: before, error: beforeError } = await owner.client
@@ -173,19 +201,45 @@ test(
 
 test(
   "conversations : propriété, expiration, état idempotent et finalisation concurrente",
-  { skip: skipReason || false },
+  { skip: skipReason || deletionSkipReason || false },
   async (t) => {
     const a = await login(accounts.memberA);
     const b = await login(accounts.memberB);
     const manager = await login(accounts.manager);
+    const conversationIds = new Set();
+    const managerConversationIds = new Set();
     const questionId = randomUUID();
     const managerQuestionId = randomUUID();
     const question = `S8 conversation RLS ${Date.now()}`;
     let resourceId;
     t.after(async () => {
+      const cleanupErrors = [];
+      try {
+        await cleanupOwnedConversations(a.client, conversationIds);
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
+      try {
+        await cleanupOwnedConversations(manager.client, managerConversationIds);
+      } catch (error) {
+        cleanupErrors.push(error);
+      }
       if (resourceId) {
-        const { error } = await a.client.from("resources").delete().eq("id", resourceId);
-        assert.ifError(error);
+        try {
+          const { error } = await a.client.from("resources").delete().eq("id", resourceId);
+          assert.ifError(error);
+          const { data: remaining, error: verifyError } = await a.client
+            .from("resources")
+            .select("id")
+            .eq("id", resourceId);
+          assert.ifError(verifyError);
+          assert.deepEqual(remaining, [], `la ressource de test exacte ${resourceId} doit être absente`);
+        } catch (error) {
+          cleanupErrors.push(error);
+        }
+      }
+      if (cleanupErrors.length) {
+        throw new AggregateError(cleanupErrors, "Échec du nettoyage des fixtures de conversation.");
       }
     });
 
@@ -202,16 +256,8 @@ test(
       .limit(1)
       .maybeSingle();
     assert.ifError(categoryError);
-    let categoryId = category?.id;
-    if (!categoryId) {
-      const { data: createdCategory, error: createCategoryError } = await manager.client
-        .from("categories")
-        .insert({ workspace_id: profile.workspace_id, name: `S8 catégorie test ${Date.now()}` })
-        .select("id")
-        .single();
-      assert.ifError(createCategoryError);
-      categoryId = createdCategory.id;
-    }
+    assert.ok(category?.id, "Le test exige une catégorie préexistante dans l'espace du membre A.");
+    const categoryId = category.id;
     const { data: resource, error: resourceError } = await a.client
       .from("resources")
       .insert({
@@ -265,6 +311,7 @@ test(
         const terminalId = randomUUID();
         const terminalQuestion = `S8 état terminal ${status}`;
         const initial = await claim(a.client, terminalId, terminalQuestion);
+        if (initial.conversation_id) conversationIds.add(initial.conversation_id);
         assert.equal(initial.claimed, true);
         const { data: finished, error: finishError } = await a.client.rpc(
           "finish_conversation_question",
@@ -305,6 +352,7 @@ test(
     });
 
     const created = await claim(a.client, questionId, question);
+    if (created.conversation_id) conversationIds.add(created.conversation_id);
     assert.equal(created.claimed, true);
     assert.equal(created.question_status, "generating");
     assert.ok(created.generation_token);
@@ -525,6 +573,7 @@ test(
     });
 
     const managerClaim = await claim(manager.client, managerQuestionId, `${question} responsable`);
+    if (managerClaim.conversation_id) managerConversationIds.add(managerClaim.conversation_id);
     assert.equal(managerClaim.claimed, true);
     const { data: managerFinished, error: managerFinishError } = await manager.client.rpc("finish_conversation_question", {
       p_question_id: managerQuestionId,

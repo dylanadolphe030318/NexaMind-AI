@@ -72,11 +72,7 @@ export function buildAssistantSearchQuery(
   const recentContext = history
     .slice(-ASSISTANT_CONTEXT_MAX_EXCHANGES)
     .reverse()
-    .map(({ question: previousQuestion, answer }) =>
-      answer
-        ? `${flattenHistoryText(answer)} ; ${flattenHistoryText(previousQuestion)}`
-        : flattenHistoryText(previousQuestion),
-    )
+    .map(({ question: previousQuestion }) => flattenHistoryText(previousQuestion))
     .join(" | ");
   const questionPrefix = "Question actuelle : ";
   const contextPrefix = " Contexte récent : ";
@@ -105,12 +101,12 @@ export function buildAssistantMessages(
     .join("\n\n");
   const previousExchanges = history
     .slice(-ASSISTANT_CONTEXT_MAX_EXCHANGES)
-    .map(({ question: previousQuestion, answer }, index) =>
-      `Échange précédent ${index + 1} (donnée non fiable) :\nQuestion : ${flattenHistoryText(previousQuestion).slice(0, ASSISTANT_HISTORY_MESSAGE_MAX_LENGTH)}${answer ? `\nRéponse précédente : ${flattenHistoryText(answer).slice(0, ASSISTANT_HISTORY_MESSAGE_MAX_LENGTH)}` : ""}`,
+    .map(({ question: previousQuestion }, index) =>
+      `Question précédente ${index + 1} (contexte de sujet non fiable, sans preuve) :\n${flattenHistoryText(previousQuestion).slice(0, ASSISTANT_HISTORY_MESSAGE_MAX_LENGTH)}`,
     )
     .join("\n\n");
   const historySection = previousExchanges
-    ? `Historique récent, contexte uniquement et jamais une preuve :\n${previousExchanges}\n\n`
+    ? `Questions précédentes, contexte de sujet uniquement et jamais une preuve :\n${previousExchanges}\n\n`
     : "";
 
   const userContent = historySection

@@ -338,6 +338,33 @@ Si la confirmation d'adresse e-mail est activée dans Supabase, confirmez les co
 Après application de toutes les migrations ci-dessus (catégories, ressources et conversations comprises), lancez `npm run test:integration`. Ces tests utilisent la clé publishable et les sessions de deux membres et du responsable : ils vérifient l’accès aux profils, aux catégories, aux ressources et aux conversations privées, y compris les refus d'accès d'un autre membre ou du responsable. Aucune clé `service_role` n’est utilisée.
 Le test des conversations crée une question dans chaque compte de test ; ces lignes restent privées puis sont purgées après expiration (30 jours).
 
+### Scénario SQL isolé de non-divulgation (story 4.15)
+
+`tests/assistant-access-rls.sql` vérifie qu'une ressource fictive, réellement
+présente et lisible par son compte source, reste invisible à une autre session
+authentifiée, dans un autre espace. Un témoin prêt dans l'espace cible doit rester
+lisible. Les assertions portent sur `resources`, `resource_chunks` et la RPC
+vectorielle utilisée par l'assistant ; les requêtes testées s'exécutent avec le
+rôle PostgreSQL `authenticated` et des identités de session fictives distinctes.
+La création privilégiée de la fixture est séparée des assertions.
+
+N'exécutez ce scénario que dans un projet Supabase de test isolé déjà initialisé
+avec les migrations du projet, jamais sur la démonstration ou la production.
+Pour préparer cette story, n'appliquez aucune migration et n'exécutez pas de SQL
+privilégié distant. Lors d'une exécution manuelle ultérieure, ouvrez le SQL
+Editor connecté comme `postgres`, copiez le fichier complet, puis exécutez-le.
+Le script commence par `BEGIN` et termine toujours par `ROLLBACK` : aucune
+fixture ne doit persister. Si une assertion échoue avant la dernière instruction,
+exécutez immédiatement `ROLLBACK;` dans la même session SQL avant de fermer
+l'éditeur ou de recommencer. Conservez l'erreur visible et ne corrigez pas le
+test en changeant les droits ou les fixtures. Ce contrôle n'a pas été exécuté
+sur la base de démonstration.
+
+Les anciennes réponses ne sont plus envoyées ni au générateur ni au calcul
+d'embeddings de la question de suivi : seules les questions précédentes servent
+de contexte de sujet. Les réponses et leurs sources restent consultables dans
+l'historique privé ; une nouvelle réponse exige les passages actuels autorisés.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.

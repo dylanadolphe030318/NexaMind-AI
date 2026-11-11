@@ -177,7 +177,7 @@ test("réponse normale, je ne sais pas, quota et session", async () => {
   assert.equal((await runAssistant("  ", { retrieve: async () => okSearch, generate })).status, "invalid");
 });
 
-test("la recherche et le prompt de suivi utilisent le contexte récent, pas les anciennes sources", async () => {
+test("recherche et génération utilisent les anciennes questions sans transmettre les réponses historiques", async () => {
   const history = [{ question: "Quelle technologie utilisons-nous ?", answer: "La technologie Atlas." }];
   const calls = { query: "", messages: [] };
   const outcome = await runAssistant("Comment fonctionne cette technologie ?", {
@@ -192,23 +192,73 @@ test("la recherche et le prompt de suivi utilisent le contexte récent, pas les 
   }, history);
 
   assert.equal(outcome.status, "ok");
-  assert.match(calls.query, /Atlas/);
+  assert.doesNotMatch(calls.query, /Atlas/);
+  assert.match(calls.query, /Quelle technologie utilisons-nous/);
   assert.match(calls.query, /cette technologie/);
   assert.ok(calls.query.length <= 300);
   assert.equal(calls.messages[0].role, "system");
   assert.equal(calls.messages[1].role, "user");
-  assert.match(calls.messages[1].content, /Historique récent, contexte uniquement et jamais une preuve/);
+  assert.match(calls.messages[1].content, /Questions précédentes, contexte de sujet uniquement et jamais une preuve/);
+  assert.match(calls.messages[1].content, /Quelle technologie utilisons-nous/);
+  assert.doesNotMatch(calls.messages[1].content, /Atlas/);
   assert.match(calls.messages[1].content, /Question actuelle : Comment fonctionne cette technologie/);
   assert.match(calls.messages[1].content, /Next.js et Supabase/);
   assert.doesNotMatch(calls.messages[1].content, /ancien extrait source non autorisé/i);
 });
 
+test("un fait historique sans passage actuel ne déclenche ni réponse ni référence", async () => {
+  const forbiddenMarker = "MARQUEUR_HISTORIQUE_INTERDIT";
+  let generationCalled = false;
+  const outcome = await runAssistant("Que disait cette ressource ?", {
+    retrieve: async (query) => {
+      assert.doesNotMatch(query, new RegExp(forbiddenMarker));
+      return { status: "ok", passages: [] };
+    },
+    generate: async () => {
+      generationCalled = true;
+      return '{"claims":[{"text":"Réponse historique.","sources":[1]}],"missing":false}';
+    },
+  }, [{ question: "Quel est son contenu ?", answer: forbiddenMarker }]);
+
+  assert.deepEqual(outcome, { status: "no-context" });
+  assert.equal(generationCalled, false);
+  assert.doesNotMatch(JSON.stringify(outcome), new RegExp(forbiddenMarker));
+});
+
+test("seuls les passages récupérés apparaissent dans le contexte réellement envoyé au modèle", async () => {
+  const forbiddenMarker = "MARQUEUR_INTERDIT_4_15";
+  const allowedPassage = {
+    ...passage,
+    chunkId: "authorized-chunk",
+    resourceId: "authorized-resource",
+    title: "Ressource témoin autorisée",
+    content: "Contenu témoin autorisé pour le test.",
+  };
+  let generationMessages;
+  const outcome = await runAssistant("Que faut-il retenir ?", {
+    retrieve: async (query) => {
+      assert.doesNotMatch(query, new RegExp(forbiddenMarker));
+      return { status: "ok", passages: [allowedPassage] };
+    },
+    generate: async (messages) => {
+      generationMessages = messages;
+      return '{"claims":[{"text":"Le témoin est accessible.","sources":[1]}],"missing":false}';
+    },
+  }, [{ question: "Quel était le contenu ?", answer: forbiddenMarker }]);
+
+  assert.equal(outcome.status, "ok");
+  assert.match(JSON.stringify(generationMessages), /Contenu témoin autorisé/);
+  assert.doesNotMatch(JSON.stringify(generationMessages), new RegExp(forbiddenMarker));
+  assert.doesNotMatch(JSON.stringify(outcome), new RegExp(forbiddenMarker));
+  assert.equal(outcome.sources[0].resourceId, "authorized-resource");
+});
+
 test("les deux formulations de suivi intègrent leur sujet historique à la recherche", () => {
   const technologyQuery = buildAssistantSearchQuery("Et comment fonctionne cette technologie ?", [
-    { question: "Quelle technologie est utilisée ?", answer: "La technologie Atlas." },
+    { question: "Comment utiliser la technologie Atlas ?", answer: "Réponse ancienne." },
   ]);
   const problemQuery = buildAssistantSearchQuery("Et ce problème ?", [
-    { question: "Quel problème rencontre-t-on ?", answer: "Le problème est la latence." },
+    { question: "Quel problème de latence rencontre-t-on ?", answer: "Réponse ancienne." },
   ]);
   assert.match(technologyQuery, /Atlas/);
   assert.match(problemQuery, /latence/);
@@ -224,11 +274,11 @@ test("la question transmise ne contient pas plus de dix échanges historiques", 
   assert.match(content, /Question antérieure 2/);
   assert.match(content, /Question antérieure 11/);
   assert.doesNotMatch(content, /Question antérieure 0/);
-  assert.equal((content.match(/Échange précédent /g) ?? []).length, 10);
+  assert.equal((content.match(/Question précédente /g) ?? []).length, 10);
 });
 
 test("la requête de recherche reste bornée même avec une question longue et un historique", () => {
-  const query = buildAssistantSearchQuery("Q".repeat(300), [{ question: "Sujet", answer: "Atlas" }]);
+  const query = buildAssistantSearchQuery("Q".repeat(300), [{ question: "Sujet Atlas", answer: "Réponse ancienne." }]);
   assert.ok(query.length <= 300);
   assert.match(query, /Contexte récent/);
   assert.match(query, /Atlas/);

@@ -84,9 +84,9 @@ development_status:
   4-11-rouvrir-une-conversation: done
   4-12-continuer-une-conversation-précédente: done
   4-13-supprimer-une-conversation-de-son-historique: done
-  # Sprint 9 : développement autorisé, une story puis évaluation humaine.
+  # Sprint 9 : lot restant autorisé, évaluation humaine regroupée à la fin.
   4-14-relier-les-affirmations-aux-sources: review
-  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: ready-for-dev
+  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: review
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: ready-for-dev
   epic-4-retrospective: done
 sprint_story_limits:
@@ -112,6 +112,9 @@ sprint_9_planned:
   manifest: "_bmad-output/specs/spec-sprint-9-ia/stories.yaml"
   spec_checkpoint: false
   done_checkpoint: true
+  execution_override: "2026-11-11 : Dylan autorise 4.15, 4.16, S8-2, S8-3 dans
+    cet ordre sans pause humaine ; tests manuels a la fin, controles automatiques
+    conserves et aucun statut done. 4.16 preparee sans resultat invente."
   complements:
     s8-2: ready-for-dev
     s8-3: ready-for-dev
