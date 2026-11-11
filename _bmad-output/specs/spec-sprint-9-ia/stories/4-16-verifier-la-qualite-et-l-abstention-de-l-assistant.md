@@ -3,13 +3,31 @@ story: 4-16-verifier-la-qualite-et-l-abstention-de-l-assistant
 title: Vérifier la qualité et l'abstention de l'assistant
 epic: 4
 sprint: 9
-status: ready-for-dev
+status: in-review
+baseline_commit: ce716e74dfb01101e3cef1b50d614b60387d2384
 context:
   - ../SPEC.md
   - ../conventions.md
 ---
 
 # Story 4.16 — mesurer les réponses et les « je ne sais pas »
+
+## Direction de réalisation du 2026-11-11
+
+Dylan confirme : enchaîner les stories restantes du sprint 9 sans pause,
+reporter ses tests manuels à la fin et préparer 4.16 sans inventer ses résultats.
+Cette direction remplace les pauses et prérequis d'évaluation humaine pour la
+préparation, pas les critères d'acceptation. 4.14 et 4.15 sont implémentées,
+non acceptées ; le SQL isolé 4.15 reste non exécuté, Q9/Q10 non vérifiées.
+
+Préparer maintenant le protocole et le rapport complet avec une ligne par
+question, tous les résultats réels non exécutés et les dénominateurs conservés.
+Ne pas lancer d'appel réel IA, importer des ressources, modifier le corpus,
+exécuter du SQL distant, commiter ou pousser. Le pilote crée le commit puis
+poursuit S8-2. Exécuter les tests automatisés pertinents et ne pas modifier
+de code produit sans défaut démontré ; aucune fonctionnalité hors sprint.
+Garder la fiche en revue avec tâches d'exécution humaine ouvertes, CC-B ouverte
+et aucun statut `done`. Arrêter sur erreur technique persistante.
 
 ## Ce que cela permet
 
@@ -65,16 +83,16 @@ et reconnaît les informations absentes, sans confondre cela avec les droits.
 
 - [ ] `tests-ia.md` : exécuter la section sprint 9 sans réécrire les questions ;
   identifier les ressources accessibles et passages attendus avant notation.
-- [ ] `README.md` : étapes de campagne, prérequis de migration issus de 4.14/4.15,
+- [x] `README.md` : étapes de campagne, prérequis de migration issus de 4.14/4.15,
   sessions, corpus, modèles et contraintes ; distinguer préparation et résultats.
-- [ ] Nouveau rapport
+- [x] Nouveau rapport
   `_bmad-output/implementation-artifacts/sprint-9-evaluation.md` lors de la
   réalisation : tableau D1–D10/A1–A3, scores explicites 8/10 et 3/3, grilles Q1
   et S8-D, contrôle d'accès séparé, compte rendu des échecs et conditions d'essai.
-- [ ] `tests/assistant.test.mjs` et `assistant-conversations.test.mjs` :
+- [x] `tests/assistant.test.mjs` et `assistant-conversations.test.mjs` :
   couverture déterministe des abstentions, références invalides et suites ;
   ne pas présenter ces tests comme une évaluation sémantique du fournisseur réel.
-- [ ] `_bmad-output/implementation-artifacts/sprint-status.yaml` : consigner
+- [x] `_bmad-output/implementation-artifacts/sprint-status.yaml` : consigner
   résultats réels, garder la story en revue et CC-B ouverte jusqu'à évaluation
   de Dylan. Ne pas marquer l'epic terminé pendant que S8-2/S8-3 restent à faire.
 
@@ -96,3 +114,12 @@ sans les utiliser comme score de l'assistant. Droits : preuves issues de 4.15.
 Les seuils 8/10 et 3/3 sont requis ; ne pas inventer un résultat aujourd'hui.
 Après 4.14 et 4.15 évaluées, un commit pour le protocole/résultats, puis arrêt
 pour l'évaluation de Dylan avant les deux stories visuelles.
+
+## Vérification de la préparation
+
+48 tests déterministes assistant/conversations réussis, aucun ignoré ; lint
+ciblé réussi. Revue directe du diff : dix lignes D et trois lignes A présentes,
+questions historiques préservées, scores non calculables avec dénominateurs
+fixes, grilles Q1/S8-D et droits séparés. Aucune campagne réelle revendiquée ;
+la tâche d'exécution reste ouverte. Un espace final Markdown a été retiré
+avant commit. Aucun code produit, modèle ou budget modifié.

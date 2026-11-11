@@ -168,7 +168,10 @@ test("réponse normale, je ne sais pas, quota et session", async () => {
     }],
   });
   const missing = async () => '{"claims":[],"missing":true}';
-  assert.equal((await runAssistant("Q ?", { retrieve: async () => okSearch, generate: missing })).status, "unknown");
+  assert.deepEqual(
+    await runAssistant("Q ?", { retrieve: async () => okSearch, generate: missing }),
+    { status: "unknown" },
+  );
   assert.equal(
     (await runAssistant("Q ?", { retrieve: async () => ({ status: "rate-limited" }), generate })).status,
     "rate-limited",

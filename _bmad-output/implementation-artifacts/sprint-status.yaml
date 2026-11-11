@@ -87,7 +87,7 @@ development_status:
   # Sprint 9 : lot restant autorisé, évaluation humaine regroupée à la fin.
   4-14-relier-les-affirmations-aux-sources: review
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: review
-  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: ready-for-dev
+  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: review
   epic-4-retrospective: done
 sprint_story_limits:
   min: 3

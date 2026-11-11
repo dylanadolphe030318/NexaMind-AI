@@ -92,6 +92,16 @@ Vérifier que ces informations ne sont pas présentes dans le corpus choisi.
 6. S8-D conserve sa grille numéro 3.1 / preuve / lien et la comparaison autonome
    Q5 ; ne pas remplacer une réponse correcte par une abstention dans le score.
 
+### Rapport de la story 4.16
+
+Le rapport [sprint-9-evaluation.md](_bmad-output/implementation-artifacts/sprint-9-evaluation.md)
+préserve une ligne pour chacune des questions D1–D10 et A1–A3. Au 2026-11-11,
+la campagne n'a pas été exécutée : les réponses, sources, preuves et liens sont
+donc consignés comme **non exécutés**, sans prétendre que le corpus est gelé ou
+accessible. Le score reste non calculable avec les dénominateurs 10 et 3.
+Les contrôles Q1, S8-D et les droits Q9/Q10 sont consignés à part. Les tests
+unitaires automatisés ne remplacent pas cette évaluation humaine du fournisseur.
+
 ### Droits : Q9 et Q10 ne sont pas des questions d'absence
 
 Le produit a un seul workspace partagé ; une ressource d'un autre membre de cet

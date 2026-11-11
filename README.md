@@ -365,6 +365,65 @@ d'embeddings de la question de suivi : seules les questions précédentes serven
 de contexte de sujet. Les réponses et leurs sources restent consultables dans
 l'historique privé ; une nouvelle réponse exige les passages actuels autorisés.
 
+### Campagne de qualité de l'assistant (story 4.16)
+
+Le protocole et le relevé courant sont dans [`tests-ia.md`](tests-ia.md) et
+[`_bmad-output/implementation-artifacts/sprint-9-evaluation.md`](_bmad-output/implementation-artifacts/sprint-9-evaluation.md).
+Le relevé du 2026-11-11 est une préparation uniquement : aucun appel réel à
+l'assistant, import de ressource ou SQL distant n'a été exécuté. N'interprétez
+pas les champs « non exécuté » comme des réussites ou des échecs.
+
+Avant la campagne humaine :
+
+1. Confirmez que les changements de 4.14 et 4.15 sont disponibles et que les
+   migrations préalables sont appliquées dans l'ordre normal. La migration
+   `20261106120000_create_conversations.sql` fournit notamment l'historique et
+   les références persistées aux passages ; ne la rejouez pas après succès.
+   Pour 4.15, la preuve de non-divulgation est le scénario
+   `tests/assistant-access-rls.sql`, distinct d'une migration et d'une simple
+   abstention. Son exécution future est limitée à un projet de test isolé déjà
+   migré, avec les sessions prévues et son `ROLLBACK`; ne l'exécutez pas sur la
+   démonstration ou la production.
+2. Connectez-vous avec un compte membre autorisé. Préparez via les parcours
+   habituels les ressources documentaires D1–D10, puis relevez pour chacune le
+   titre réellement accessible, l'ID/révision et le passage attendu. La présence
+   d'un document local ne prouve ni son importation ni son indexation. Vérifiez
+   que les informations A1–A3 sont absentes du même corpus, puis gelez ce corpus
+   et notez sa version avant de noter des réponses. Ne changez ni les questions
+   ni les attentes pour s'adapter aux ressources disponibles.
+3. Notez la date, le compte/rôle sans identifiants secrets, la version du code,
+   le corpus et sa configuration. Gardez le modèle configuré (par défaut
+   `gpt-6-luna`), les embeddings `text-embedding-3-small`, le budget de 500 tokens
+   de l'assistant, le délai de 30 secondes et les limites de contexte/quota
+   actuelles ; n'augmentez pas les budgets et ne lancez pas de reprise automatique.
+4. Posez D1–D10 dans des échanges Assistant séparés, puis A1–A3. Conservez une
+   ligne par question même si elle échoue ou n'est pas exécutée. Une réussite D
+   exige une réponse correcte et une source attendue qui prouve le fait ; le
+   seuil est 8/10. Une réussite A exige une abstention sans fait inventé ni
+   source justificative ; le seuil est 3/3. Un nouvel essai garde le résultat
+   initial et son motif.
+5. Pour Q1, notez séparément sur Assistant les éléments Next.js App Router/
+   TypeScript et PostgreSQL/authentification/stockage/RLS ; sur Recherche,
+   relevez les passages et rangs top 3 séparément de la phrase et du lien. Après
+   Q5, évaluez S8-D dans sa conversation de suivi : numéro 3.1, preuve actuelle
+   et lien ouvrable, puis comparez à Q5 autonome.
+6. Consignez Q9/Q10 à part du score documentaire et des absences. Le contrôle
+   n'est vérifié que si la fixture réellement interdite et le témoin autorisé
+   sont établis dans l'environnement isolé, et que les assertions sous les
+   sessions concernées passent. Si le montage manque, inscrivez « non vérifié » ;
+   une réponse inconnue ou une récupération simulée vide ne prouve pas RLS.
+
+Vérification déterministe sans appel au fournisseur IA :
+
+```powershell
+node --test tests\assistant.test.mjs tests\assistant-conversations.test.mjs
+```
+
+Cette commande couvre notamment les réponses sans preuve, les références
+invalides, les abstentions, les contextes de suivi et les références persistées.
+Elle ne constitue pas un score sémantique du fournisseur ni une preuve humaine
+de la qualité des réponses.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
