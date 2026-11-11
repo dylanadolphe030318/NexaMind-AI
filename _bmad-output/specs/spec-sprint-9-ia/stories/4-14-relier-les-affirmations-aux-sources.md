@@ -162,3 +162,38 @@ revue a échoué avant lecture du diff parce que son chemin d'instructions omett
 le traçage des branches du diff, des suppressions et des appels : aucun défaut
 supplémentaire confirmé. Les limites sémantiques restent explicites, sans report
 technique supplémentaire.
+
+### Review Findings — sprint 9, 2026-11-11
+
+- [x] [Review][Patch] Refuser les references libres de type « source numero 9 »
+  dans le texte des affirmations
+  [assistant-core.ts:165](../../../../src/features/assistant/assistant-core.ts#L165).
+  Avec un seul passage et `sources: [1]`, le parseur accepte ce texte et le rendu
+  affiche le numero invente a cote du lien « Source 1 ». Reproduction executee
+  de `runAssistant` jusqu'au rendu React, sans fournisseur ni reseau.
+  Gravite moyenne : association fait/source ambigue, contraire au critere 3.
+  Correction validee par Dylan puis appliquee : variantes numero/numeros,
+  numero accentue, n°, nº, no., pluriel, ponctuation et espaces insecables
+  refusees avant affichage. Un test de regression verifie le rejet dans le
+  parseur et le resultat d'erreur sans reponse ni sources dans `runAssistant`.
+  Les faits ordinaires comme « La source de donnees contient 9 tables »
+  restent acceptes. Test observe en echec avant correction puis en reussite.
+
+#### Rejected
+
+- Troncature des longues questions de suivi : mecanisme identique dans le
+  baseline `d9f2c33`, pas une regression introduite par ce sprint.
+- Schema non teste a travers l'adaptateur : lacune de test, mais aucun mauvais
+  routage constate ; le schema correct est selectionne et une assertion
+  existante controle ce choix. Pas de defaut produit demontre.
+- Ancien texte historique apres retrait d'une source : conservation privee
+  explicitement prevue par la fiche, deja presente avant le sprint ; les sources
+  indisponibles sont masquees et ces anciennes reponses ne sont plus envoyees
+  au fournisseur. Aucune nouvelle vulnerabilite demontree.
+
+Les quatre couches de revue ont rendu un resultat (aucun constat pour les cas
+limites). Revue de securite distincte : aucune vulnerabilite nouvelle confirmee.
+Les 52 tests assistant, conversations et client de selection ont ete executes :
+52 reussis, aucun ignore ; TypeScript et lint cible reussis apres correction.
+Le SQL RLS isole et l'evaluation humaine restent
+non executes ; aucun statut de story n'est modifie.

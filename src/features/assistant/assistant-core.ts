@@ -162,7 +162,7 @@ export function parseAssistantReply(content: string, passageCount: number): Assi
       !text ||
       text.length > 2000 ||
       /\[\[source:/i.test(text) ||
-      /\bsource\s*[#:]?\s*\d+/i.test(text) ||
+      /\bsources?\s*[#:]?\s*(?:(?:num[eé]ros?|n[°ºo]\.?)\s*)?[#:]?\s*\d+/i.test(text) ||
       /\[[^\]]+\]\([^)]+\)/.test(text) ||
       /(?:https?:\/\/|ftp:\/\/|mailto:|www\.)/i.test(text) ||
       /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/i.test(text)

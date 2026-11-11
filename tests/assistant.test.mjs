@@ -141,6 +141,40 @@ test("une réponse avec un numéro de passage inconnu est refusée", () => {
   assert.throws(() => parseAssistantReply("pas du json", 1));
 });
 
+test("les références libres dans les affirmations sont refusées avant affichage", async () => {
+  for (const reference of [
+    "source numéro 9",
+    "source numero 9",
+    "sources numéros 9 et 10",
+    "Source n° 9",
+    "source nº9",
+    "source no. 9",
+    "source : numéro 9",
+    "source numéro : 9",
+    "SOURCE NUMÉRO\u00a09",
+    "source numéro 1",
+  ]) {
+    const reply = JSON.stringify({
+      claims: [{ text: `Fait documenté (${reference}).`, sources: [1] }],
+      missing: false,
+    });
+    assert.throws(() => parseAssistantReply(reply, 1), /contenu non autorisé/, reference);
+    const outcome = await runAssistant("Question ?", {
+      retrieve: async () => okSearch,
+      generate: async () => reply,
+    });
+    assert.equal(outcome.status, "error", reference);
+    assert.equal("answer" in outcome, false, reference);
+    assert.equal("sources" in outcome, false, reference);
+  }
+
+  const claim = { text: "La source de données contient 9 tables.", sources: [1] };
+  assert.deepEqual(
+    parseAssistantReply(JSON.stringify({ claims: [claim], missing: false }), 1),
+    { claims: [claim], missing: false },
+  );
+});
+
 test("aucun appel au modèle sans passage", async () => {
   let called = false;
   const outcome = await runAssistant("Q ?", {
