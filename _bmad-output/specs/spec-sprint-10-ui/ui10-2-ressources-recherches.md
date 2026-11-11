@@ -3,8 +3,9 @@ title: Harmoniser les ressources, categories et recherches
 story: ui10-2
 type: feature
 created: 2026-11-11
-status: ready-for-dev
+status: in-review
 route: dispatch
+baseline_commit: 4f19a335fd8cf7f3417e3eeb25c7b0e80eab444b
 context:
   - "{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-projet-ia-2026-10-28/DESIGN.md"
 ---
@@ -56,9 +57,9 @@ commit, push ou done par l'agent. Le pilote commitera chaque lot apres controles
 
 ## Tasks & Acceptance
 
-- [ ] Appliquer les styles a chacune des neuf routes et a leurs etats disponibles.
-- [ ] Garder selections, liens, badges, formulaires et confirmations.
-- [ ] Ajouter/adapter les tests de rendu des ecrans touches, pas seulement CSS.
+- [x] Appliquer les styles a chacune des neuf routes et a leurs etats disponibles.
+- [x] Garder selections, liens, badges, formulaires et confirmations.
+- [x] Ajouter/adapter les tests de rendu des ecrans touches, pas seulement CSS.
 - Etant donne une ressource autorisee, quand elle est ouverte ou geree,
   alors ses informations et actions restent disponibles dans le nouveau style.
 - Etant donne une liste vide, un refus ou une erreur, quand elle est affichee,
@@ -72,4 +73,16 @@ Le pilote verifie navigateur, revue et commit.
 
 ## Implementation Notes
 
+Le pilote a charge le workflow BMAD et fera la revue ; executer cette fiche
+directement sans autre skill ni sous-agent. Mettre la fiche en revue et rendre
+les controles effectues, sans lancer une nouvelle campagne de revue.
+
 ## Review Triage Log
+
+Revue directe du pilote : classes ciblees sur historique/categories, controles
+de focus et confirmations destructives, sans changement des services ni actions.
+La nouvelle suite est enregistree explicitement dans `test:unit`, sans import
+cache depuis une autre suite. Tests de rendu des neuf routes et des etats ;
+controle authentifie au navigateur toujours differe faute de session autorisee.
+Verification directe finale : 23 tests ressources, categories, cartes et
+validation reussis, aucun ignore ; TypeScript, lint cible et diff-check reussis.

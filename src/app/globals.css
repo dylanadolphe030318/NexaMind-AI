@@ -152,6 +152,22 @@ a:focus-visible {
   background: var(--purple-deep);
 }
 
+.button-destructive {
+  border-color: var(--error);
+  background: var(--error);
+  box-shadow: none;
+}
+
+.button-destructive:hover {
+  border-color: #8f1d14;
+  background: #8f1d14;
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .button-small {
   min-height: 44px;
   padding: 0 18px;
@@ -528,6 +544,10 @@ a:focus-visible {
   box-shadow: 0 12px 32px rgb(37 32 50 / 7%);
 }
 
+.confirmation-card {
+  background: #fff;
+}
+
 .auth-card h1 {
   margin: 34px 0 10px;
   font-size: clamp(1.7rem, 7vw, 2.15rem);
@@ -727,12 +747,14 @@ a:focus-visible {
 }
 
 .category-entry {
+  min-width: 0;
   display: grid;
   gap: 14px;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background: #fff;
+  overflow-wrap: anywhere;
 }
 
 .resource-card {
@@ -916,6 +938,7 @@ a:focus-visible {
 
 .category-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -923,6 +946,7 @@ a:focus-visible {
 
 .category-rename-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

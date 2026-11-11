@@ -56,7 +56,9 @@ export default async function CategoriesPage() {
               categories={pageData.categories}
             />
           ) : (
-            <p className="category-empty">Aucune cat&eacute;gorie n&apos;est disponible pour le moment.</p>
+            <p className="category-empty" role="status">
+              Aucune cat&eacute;gorie n&apos;est disponible pour le moment.
+            </p>
           )}
         </section>
 

@@ -51,7 +51,7 @@ export default async function RecentSearchesPage({
           ) : (
             <ul className="category-list">
               {outcome.entries.map((entry) => (
-                <li className="category-entry" key={entry.id}>
+                <li className="category-entry resource-card" key={entry.id}>
                   <p className="category-name">
                     <Link
                       className="resource-link"

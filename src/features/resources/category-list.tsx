@@ -57,7 +57,7 @@ export function CategoryList({
         </select>
       </div>
       {selectedCategory ? (
-        <div className="category-entry">
+        <div className="category-entry resource-card">
           <div className="category-row">
             <p className="category-name">{selectedCategory.name}</p>
             {canManage && state.editingCategoryId !== selectedCategory.id ? (

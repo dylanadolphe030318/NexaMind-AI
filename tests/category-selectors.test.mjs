@@ -252,12 +252,20 @@ test("les catégories inconnues restent visibles et les paramètres invalides r�
   assert.deepEqual(calls, [unknownCategoryId, undefined]);
   assert.match(malformedMarkup, /<option value="" selected="">Toutes les catégories<\/option>/);
 
+  const allCategoriesMarkup = renderToStaticMarkup(
+    await ResourcesPage({
+      searchParams: Promise.resolve({ category: "" }),
+    }),
+  );
+  assert.deepEqual(calls, [unknownCategoryId, undefined, undefined]);
+  assert.match(allCategoriesMarkup, /<option value="" selected="">Toutes les catégories<\/option>/);
+
   const errorMarkup = renderToStaticMarkup(
     await ResourcesPage({
       searchParams: Promise.resolve({ category: errorCategoryId }),
     }),
   );
-  assert.deepEqual(calls, [unknownCategoryId, undefined, errorCategoryId]);
+  assert.deepEqual(calls, [unknownCategoryId, undefined, undefined, errorCategoryId]);
   assert.match(errorMarkup, /role="alert">Les ressources ne sont pas disponibles\./);
   assert.match(errorMarkup, /href="\/resources"[^>]*>Réessayer<\/a>/);
 
@@ -302,6 +310,15 @@ test("la sélection de catégorie ferme le renommage précédent et restitue le 
     (element) => element.type === "button" && element.props.children === "Renommer",
   );
   assert.equal(renameButtons.length, 1);
+  assert.equal(
+    findElements(
+      tree,
+      (element) =>
+        element.type === "div" &&
+        element.props.className === "category-entry resource-card",
+    ).length,
+    1,
+  );
   renameButtons[0].props.ref.current = { focus() {} };
   renameButtons[0].props.onClick();
 

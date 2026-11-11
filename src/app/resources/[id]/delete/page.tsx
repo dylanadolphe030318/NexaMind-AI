@@ -33,7 +33,10 @@ export default async function DeleteResourcePage({
 
   return (
     <main className="auth-page category-page">
-      <section aria-labelledby="delete-resource-title" className="auth-card category-card">
+      <section
+        aria-labelledby="delete-resource-title"
+        className="auth-card category-card confirmation-card"
+      >
         <h1 id="delete-resource-title">Supprimer la ressource</h1>
 
         {result.status !== "ok" ? (
@@ -54,7 +57,7 @@ export default async function DeleteResourcePage({
               Cette action est d&eacute;finitive.
             </p>
             <form action={deleteResource.bind(null, result.resource.id)} className="resource-delete-actions">
-              <button className="button" type="submit">
+              <button className="button button-destructive" type="submit">
                 Supprimer d&eacute;finitivement
               </button>
               <Link className="button button-secondary" href={`/resources/${id}`}>

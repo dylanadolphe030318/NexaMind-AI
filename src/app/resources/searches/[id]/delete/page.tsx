@@ -33,7 +33,10 @@ export default async function DeleteSearchPage({
 
   return (
     <main className="auth-page category-page">
-      <section aria-labelledby="delete-search-title" className="auth-card category-card">
+      <section
+        aria-labelledby="delete-search-title"
+        className="auth-card category-card confirmation-card"
+      >
         <h1 id="delete-search-title">Supprimer cette recherche&nbsp;?</h1>
 
         {result.status !== "ok" ? (
@@ -53,7 +56,7 @@ export default async function DeleteSearchPage({
               <strong>&laquo;&nbsp;{result.search.query || "recherche vide"}&nbsp;&raquo;</strong>&nbsp;?
             </p>
             <form action={deleteSearch.bind(null, result.search.id)} className="resource-delete-actions">
-              <button className="button" type="submit">
+              <button className="button button-destructive" type="submit">
                 Confirmer la suppression
               </button>
               <Link className="button button-secondary" href="/resources/searches">
