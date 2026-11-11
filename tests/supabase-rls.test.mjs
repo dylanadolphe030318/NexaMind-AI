@@ -343,6 +343,29 @@ test(
           .single();
         assert.ifError(createError);
         const fixture = trackCategory(category.id, managerProfile.workspace_id);
+        const { data: resource, error: resourceError } = await memberA
+          .from("resources")
+          .insert({
+            workspace_id: managerProfile.workspace_id,
+            category_id: category.id,
+            owner_id: sessionA.user.id,
+            title: "RLS-TEST-failure-" + randomUUID(),
+            body: "fixture pour le nettoyage après échec",
+          })
+          .select("id")
+          .single();
+        assert.ifError(resourceError);
+        trackResource(resource.id);
+        const { data: search, error: searchError } = await memberA
+          .from("searches")
+          .insert({
+            owner_id: sessionA.user.id,
+            query: "RLS-TEST-failure-" + randomUUID(),
+          })
+          .select("id")
+          .single();
+        assert.ifError(searchError);
+        trackSearch(search.id);
         const simulatedFailure = new Error("échec simulé après création");
 
         await assert.rejects(
@@ -350,12 +373,30 @@ test(
             action: async () => {
               throw simulatedFailure;
             },
-            cleanup: [categoryCleanup.at(-1)],
+            cleanup: [
+              resourceCleanup.at(-1),
+              searchCleanup.at(-1),
+              categoryCleanup.at(-1),
+            ],
           }),
           (error) => error === simulatedFailure,
         );
         assert.equal(fixture.deleted, true);
         assert.equal(fixture.verified, true);
+        const { data: remainingResource, error: resourceReadError } = await memberA
+          .from("resources")
+          .select("id")
+          .eq("id", resource.id)
+          .maybeSingle();
+        assert.ifError(resourceReadError);
+        assert.equal(remainingResource, null);
+        const { data: remainingSearch, error: searchReadError } = await memberA
+          .from("searches")
+          .select("id")
+          .eq("id", search.id)
+          .maybeSingle();
+        assert.ifError(searchReadError);
+        assert.equal(remainingSearch, null);
       });
 
       await t.test("le RPC de nettoyage est borné, refuse les catégories interdites et permet le réessai", async () => {

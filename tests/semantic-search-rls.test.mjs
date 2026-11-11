@@ -84,9 +84,29 @@ async function cleanupResourceIds(client, resourceIds) {
   }
 }
 
-async function cleanupRateLimitIds(client, callIds) {
+async function cleanupRateLimitIds(
+  client,
+  callIds,
+  { userId, activeSince, knownIds } = {},
+) {
   const errors = [];
-  for (const id of callIds) {
+  const ids = new Set(callIds);
+  if (userId && activeSince && knownIds) {
+    try {
+      const { data: recent, error } = await client
+        .from("semantic_search_calls")
+        .select("id")
+        .eq("user_id", userId)
+        .gt("created_at", activeSince);
+      assert.ifError(error);
+      for (const row of recent ?? []) {
+        if (!knownIds.has(row.id)) ids.add(row.id);
+      }
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  for (const id of ids) {
     try {
       const { error: deleteError } = await client
         .from("semantic_search_calls")
@@ -110,8 +130,8 @@ async function cleanupRateLimitIds(client, callIds) {
 }
 
 test("recherche sémantique : proximité, limite et droits (RLS active, sans clé de service)", async (t) => {
-  const a = await login(accounts.memberA);
-  const b = await login(accounts.memberB);
+  let a;
+  let b;
   const createdIds = [];
 
   const search = (session, vector, limit = 5, minSimilarity = 0.3) =>
@@ -139,6 +159,8 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
 
   await runWithRlsCleanup({
     action: async () => {
+    a = await login(accounts.memberA);
+    b = await login(accounts.memberB);
     const { data: profile, error: profileError } = await a.client
       .from("profiles")
       .select("workspace_id")
@@ -355,9 +377,19 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
         "le seuil implicite et 0,2 renvoient les mêmes références",
       );
       assert.deepEqual(
+        implicitCandidates.data,
+        explicitCandidates.data,
+        "les lignes complètes et leur ordre sont identiques avec le seuil implicite et 0,2",
+      );
+      assert.deepEqual(
         references(implicitCandidates.data),
         references(implicitRetry.data),
         "le premier appel implicite et son réessai gardent les mêmes références",
+      );
+      assert.deepEqual(
+        implicitCandidates.data,
+        implicitRetry.data,
+        "les lignes complètes et leur ordre sont stables au réessai implicite",
       );
       const lowThresholdCandidate = implicitCandidates.data.find(
         (row) => row.resource_id === lowerThresholdHit.id,
@@ -533,13 +565,17 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       assert.equal(data.some((row) => row.resource_id === ready.id), false);
     });
     },
-    cleanup: [() => cleanupResourceIds(a.client, createdIds)],
+    cleanup: [
+      () => (a ? cleanupResourceIds(a.client, createdIds) : undefined),
+    ],
     disconnect: [
       async () => {
+        if (!a) return;
         const { error } = await a.client.auth.signOut();
         assert.ifError(error);
       },
       async () => {
+        if (!b) return;
         const { error } = await b.client.auth.signOut();
         assert.ifError(error);
       },
@@ -548,15 +584,22 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
 });
 
 test("limite de recherches : refus au-delà du plafond, compteur propre à chaque membre", async () => {
-  const b = await login(accounts.memberB);
-  const a = await login(accounts.memberA);
+  let b;
+  let a;
   const anonymousClient = newClient();
   const consume = (session, max) =>
     session.client.rpc("consume_semantic_search_quota", { p_max_per_minute: max });
   const createdCallIds = { memberA: [], memberB: [] };
+  let cleanupContext = {
+    memberA: { knownIds: null, userId: null },
+    memberB: { knownIds: null, userId: null },
+    activeSince: null,
+  };
 
   await runWithRlsCleanup({
     action: async () => {
+      b = await login(accounts.memberB);
+      a = await login(accounts.memberA);
       const activeSince = new Date(Date.now() - 60_000).toISOString();
       const { data: recentB, error: recentBError } = await b.client
         .from("semantic_search_calls")
@@ -572,6 +615,11 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
       assert.ifError(recentAError);
       const knownB = new Set((recentB ?? []).map((row) => row.id));
       const knownA = new Set((recentA ?? []).map((row) => row.id));
+      cleanupContext = {
+        activeSince,
+        memberA: { knownIds: knownA, userId: a.userId },
+        memberB: { knownIds: knownB, userId: b.userId },
+      };
       const memberBLimit = knownB.size + 1;
       const memberALimit = knownA.size + 1;
       assert.ok(memberBLimit <= 20 && memberALimit <= 20, "attendre le renouvellement du quota avant de relancer ce test");
@@ -631,15 +679,29 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
       assert.ok(anonymous.error, "un visiteur sans session est refusé");
     },
     cleanup: [
-      () => cleanupRateLimitIds(b.client, createdCallIds.memberB),
-      () => cleanupRateLimitIds(a.client, createdCallIds.memberA),
+      () =>
+        b
+          ? cleanupRateLimitIds(b.client, createdCallIds.memberB, {
+              ...cleanupContext.memberB,
+              activeSince: cleanupContext.activeSince,
+            })
+          : undefined,
+      () =>
+        a
+          ? cleanupRateLimitIds(a.client, createdCallIds.memberA, {
+              ...cleanupContext.memberA,
+              activeSince: cleanupContext.activeSince,
+            })
+          : undefined,
     ],
     disconnect: [
       async () => {
+        if (!b) return;
         const { error } = await b.client.auth.signOut();
         assert.ifError(error);
       },
       async () => {
+        if (!a) return;
         const { error } = await a.client.auth.signOut();
         assert.ifError(error);
       },

@@ -59,3 +59,7 @@
 - source_spec: `_bmad-output/specs/spec-backlog-standard/stories/3-5-ameliorer-le-classement-des-recherches-de-ressources.md`
   summary: Vérifier avec le fournisseur réel la sélection face à des instructions présentes dans les données (risque moyen non confirmé).
   evidence: Les tests locaux vérifient le prompt et les identifiants autorisés, pas la résistance sémantique du modèle. Un essai contrôlé avec contenu fictif contradictoire et génération réelle permettrait de lever l'incertitude ; aucune divulgation ni instruction suivie n'a été constatée.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-cc-2026-11-11-nettoyage-rls-et-seuil-rpc.md`
+  summary: Faire remonter et vérifier les erreurs de nettoyage dans `tests/indexing-rls.test.mjs`.
+  evidence: Le `finally` existant supprime les ressources suivies par ID exact, mais ignore les erreurs de suppression et ne vérifie pas leur absence ; ce test préexistant n'est pas modifié par le nettoyage des catégories RLS de cette livraison.

@@ -150,6 +150,14 @@ Les documents approuvés sont déjà commités dans le baseline ; aucun push dem
 - low — Rejeté : le décalage d’horloge ne fausse le comptage qu’autour de la frontière de la fenêtre d’une minute ; le corriger correctement demanderait une référence temporelle côté base ou une nouvelle interface, disproportionnée pour ce risque rare.
 - low — Rejeté : les tests de quota peuvent entrer en concurrence si les mêmes comptes sont réutilisés ; le `README.md` demande maintenant des comptes dédiés aux tests et interdit les exécutions simultanées avec les mêmes identifiants.
 - false — Le spec reste un fichier local non suivi et aucun push n’est demandé ; ces identifiants opérationnels ne sont pas publiés par les commits de code. Le spec fourni ne doit pas être modifié pour ce finding.
+- false — La migration limite le RPC au responsable du workspace, à l’identifiant exact, au format strict défini comme fixture par le spec et aux catégories inutilisées ; une catégorie non conforme est refusée et aucune suppression par préfixe n’existe.
+- false — Le workspace aléatoire différent du workspace du responsable reçoit le même refus 42501 que tout workspace non autorisé ; le RPC revérifie aussi que la catégorie exacte appartient au workspace fourni avant toute suppression.
+- medium / patch — Le test comparait seulement les références triées alors que `tests-ia.md` annonçait des résultats identiques ; il compare maintenant les lignes complètes et leur ordre pour l’appel implicite, l’appel explicite à 0,2 et le réessai.
+- medium / patch — Les tests sémantiques ouvraient des sessions avant l’enregistrement des actions de nettoyage ; l’authentification est désormais dans l’action protégée et les déconnexions tolèrent les sessions non initialisées.
+- medium / patch — Une lecture échouée après l’insertion d’un appel de quota pouvait empêcher l’enregistrement de son ID ; le nettoyage recense maintenant les lignes exactes postérieures à l’instantané initial, en plus des IDs suivis.
+- medium / patch — Le test d’échec simulé ne vérifiait en base que la catégorie ; il crée maintenant une catégorie, une ressource et une recherche, déclenche l’échec, les nettoie par ID et vérifie leur absence avant la déconnexion.
+- false — Le test du seuil omet `p_min_similarity` mais fixe `p_limit` à 20 ; le spec demande de vérifier le défaut du seuil de similarité, pas le défaut de la limite, dont la signature et le plafond ne changent pas.
+- false — Les commandes et nombres de tests sont présents dans la documentation ; aucun identifiant de run n’est exigé par le spec et l’absence de cet identifiant ne rend pas les vérifications non reproductibles.
 
 ## Verification
 
