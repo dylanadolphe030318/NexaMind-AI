@@ -82,6 +82,34 @@ Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis
 
 **Nettoyage des tests RLS (proposition de changement du 2026-11-07) :** à la fin de chaque test d’intégration RLS, qu’il réussisse ou échoue, supprimer toutes les données créées par le test (conversations, messages, catégories et ressources temporaires). Vérifier que le nettoyage s’exécute aussi après une erreur et qu’il ne supprime aucune donnée réelle.
 
+### Correction de trajectoire approuvée le 2026-11-11 — contrôles à préparer
+
+Ces contrôles sont approuvés pour les futures corrections et la story 4.16 ;
+ils ne signifient pas que le code ou les migrations correspondants sont livrés.
+
+- **Nettoyage RLS (A, hors sprint) :** le runner ne dispose actuellement d'aucun
+  DELETE sur les catégories. Après livraison du chemin technique borné, suivre
+  l'identifiant exact de la fixture et vérifier son retrait après succès et après
+  échec simulé, avant déconnexion du responsable. Contrôler les erreurs et le
+  réessai ; vérifier les refus membre/anonyme, autre workspace, catégorie réelle
+  ou utilisée. Les assertions restent sous RLS, sans clé de service.
+  Ne pas supprimer les anciennes catégories « RLS... » par préfixe : dresser un
+  inventaire et faire confirmer les identifiants inutilisés par Dylan.
+- **Preuve Q1 (B, préparation de 4.16) :** garder la question inchangée. Noter
+  séparément Next.js App Router/TypeScript et les services PostgreSQL,
+  authentification, stockage de fichiers et RLS de Supabase. Sur Recherche,
+  relever titres, passages probants et rangs top 3 ; relever aussi la phrase et
+  son lien, sans les substituer à la preuve du classement. Sur Assistant,
+  relever réponse, sources qui appuient chaque élément et liens ouvrables.
+  Une phrase partielle ne prouve pas toute la réponse. Garder les règles de notation.
+  Ce contrôle historique ne remplace pas le jeu requis par 4.16 : dix questions
+  documentées et trois questions sans réponse.
+- **Seuil RPC (C, hors sprint) :** après application de la nouvelle migration,
+  comparer l'appel de `search_resource_chunk_candidates` sans seuil à l'appel
+  avec 0,2 sur une fixture contrôlée entre 0,2 et 0,3, admissible dans la fenêtre
+  hybride. Vérifier résultats, références et plafond de vingt, première utilisation,
+  réessai et refus anonyme. L'ancien RPC et l'assistant restent inchangés.
+
 ## Vérification après le test 7 — recherche de ressources
 
 Pour `/resources/search`, le seuil minimal de similarité est de 0,20 et la fenêtre

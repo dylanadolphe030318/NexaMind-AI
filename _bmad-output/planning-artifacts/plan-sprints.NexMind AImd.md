@@ -50,6 +50,31 @@ Après la [rétrospective finale du sprint 8](../implementation-artifacts/sprint
 
 Responsables : développeur pour la preuve ouvrable et les tests automatisés ; Dylan pour l'application SQL et la vérification manuelle. Ces précisions seront reprises dans les fiches du sprint 9 lors de leur préparation.
 
+## Correction de trajectoire validée le 2026-11-11
+
+Dylan approuve [la proposition issue de la rétro 3.5](sprint-change-proposal-2026-11-11.md).
+Le sprint 9 conserve cinq stories dans l'ordre 4.14, 4.15, 4.16, S8-2, S8-3.
+Aucune story terminée n'est rouverte et aucun développement n'est lancé.
+
+- **CC-2026-11-11-A — hors sprint, à réaliser séparément avant le sprint 9 :**
+  nettoyer uniquement les catégories de test RLS confirmées inutilisées et
+  empêcher leur retour après succès ou échec des tests. Prévoir un chemin
+  technique borné de nettoyage, sans suppression générale de catégories.
+  L'inventaire exact des anciennes lignes doit être approuvé avant suppression.
+- **CC-2026-11-11-C — hors sprint, après A et avant le sprint 9 :**
+  aligner sur 0,2 le défaut du seul RPC de candidats par une nouvelle migration,
+  sans changer le classement de l'assistant ; tester défaut implicite et explicite.
+- **CC-2026-11-11-B — précision du travail de vérification de 4.16 :**
+  relever séparément les preuves de Next.js App Router/TypeScript et des services
+  Supabase pour Q1, avec rangs de passages, phrase complémentaire et liens sur
+  Recherche, réponse sourcée sur Assistant. Les dix questions historiques et
+  la notation restent inchangées ; elles ne remplacent pas le jeu demandé par 4.16.
+
+Les corrections A et C sont suivies hors sprint et non ajoutées aux cinq stories
+du sprint 9. Développeur : réalisation et tests sur demande, un commit par correction.
+Dylan : application SQL, accord sur les données à retirer et évaluation avant clôture.
+Le fournisseur, les embeddings, pgvector, les quotas et le budget restent inchangés.
+
 ## Points encore ouverts
 
 - Choisir l’hébergement de Next.js.

@@ -113,6 +113,30 @@ sprint_9_planned:
     s8-3: ready-for-dev
   development_started: false
 action_items:
+  - id: "cc-2026-11-11-a"
+    epic: 2
+    action: "Hors sprint, avant le sprint 9 : nettoyage borne des fixtures categories
+      RLS apres succes ou echec. Inventaire et accord sur les anciennes lignes
+      avant suppression ; aucun droit general DELETE ni cle de service dans les tests."
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
+  - id: "cc-2026-11-11-b"
+    epic: 4
+    action: "Dans la verification de 4.16 : reprendre la grille Q1 approuvee
+      dans epics.md et tests-ia.md lors de la preparation de la fiche, puis l'evaluer.
+      Questions et notation inchangees ; le jeu historique ne remplace pas le jeu de 4.16."
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
+  - id: "cc-2026-11-11-c"
+    epic: 3
+    action: "Hors sprint, apres A et avant le sprint 9 : nouvelle migration pour le
+      defaut 0,2 du RPC candidats. Verifier equivalence seuil implicite/explicite
+      et non-regression de l'ancien RPC et de l'assistant."
+    owner: "Dylan + développeur"
+    status: open
+    ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "epic-1-retro-item-1-pr-parer-un-compte-membre-et-un-compte-r"
     epic: 1
     action: "Préparer un compte membre et un compte responsable de test avant le sprint

@@ -619,6 +619,36 @@ afin de m’assurer que les réponses sont sourcées et que l’assistant s’ab
 
 **Étant donné** 3 questions dont les réponses sont absentes des ressources, **quand** l’assistant répond, **alors** il s’abstient dans les 3 cas.
 
+**Précision de vérification approuvée le 2026-11-11 — CC-2026-11-11-B :**
+pour Q1 du jeu historique, relever séparément les preuves de Next.js App Router
+avec TypeScript et des services PostgreSQL, authentification, stockage de fichiers
+et RLS de Supabase. Sur Recherche de ressources, conserver les rangs des passages
+probants et vérifier le top 3 ; la phrase affichée et son lien sont complémentaires,
+pas une preuve de classement. Sur Assistant, vérifier la réponse, les sources qui
+confirment les affirmations et les liens ouvrables. Garder les questions et
+la notation existantes. Le jeu historique ne remplace pas les dix questions
+documentées et les trois questions sans réponse exigées ci-dessus.
+Cette précision sera reprise dans la fiche 4.16 lors de sa préparation.
+
+## Corrections techniques hors sprint — approuvées le 2026-11-11
+
+Voir [la proposition de correction de trajectoire](sprint-change-proposal-2026-11-11.md).
+Ces corrections ne sont pas de nouvelles stories dans le sprint 9.
+
+- **CC-2026-11-11-A (Epic 2, entretien des tests) :** nettoyer les catégories RLS
+  confirmées inutilisées et corriger la fuite de fixtures. Prévoir un chemin
+  technique limité au responsable du workspace, à un identifiant exact et au
+  format de fixture reconnu ; refuser les catégories réelles, étrangères ou utilisées.
+  Aucun bouton ni droit général de suppression de catégorie. L'inventaire des
+  anciennes lignes doit être validé avant suppression.
+- **CC-2026-11-11-C (Epic 3, contrat RPC) :** après A, aligner le défaut de
+  `search_resource_chunk_candidates` à 0,2 par une nouvelle migration et vérifier
+  son équivalence avec le seuil explicite, sans modification de l'assistant.
+
+Réalisation sur demande avant le développement du sprint 9, tests et commit
+séparés pour chaque correction, application SQL et évaluation par Dylan.
+La story 3.5 reste terminée ; les epics et le sprint 9 ne sont pas redécoupés.
+
 ## Plan des sprints
 
 ### Sprint 1 — Une première version protégée et visible
