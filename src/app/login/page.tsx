@@ -43,7 +43,7 @@ export default async function LoginPage({
         </p>
 
         {signOutError === "1" ? (
-          <p aria-live="polite" className="form-message form-message-error">
+          <p aria-live="polite" className="auth-message auth-message-error">
             Une erreur est survenue pendant la déconnexion. Vérifiez votre
             session avant de continuer.
           </p>

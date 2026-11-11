@@ -58,7 +58,7 @@ Ce document transforme le PRD, les documents UX et l’architecture de NexaMind 
 
 ### Exigences UX et visuelles
 
-- **UX-DR1 — Identité visuelle :** appliquer la palette et les tokens du document DESIGN : violet principal, rose en accent, fonds clairs, typographie système, espacements en multiples de 4 px et rayons définis ; garder les ressources et réponses prioritaires sur la décoration.
+- **UX-DR1 — Identité visuelle :** appliquer DESIGN à toutes les pages : violet profond, rose secondaire, fond blanc, cartes mauve pâle, dégradés réservés au logo et aux actions principales, typographie système, espacements en multiples de 4 px et rayons définis ; garder les ressources et réponses prioritaires sur la décoration. Extension globale approuvée par CC-2026-11-11-UI.
 - **UX-DR2 — Contraste et états :** viser WCAG 2.2 AA pour les contrastes indiqués ; ne jamais communiquer une erreur, une réussite, une catégorie ou une permission par la seule couleur. Le focus est visible.
 - **UX-DR3 — Navigation adaptative :** fournir les accès aux mêmes écrans depuis une navigation persistante sur ordinateur et compacte sur mobile ; indiquer l’écran actif autrement que par la couleur seule. **[ASSUMPTION]**
 - **UX-DR4 — Ressources :** présenter titre, catégorie et date sur les cartes/lignes ; le détail permet de lire le contenu ; les résultats de recherche ajoutent un extrait et un lien vers la ressource.
@@ -650,6 +650,22 @@ séparés pour chaque correction, application SQL et évaluation par Dylan.
 La story 3.5 reste terminée ; les epics et le sprint 9 ne sont pas redécoupés.
 
 ## Plan des sprints
+
+### Extension transversale approuvée — sprint UI 10
+
+[CC-2026-11-11-UI](sprint-change-proposal-2026-11-11-refonte-visuelle.md)
+ajoute trois compléments sans nouvel epic ni réouverture des stories terminées :
+
+- **UI10-1** (Epic 1, socle transversal) : harmoniser les styles communs,
+  l'accueil, l'inscription, la connexion et le tableau de bord.
+- **UI10-2** (Epics 2 et 3) : harmoniser ressources, catégories, recherche,
+  formulaires, détails, historiques et confirmations.
+- **UI10-3** (Epic 4, validation transversale) : harmoniser assistant et
+  conversations, conserver les sources et vérifier toutes les pages.
+
+Les critères détaillés et l'inventaire des seize pages sont dans la proposition
+et les [fiches UI 10](../specs/spec-sprint-10-ui/).
+Le sprint IA 9 conserve cinq stories en revue et ses évaluations ouvertes.
 
 ### Sprint 1 — Une première version protégée et visible
 

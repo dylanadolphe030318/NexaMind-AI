@@ -63,3 +63,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-cc-2026-11-11-nettoyage-rls-et-seuil-rpc.md`
   summary: Faire remonter et vérifier les erreurs de nettoyage dans `tests/indexing-rls.test.mjs`.
   evidence: Le `finally` existant supprime les ressources suivies par ID exact, mais ignore les erreurs de suppression et ne vérifie pas leur absence ; ce test préexistant n'est pas modifié par le nettoyage des catégories RLS de cette livraison.
+- source_spec: `_bmad-output/specs/spec-sprint-10-ui/ui10-1-socle-accueil-acces.md`
+  summary: Verifier au navigateur l'espace membre avec des sessions de test autorisees membre et responsable.
+  evidence: Le rendu connecte et le role sont couverts par une session simulee et la redirection visiteur est testee, mais aucun compte authentifie n'etait disponible pour une verification navigateur sans acces distant.

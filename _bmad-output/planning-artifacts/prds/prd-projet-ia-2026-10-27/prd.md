@@ -171,6 +171,12 @@ L’application distingue les actions du responsable et du membre et n’utilise
 
 ## 6. Qualité, confidentialité et sécurité
 
+**Direction visuelle approuvée le 2026-11-11 :** toutes les pages, publiques et
+protégées, partagent une identité cohérente, fond blanc et cartes mauve pâle.
+Les valeurs sont définies dans [DESIGN](../../ux-designs/ux-projet-ia-2026-10-28/DESIGN.md).
+Cette refonte ne modifie aucune fonction FR-1 à FR-9, les permissions ni les
+seuils de qualité IA ; elle conserve lisibilité, clavier et adaptation mobile.
+
 Les éléments ci-dessous sont nécessaires à un produit crédible, mais leurs seuils ne sont pas définis dans le challenge ; les valeurs chiffrées marquées comme hypothèses devront être validées.
 
 - Le budget et les quotas d’utilisation des services IA restent à définir avant tout usage réel ; les choix techniques sont consignés dans l’architecture.

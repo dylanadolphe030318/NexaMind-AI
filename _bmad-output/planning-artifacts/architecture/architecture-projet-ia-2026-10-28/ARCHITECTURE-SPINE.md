@@ -95,6 +95,15 @@ companions: []
 
 ## Consistency Conventions
 
+### Présentation partagée — sprint UI 10
+
+La [refonte approuvée](../../sprint-change-proposal-2026-11-11-refonte-visuelle.md)
+réutilise les tokens de DESIGN, les styles globaux et les composants de
+présentation existants. Classes ciblées pour les cartes et états ; pas de
+`use client` ajouté à une page serveur pour un changement décoratif.
+Aucune bibliothèque UI, migration, dépendance externe ou modification des
+services métier n'est nécessaire. AD-1 à AD-7 sont conservés.
+
 ### Exception technique de nettoyage livrée — 2026-11-11
 
 La correction [CC-2026-11-11-A](../../sprint-change-proposal-2026-11-11.md) est

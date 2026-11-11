@@ -37,7 +37,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="auth-page">
-      <section aria-labelledby="dashboard-title" className="auth-card">
+      <section
+        aria-labelledby="dashboard-title"
+        className="auth-card dashboard-card"
+      >
         <Link aria-label="NexaMind AI, accueil" className="brand" href="/">
           <span aria-hidden="true" className="brand-mark">
             <svg fill="none" viewBox="0 0 32 32">

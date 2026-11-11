@@ -3,19 +3,26 @@
 :root {
   color-scheme: light;
   --ink: #252032;
-  --muted: #716b7c;
-  --purple: #653a91;
-  --purple-deep: #512978;
+  --muted: #6e6878;
+  --purple: #5b21b6;
+  --purple-deep: #3b0764;
   --pink: #b83e6e;
-  --line: #eee9f2;
+  --error: #b42318;
+  --success: #24734b;
+  --line: #e8dde9;
+  --control-border: #8a8194;
+  --focus: #252032;
   --surface-mauve: #f3edf8;
-  --font-sans: Arial, Helvetica, sans-serif;
+  --radius-field: 12px;
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --font-system: system-ui, sans-serif;
 }
 
 @theme inline {
   --color-background: #fff;
   --color-foreground: var(--ink);
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-system);
 }
 
 * {
@@ -31,7 +38,7 @@ body {
   min-height: 100vh;
   margin: 0;
   color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-system);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
 }
@@ -42,16 +49,13 @@ a {
 }
 
 a:focus-visible {
-  outline: 3px solid #b83e6e;
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 
 .landing {
   min-height: 100vh;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 82% 46%, rgb(245 237 250 / 65%), transparent 34rem),
-    linear-gradient(180deg, #fff 0%, #fefcff 100%);
+  background: #fff;
 }
 
 .page-shell {
@@ -65,6 +69,7 @@ a:focus-visible {
 .site-header {
   min-height: 94px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
@@ -90,7 +95,7 @@ a:focus-visible {
   border-radius: 12px;
   color: #fff;
   background: linear-gradient(145deg, var(--purple), var(--pink));
-  box-shadow: 0 6px 16px rgb(101 58 145 / 18%);
+  box-shadow: 0 6px 16px rgb(91 33 182 / 18%);
 }
 
 .brand-mark svg {
@@ -110,7 +115,7 @@ a:focus-visible {
 
 .header-login,
 .text-link {
-  color: #4d4658;
+  color: var(--muted);
   font-size: 0.9rem;
   font-weight: 600;
   transition: color 160ms ease;
@@ -129,10 +134,10 @@ a:focus-visible {
   gap: 15px;
   padding: 0 23px;
   border: 1px solid var(--purple);
-  border-radius: 12px;
+  border-radius: var(--radius-button);
   color: #fff;
-  background: var(--purple);
-  box-shadow: 0 8px 18px rgb(101 58 145 / 17%);
+  background: linear-gradient(135deg, var(--purple), #6d28d9);
+  box-shadow: 0 8px 18px rgb(91 33 182 / 17%);
   font-size: 0.93rem;
   font-weight: 700;
   transition:
@@ -150,11 +155,12 @@ a:focus-visible {
 .button-small {
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 10px;
+  border-radius: var(--radius-button);
   font-size: 0.85rem;
 }
 
 .button-secondary {
+  border-color: var(--purple);
   color: var(--purple-deep);
   background: #fff;
   box-shadow: none;
@@ -251,8 +257,7 @@ a:focus-visible {
   inset: 12%;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(232 213 244 / 72%), rgb(247 240 250 / 30%) 55%, transparent 72%);
-  filter: blur(7px);
+  background: var(--surface-mauve);
 }
 
 .orbit {
@@ -285,9 +290,9 @@ a:focus-visible {
   border: 1px solid rgb(255 255 255 / 75%);
   border-radius: 32%;
   color: #fff;
-  background: linear-gradient(145deg, #8b5bb4, #62368b 62%, #b83e6e);
+  background: var(--purple);
   box-shadow:
-    0 25px 65px rgb(101 58 145 / 28%),
+    0 25px 65px rgb(91 33 182 / 22%),
     inset 0 1px 0 rgb(255 255 255 / 45%);
   transform: rotate(-8deg);
 }
@@ -315,7 +320,6 @@ a:focus-visible {
 
 .art-star {
   color: var(--pink);
-  text-shadow: 0 5px 16px rgb(184 62 110 / 20%);
 }
 
 .star-one {
@@ -327,7 +331,7 @@ a:focus-visible {
 .star-two {
   bottom: 20%;
   left: 18%;
-  color: var(--purple);
+  color: var(--purple-deep);
   font-size: 2rem;
 }
 
@@ -356,7 +360,7 @@ a:focus-visible {
   bottom: 30%;
   width: 16px;
   height: 16px;
-  background: #8c69b0;
+  background: var(--purple);
 }
 
 .site-footer {
@@ -366,12 +370,12 @@ a:focus-visible {
   justify-content: space-between;
   gap: 16px;
   border-top: 1px solid var(--line);
-  color: #827b8a;
+  color: var(--muted);
   font-size: 0.78rem;
 }
 
 .site-footer span:first-child {
-  color: #5a5364;
+  color: var(--ink);
   font-weight: 700;
 }
 
@@ -419,9 +423,21 @@ a:focus-visible {
   }
 }
 
+@media (max-width: 480px) {
+  .site-header {
+    align-items: flex-start;
+    padding: 18px 0;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 @media (max-width: 420px) {
   .page-shell {
-    width: calc(100% - 36px);
+    width: calc(100% - 32px);
   }
 
   .brand {
@@ -499,9 +515,7 @@ a:focus-visible {
   display: grid;
   place-items: center;
   padding: 32px 20px;
-  background:
-    radial-gradient(ellipse at 82% 20%, rgb(245 237 250 / 65%), transparent 34rem),
-    linear-gradient(180deg, #fff 0%, #fefcff 100%);
+  background: #fff;
 }
 
 .auth-card {
@@ -509,9 +523,9 @@ a:focus-visible {
   min-width: 0;
   padding: 40px;
   border: 1px solid var(--line);
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 20px 70px rgb(37 32 50 / 8%);
+  border-radius: var(--radius-card);
+  background: var(--surface-mauve);
+  box-shadow: 0 12px 32px rgb(37 32 50 / 7%);
 }
 
 .auth-card h1 {
@@ -531,8 +545,9 @@ a:focus-visible {
   margin: 20px 0 0;
   padding: 14px 16px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-card);
   color: var(--muted);
+  background: #fff;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
@@ -562,8 +577,8 @@ a:focus-visible {
   width: 100%;
   min-height: 48px;
   padding: 0 13px;
-  border: 1px solid #d8d1df;
-  border-radius: 9px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-field);
   color: var(--ink);
   background: #fff;
   font: inherit;
@@ -588,8 +603,8 @@ a:focus-visible {
 .auth-field select {
   width: 100%;
   padding: 12px 13px;
-  border: 1px solid #d8d1df;
-  border-radius: 9px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-field);
   color: var(--ink);
   background: #fff;
   font: inherit;
@@ -608,18 +623,18 @@ a:focus-visible {
 .auth-field input:focus-visible,
 .auth-field textarea:focus-visible,
 .auth-field select:focus-visible {
-  outline: 3px solid rgb(101 58 145 / 35%);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
-  border-color: var(--purple);
+  border-color: var(--focus);
 }
 
 .auth-field [aria-invalid="true"] {
-  border-color: #782546;
+  border-color: var(--error);
 }
 
 .field-error {
   margin: 0;
-  color: #782546;
+  color: var(--error);
   font-size: 0.85rem;
   font-weight: 600;
 }
@@ -643,20 +658,20 @@ a:focus-visible {
 .auth-message {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 9px;
+  border-radius: 12px;
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
 .auth-message-error {
   border: 1px solid #e8bbc9;
-  color: #782546;
+  color: var(--error);
   background: #fff6f8;
 }
 
 .auth-message-success {
   border: 1px solid #b7d9c5;
-  color: #205936;
+  color: var(--success);
   background: #f3fbf6;
 }
 
@@ -716,7 +731,7 @@ a:focus-visible {
   gap: 14px;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: #fff;
 }
 
@@ -734,7 +749,7 @@ a:focus-visible {
   min-width: 0;
   padding: 18px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--surface-mauve);
   overflow-wrap: anywhere;
 }
@@ -880,7 +895,7 @@ a:focus-visible {
   margin: 0;
   padding: 18px;
   border: 1px dashed #cfc5d8;
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   color: var(--muted);
 }
 
@@ -924,8 +939,29 @@ a:focus-visible {
 
 .dashboard-categories-link {
   width: 100%;
-  margin-top: 24px;
+  margin-top: 12px;
   text-decoration: none;
+}
+
+.dashboard-card {
+  width: min(100%, 720px);
+}
+
+.dashboard-card .dashboard-categories-link {
+  border-color: var(--control-border);
+  color: var(--purple);
+  background: #fff;
+  box-shadow: none;
+}
+
+.dashboard-card .dashboard-categories-link:hover {
+  border-color: var(--purple);
+  color: #fff;
+  background: var(--purple-deep);
+}
+
+.dashboard-card > .dashboard-categories-link:nth-of-type(2) {
+  margin-top: 24px;
 }
 
 @media (max-width: 520px) {

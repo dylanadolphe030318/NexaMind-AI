@@ -56,6 +56,14 @@ L’interface parle simplement, avec calme et précision. Elle dit ce qui vient 
 
 ## Component Patterns
 
+La [refonte UI 10 approuvée](../../sprint-change-proposal-2026-11-11-refonte-visuelle.md)
+harmonise l'apparence de toutes les pages sans ajouter de destination, fonction
+ou permission. Les champs, liens, sélecteurs natifs, confirmations et états
+ci-dessous gardent leur comportement. Les questions historiques restent
+distinctes des réponses ; les sources gardent leurs numéros et leurs liens.
+Les écrans réels sont à vérifier au clavier, à 320/375/1280 px et au zoom 200 %,
+avec comptes membre et responsable pour les surfaces protégées.
+
 Les éléments ci-dessous décrivent le comportement. Leur apparence est décrite dans [DESIGN.md](./DESIGN.md).
 
 | Élément | Comportement |

@@ -6,19 +6,19 @@ updated: 2026-10-28
 sources:
   - ../../prds/prd-projet-ia-2026-10-27/prd.md
 colors:
-  primary: '#653A91'
+  primary: '#5B21B6'
   primary-foreground: '#FFFFFF'
-  primary-hover: '#512D78'
+  primary-hover: '#3B0764'
   accent: '#B83E6E'
   accent-foreground: '#FFFFFF'
   accent-soft: '#FCEBF2'
-  background: '#FFFAFC'
+  background: '#FFFFFF'
   surface: '#FFFFFF'
-  surface-soft: '#F7F1F8'
-  text-primary: '#29222D'
-  text-secondary: '#625866'
+  surface-soft: '#F3EDF8'
+  text-primary: '#252032'
+  text-secondary: '#6E6878'
   border: '#E8DDE9'
-  focus: '#653A91'
+  focus: '#252032'
   error: '#B42318'
   success: '#24734B'
 typography:
@@ -43,9 +43,9 @@ typography:
     fontWeight: '550'
     lineHeight: '1.4'
 rounded:
-  sm: 6px
-  md: 10px
-  lg: 16px
+  sm: 12px
+  md: 14px
+  lg: 20px
   full: 9999px
 spacing:
   '1': 4px
@@ -59,7 +59,7 @@ spacing:
   gutter-desktop: 24px
 components:
   button-primary:
-    background: '{colors.primary}'
+    background: 'linear-gradient(135deg, #5B21B6, #6D28D9)'
     foreground: '{colors.primary-foreground}'
     radius: '{rounded.md}'
   button-secondary:
@@ -77,7 +77,7 @@ components:
     background: '#F3EDF8'
     foreground: '{colors.text-primary}'
     border: '{colors.border}'
-    radius: '{rounded.md}'
+    radius: '{rounded.lg}'
   source-link:
     foreground: '{colors.primary}'
     underline: true
@@ -112,7 +112,10 @@ Utiliser l’échelle d’espacement en multiples de 4 px définie dans les toke
 
 ## Elevation & Depth
 
-Privilégier les fonds et bordures légères à une accumulation d’ombres. Réserver les ombres discrètes aux menus ou dialogues superposés, afin que les ressources et les sources restent visuellement dominantes.
+Privilégier les fonds et bordures légères à une accumulation d’ombres. Depuis
+CC-2026-11-11-UI, les cartes peuvent avoir une ombre discrète ; la bordure et le
+fond suffisent toujours à les distinguer. Les ressources et sources restent
+visuellement dominantes.
 
 ## Shapes
 
@@ -121,7 +124,7 @@ Les champs et boutons ont des angles légèrement arrondis ; les cartes et dialo
 ## Components
 
 - **Navigation principale** — libellés lisibles, surface `{colors.surface}`, destination active indiquée par le violet et un signal non chromatique.
-- **Bouton principal** — fond `{colors.primary}`, texte `{colors.primary-foreground}`, rayon `{rounded.md}` ; le libellé d’action reste visible.
+- **Bouton principal** — dégradé violet `#5B21B6` vers `#6D28D9`, texte `{colors.primary-foreground}`, rayon `{rounded.md}` ; le libellé d’action reste visible. Survol violet profond ; contraste vérifié sur toute la plage.
 - **Bouton secondaire** — fond `{colors.surface}`, texte `{colors.primary}`, bordure `{colors.border}` et rayon `{rounded.md}`.
 - **Formulaire de ressource** — champs sur `{colors.surface}`, texte `{colors.text-primary}`, bordures `{colors.border}` et focus `{colors.focus}` ; l’erreur utilise `{colors.error}` et un message textuel.
 - **Sélecteur de catégorie** — apparence de champ, avec la catégorie choisie affichée en texte ; les catégories ne sont pas distinguées par couleur seule.
@@ -153,10 +156,21 @@ aux métadonnées de ces cartes.
 
 | À faire | À éviter |
 |---|---|
-| Garder violet et rose comme accents au service de la lecture | Employer des dégradés ou de grandes surfaces saturées qui gênent la lecture |
+| Garder violet profond et rose secondaire au service de la lecture | Mettre des dégradés derrière les contenus longs ou copier des écrans bancaires |
 | Afficher les catégories avec leur nom textuel | Distinguer les catégories uniquement par une couleur |
 | Rendre les sources de réponse visibles et identifiables | Présenter une réponse IA sans moyen clair d’ouvrir sa source |
 | Employer les couleurs d’état avec un libellé explicite | Signaler une erreur ou une réussite par la couleur seule |
 | Laisser l’espace visuel aux ressources et aux réponses | Ajouter des éléments décoratifs ou des animations sans rôle fonctionnel |
 
 Le glossaire partagé est conservé dans la section **Shared Glossary** d’[EXPERIENCE.md](./EXPERIENCE.md), pour garder une seule définition de référence.
+
+## Extension globale approuvée — sprint UI 10
+
+[CC-2026-11-11-UI](../../sprint-change-proposal-2026-11-11-refonte-visuelle.md)
+applique cette identité à toutes les pages : accueil, accès, tableau de bord,
+ressources, catégories, recherches et assistant avec leurs historiques,
+formulaires, confirmations et états. Fond global blanc, cartes d'information
+mauve pâle, champs blancs, formes plus arrondies et espaces aérés. Les dégradés
+sont limités au logo et aux actions principales. Les confirmations destructives
+gardent un traitement distinct ; erreur, succès et absence ne sont pas recolorés
+en cartes de réponse. Police système et seuils AA conservés.

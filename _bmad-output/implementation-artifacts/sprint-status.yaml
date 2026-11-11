@@ -119,6 +119,18 @@ sprint_9_planned:
     s8-2: review
     s8-3: review
   development_started: true
+sprint_10_ui:
+  proposal: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11-refonte-visuelle.md"
+  story_folder: "_bmad-output/specs/spec-sprint-10-ui"
+  execution_order: ["ui10-1", "ui10-2", "ui10-3"]
+  stories:
+    ui10-1: review
+    ui10-2: ready-for-dev
+    ui10-3: ready-for-dev
+  development_started: true
+  direction: "2026-11-11 : Dylan approuve la refonte de toutes les pages et son
+    lancement. Fond blanc, cartes mauve pale, aucune fonction ajoutee.
+    Un commit par story, evaluation humaine avant done. Sprint IA 9 reste ouvert."
 action_items:
   - id: "cc-2026-11-11-a"
     epic: 2
