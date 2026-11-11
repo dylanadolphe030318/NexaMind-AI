@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { formatResourceDate, isUuid } from "@/features/resources/resource-format";
+import { formatResourceDate } from "@/features/resources/resource-format";
+import { parseResourceCategoryParam } from "@/features/resources/category-filter";
+import { ResourceCategoryFilter } from "@/features/resources/resource-category-filter";
 import { getResourceIndexingLabel } from "@/features/resources/resource-status";
 import { getResourceListData } from "@/features/resources/resources";
 
@@ -19,7 +21,7 @@ export default async function ResourcesPage({
   searchParams: Promise<{ category?: string | string[]; deleted?: string | string[] }>;
 }) {
   const { category, deleted } = await searchParams;
-  const requested = typeof category === "string" && isUuid(category) ? category : undefined;
+  const requested = parseResourceCategoryParam(category);
   const data = await getResourceListData(requested);
   if (!data) {
     redirect("/login");
@@ -50,34 +52,19 @@ export default async function ResourcesPage({
           </Link>
         </p>
 
-        {data.categories.length ? (
-          <nav aria-label="Filtrer par cat&eacute;gorie" className="resource-filter">
-            <ul className="resource-filter-list">
-              <li>
-                <Link
-                  aria-current={filterActive ? undefined : "true"}
-                  className="resource-filter-link"
-                  href="/resources"
-                >
-                  Toutes les cat&eacute;gories
-                  {filterActive ? "" : " (s\u00e9lectionn\u00e9e)"}
-                </Link>
-              </li>
-              {data.categories.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    aria-current={item.id === requested ? "true" : undefined}
-                    className="resource-filter-link"
-                    href={`/resources?category=${item.id}`}
-                  >
-                    {item.name}
-                    {item.id === requested ? " (s\u00e9lectionn\u00e9e)" : ""}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ) : null}
+        <section aria-label="Filtrer les ressources" className="resource-filter">
+          {data.categoriesError ? (
+            <p className="auth-message auth-message-error" role="alert">
+              Les cat&eacute;gories ne sont pas disponibles.{" "}
+              <Link href="/resources">R&eacute;essayer</Link>
+            </p>
+          ) : (
+            <ResourceCategoryFilter
+              categories={data.categories}
+              selectedCategoryId={requested}
+            />
+          )}
+        </section>
 
         <section aria-label="Liste des ressources" className="category-list-section">
           {data.resources === null ? (

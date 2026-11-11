@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { applyResourceCategoryFilter } from "./category-filter";
 import { isUuid } from "./resource-format";
 import type { ResourceIndexingStatus } from "./resource-status";
 
@@ -40,6 +41,7 @@ async function hasSession() {
 export async function getResourceListData(categoryId?: string): Promise<{
   resources: ResourceSummary[] | null;
   categories: { id: string; name: string }[];
+  categoriesError: boolean;
 } | null> {
   const { supabase, user } = await hasSession();
   if (!user) {
@@ -50,21 +52,20 @@ export async function getResourceListData(categoryId?: string): Promise<{
     .from("resources")
     .select("id, title, updated_at, indexing_status, categories(name)")
     .order("updated_at", { ascending: false });
-  if (categoryId) {
-    query = query.eq("category_id", categoryId);
-  }
+  query = applyResourceCategoryFilter(query, categoryId);
 
-  const [{ data, error }, { data: categories }] = await Promise.all([
+  const [{ data, error }, { data: categories, error: categoriesError }] = await Promise.all([
     query,
     supabase.from("categories").select("id, name").order("name"),
   ]);
 
   if (error) {
-    return { resources: null, categories: categories ?? [] };
+    return { resources: null, categories: categories ?? [], categoriesError: Boolean(categoriesError) };
   }
 
   return {
     categories: categories ?? [],
+    categoriesError: Boolean(categoriesError),
     resources: ((data ?? []) as Row[]).map((row) => ({
       id: row.id,
       title: row.title,

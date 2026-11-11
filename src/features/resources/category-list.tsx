@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 
 import { RenameCategoryForm } from "./category-forms";
+import {
+  categoryListReducer,
+  initialCategoryListState,
+} from "./category-selection";
 import type { Category } from "./categories";
 
 export function CategoryList({
@@ -12,72 +16,78 @@ export function CategoryList({
   categories: Category[];
   canManage: boolean;
 }) {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
-  const [savedMessage, setSavedMessage] = useState<string | null>(null);
-  const selectedCategory = categories.find(
-    (category) => category.id === selectedCategoryId,
+  const [state, dispatch] = useReducer(
+    categoryListReducer,
+    initialCategoryListState,
   );
+  const renameButtonRef = useRef<HTMLButtonElement>(null);
+  const selectedCategory = categories.find(
+    (category) => category.id === state.selectedCategoryId,
+  );
+
+  useEffect(() => {
+    if (state.restoreRenameFocus) {
+      renameButtonRef.current?.focus();
+      dispatch({ type: "rename-focus-restored" });
+    }
+  }, [state.restoreRenameFocus]);
 
   return (
     <>
-      {savedMessage ? (
+      {state.savedMessage ? (
         <p className="auth-message auth-message-success" role="status">
-          {savedMessage}
+          {state.savedMessage}
         </p>
       ) : null}
-      <fieldset className="category-choice">
-        <legend>Choisissez une cat&eacute;gorie</legend>
-        <ul className="category-list">
-          {categories.map((category) => {
-            const inputId = "choose-category-" + category.id;
-            const isEditing = canManage && editingCategoryId === category.id;
-
-            return (
-              <li className="category-entry" key={category.id}>
-                <div className="category-row">
-                  <div className="category-option">
-                    <input
-                      checked={selectedCategoryId === category.id}
-                      id={inputId}
-                      name="selected-category"
-                      onChange={() => setSelectedCategoryId(category.id)}
-                      type="radio"
-                      value={category.id}
-                    />
-                    <label className="category-name" htmlFor={inputId}>
-                      {category.name}
-                    </label>
-                  </div>
-                  {canManage && !isEditing ? (
-                    <button
-                      className="button button-small button-secondary"
-                      onClick={() => {
-                        setSavedMessage(null);
-                        setEditingCategoryId(category.id);
-                      }}
-                      type="button"
-                    >
-                      Renommer
-                    </button>
-                  ) : null}
-                </div>
-                {isEditing ? (
-                  <RenameCategoryForm
-                    categoryId={category.id}
-                    categoryName={category.name}
-                    onCancel={() => setEditingCategoryId(null)}
-                    onSaved={(message) => {
-                      setEditingCategoryId(null);
-                      setSavedMessage(message);
-                    }}
-                  />
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      </fieldset>
+      <div className="auth-field category-select-field">
+        <label htmlFor="selected-category">Cat&eacute;gorie</label>
+        <select
+          id="selected-category"
+          onChange={(event) =>
+            dispatch({ type: "select", categoryId: event.target.value })
+          }
+          value={state.selectedCategoryId}
+        >
+          <option value="">Choisissez une cat&eacute;gorie</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      {selectedCategory ? (
+        <div className="category-entry">
+          <div className="category-row">
+            <p className="category-name">{selectedCategory.name}</p>
+            {canManage && state.editingCategoryId !== selectedCategory.id ? (
+              <button
+                className="button button-small button-secondary"
+                onClick={() =>
+                  dispatch({
+                    type: "start-renaming",
+                    categoryId: selectedCategory.id,
+                  })
+                }
+                ref={renameButtonRef}
+                type="button"
+              >
+                Renommer
+              </button>
+            ) : null}
+          </div>
+          {canManage && state.editingCategoryId === selectedCategory.id ? (
+            <RenameCategoryForm
+              categoryId={selectedCategory.id}
+              categoryName={selectedCategory.name}
+              onCancel={() => dispatch({ type: "cancel-renaming" })}
+              onSaved={(message) =>
+                dispatch({ type: "rename-saved", message })
+              }
+            />
+          ) : null}
+        </div>
+      ) : null}
       <p aria-live="polite" className="category-selection">
         {selectedCategory
           ? "Cat\u00e9gorie s\u00e9lectionn\u00e9e : " + selectedCategory.name

@@ -116,7 +116,7 @@ sprint_9_planned:
     cet ordre sans pause humaine ; tests manuels a la fin, controles automatiques
     conserves et aucun statut done. 4.16 preparee sans resultat invente."
   complements:
-    s8-2: ready-for-dev
+    s8-2: review
     s8-3: ready-for-dev
   development_started: true
 action_items:

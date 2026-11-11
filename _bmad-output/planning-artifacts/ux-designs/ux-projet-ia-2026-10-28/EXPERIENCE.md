@@ -34,7 +34,7 @@ Application web utilisable sur ordinateur et mobile. « Les deux » est interpr�
 | Ressources | Navigation principale ou tableau de bord | Parcourir, filtrer par catégorie et ouvrir les ressources partagées |
 | Détail d’une ressource | Liste ou résultat de recherche | Lire le contenu, sa catégorie et sa date de mise à jour |
 | Ajouter / modifier une ressource | Ressources ; action autorisée selon le rôle | Saisir un titre, un texte et une catégorie |
-| Catégories | Section ressources, responsable uniquement | Créer ou renommer les catégories disponibles |
+| Catégories | Section ressources ; consultation des membres, gestion du responsable | Consulter, créer ou renommer les catégories disponibles selon son rôle |
 | Recherche | Navigation principale ou tableau de bord | Chercher par mots-clés ou par sens et consulter les résultats |
 | Assistant | Navigation principale ou tableau de bord | Poser une question, lire la réponse et ouvrir ses sources |
 | Historique | Navigation principale | Retrouver et rouvrir ses recherches et conversations |
@@ -65,7 +65,7 @@ Les éléments ci-dessous décrivent le comportement. Leur apparence est décrit
 | Bouton secondaire | Déclenche une action secondaire, comme annuler ou revenir ; ne remplace pas un libellé par une icône seule. **[ASSUMPTION]** |
 | Formulaire de ressource | Le titre et le texte sont éditables ; une indication de validation est associée au champ concerné. **[ASSUMPTION]** |
 | Sélecteur de catégorie | Propose les catégories existantes à tous les membres ; les actions de création et de renommage sont réservées au responsable. |
-| Liste de catégories | Affiche chaque nom une seule fois, en évidence ; pour le responsable, une action « Renommer » discrète par ligne ouvre une seule zone de renommage à la fois, qui rappelle la catégorie concernée et propose Enregistrer ou Annuler. *(Précisé le 2026-11-02, rétrospective du sprint 4.)* |
+| Liste de catégories | Un menu déroulant permet de choisir une catégorie et son nom sélectionné apparaît clairement. Le responsable seul voit « Renommer », qui ouvre une seule zone de saisie avec Enregistrer et Annuler ; changer de sélection ferme l’édition sans sauvegarder. La création reste disponible au responsable. |
 | Carte de ressource | Affiche le titre, la catégorie et la date ; l’action d’ouverture mène au détail. Les actions de modification et de suppression ne sont proposées que si le rôle le permet. |
 | Ligne de ressource | Variante compacte de la carte dans les listes ; conserve le titre et la catégorie et mène au détail à l’activation. **[ASSUMPTION]** |
 | Résultat de recherche | Présente le titre et un extrait ; l’ouverture mène à la ressource. |
@@ -183,13 +183,21 @@ Le produit reste une application web : les petits écrans ne deviennent pas un p
 ### Flow 5 — Gérer une catégorie (responsable, FR-4)
 
 1. Le responsable ouvre les ressources et accède à leur gestion des catégories.
-2. Il crée une nouvelle catégorie ou renomme une catégorie existante.
-3. Les catégories disponibles sont proposées lors de la création ou modification d’une ressource.
-4. **Résultat clé :** le responsable peut classer une ressource dans la catégorie choisie par l’équipe.
+2. Dans la liste Catégories, le responsable choisit une catégorie dans un menu
+   déroulant. Son nom est affiché clairement ; « Renommer » ouvre une seule zone
+   de saisie avec des actions explicites « Enregistrer » et « Annuler ». Changer
+   de catégorie ferme la zone sans enregistrer la saisie.
+3. Le responsable peut créer une nouvelle catégorie depuis la même page.
+4. Les catégories disponibles sont proposées lors de la création ou modification
+   d’une ressource. Un membre peut consulter les catégories, mais ne voit aucune
+   action de création ou de renommage.
+5. **Résultat clé :** le responsable peut classer une ressource dans la catégorie
+   choisie par l’équipe.
 
 **En cas de difficulté [ASSUMPTION] :** si la liste des catégories ou l’enregistrement échoue, l’interface explique l’échec et permet au responsable de réessayer sans effacer sa saisie.
 
-L’accès à la gestion des catégories est placé dans l’écran Ressources ; le responsable peut y créer ou renommer les catégories.
+L’accès à la gestion des catégories est placé dans l’écran Ressources ; le
+responsable peut y créer ou renommer les catégories.
 
 ### Flow 6 — Consulter et gérer une ressource (membre ou responsable, FR-3, FR-4, FR-9)
 
