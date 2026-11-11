@@ -1,5 +1,6 @@
 import type { ConversationQuestionStatus } from "./assistant-conversation-core.ts";
-import type { AssistantHistoryExchange } from "./assistant-core.ts";
+import { stripAssistantSourceMarkers, type AssistantHistoryExchange } from "./assistant-core.ts";
+import { assistantAnswerSourceReferences } from "./assistant-answer-core.ts";
 import { buildPassageExcerpt } from "../resources/semantic-search-core.ts";
 
 type ConversationRow = {
@@ -81,8 +82,14 @@ export type ConversationChunkRow = {
 };
 
 export type ConversationHistorySource =
-  | { status: "available"; resourceId: string; title: string; excerpt: string }
-  | { status: "unavailable" };
+  | {
+    status: "available";
+    sourceId: string;
+    resourceId: string;
+    title: string;
+    excerpt: string;
+  }
+  | { status: "unavailable"; sourceId?: string };
 
 export type ConversationHistoryMessage = {
   id: string;
@@ -123,7 +130,7 @@ export function buildRecentConversationExchanges(
   const answerByQuestionId = new Map(
     answers
       .filter((message) => message.role === "assistant" && message.status === "complete" && message.question_id)
-      .map((message) => [message.question_id as string, message.content]),
+      .map((message) => [message.question_id as string, stripAssistantSourceMarkers(message.content)]),
   );
 
   return {
@@ -314,15 +321,24 @@ export function buildConversationHistoryMessages(
           chunk.revision !== source.resource_revision ||
           !resource.title.trim()
         ) {
-          return { status: "unavailable" };
+          return {
+            status: "unavailable",
+            ...(source.chunk_id ? { sourceId: source.chunk_id } : {}),
+          };
         }
         return {
           status: "available",
+          sourceId: chunk.id,
           resourceId: resource.id,
           title: resource.title,
           excerpt: buildPassageExcerpt(chunk.content),
         };
       });
+      const sourceIds = new Set(
+        resolvedSources.flatMap((source) => source.sourceId ? [source.sourceId] : []),
+      );
+      const hasMissingReferences = assistantAnswerSourceReferences(message.content)
+        .some((sourceId) => !sourceIds.has(sourceId));
 
       return {
         id: message.id,
@@ -331,7 +347,8 @@ export function buildConversationHistoryMessages(
         status: message.status,
         createdAt: message.created_at,
         sources: resolvedSources,
-        hasUnavailableSources: resolvedSources.some((source) => source.status === "unavailable"),
+        hasUnavailableSources:
+          hasMissingReferences || resolvedSources.some((source) => source.status === "unavailable"),
       };
     });
 }

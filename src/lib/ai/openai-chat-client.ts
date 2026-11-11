@@ -22,8 +22,8 @@ type ChatResponse = {
   choices?: Array<{ message?: { content?: unknown; refusal?: unknown }; finish_reason?: unknown }>;
 };
 
-// Format de réponse imposé au modèle : texte, numéros des passages utilisés, information manquante.
-const REPLY_SCHEMA = {
+// Format conservé pour les sélections IA des ressources et des passages.
+const RESOURCE_SELECTION_SCHEMA = {
   name: "assistant_reply",
   strict: true,
   schema: {
@@ -38,13 +38,38 @@ const REPLY_SCHEMA = {
   },
 } as const;
 
+const ASSISTANT_REPLY_SCHEMA = {
+  name: "assistant_claims",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["claims", "missing"],
+    properties: {
+      claims: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["text", "sources"],
+          properties: {
+            text: { type: "string" },
+            sources: { type: "array", items: { type: "integer" } },
+          },
+        },
+      },
+      missing: { type: "boolean" },
+    },
+  },
+} as const;
+
 /** Retourne le texte JSON du modèle. Les erreurs ne contiennent ni la clé ni la question. */
 export async function createOpenAIChatCompletion(
   messages: ChatMessage[],
   apiKey: string,
   model: string = DEFAULT_OPENAI_CHAT_MODEL,
   request: typeof fetch = fetch,
-  options: { maxOutputTokens?: number } = {},
+  options: { maxOutputTokens?: number; responseSchema?: "assistant" | "resource-selection" } = {},
 ): Promise<string> {
   if (!apiKey) {
     throw new Error("La variable OPENAI_API_KEY est manquante.");
@@ -65,7 +90,12 @@ export async function createOpenAIChatCompletion(
       model,
       messages,
       max_completion_tokens: maxOutputTokens,
-      response_format: { type: "json_schema", json_schema: REPLY_SCHEMA },
+      response_format: {
+        type: "json_schema",
+        json_schema: options.responseSchema === "assistant"
+          ? ASSISTANT_REPLY_SCHEMA
+          : RESOURCE_SELECTION_SCHEMA,
+      },
     }),
   });
 

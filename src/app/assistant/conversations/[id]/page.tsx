@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { AssistantForm } from "@/features/assistant/assistant-form";
+import { AssistantAnswer } from "@/features/assistant/assistant-answer";
 import { conversationQuestionStatusLabel } from "@/features/assistant/assistant-conversation-core";
 import { getMyConversation } from "@/features/assistant/conversations";
 import { deleteConversationAction } from "@/features/assistant/assistant-actions";
@@ -78,11 +79,13 @@ export default async function ConversationPage({
             {result.messages.map((message) => (
               <li className="category-entry" key={message.id}>
                 <h2>{message.role === "user" ? "Vous" : "Assistant"}</h2>
-                <p>{message.content}</p>
                 {message.role === "user" ? (
-                  <p className="resource-meta">
-                    {conversationQuestionStatusLabel(message.status)}
-                  </p>
+                  <>
+                    <p>{message.content}</p>
+                    <p className="resource-meta">
+                      {conversationQuestionStatusLabel(message.status)}
+                    </p>
+                  </>
                 ) : (
                   <>
                     <p className="resource-meta">
@@ -93,26 +96,7 @@ export default async function ConversationPage({
                         Cette r&eacute;ponse a &eacute;t&eacute; enregistr&eacute;e auparavant ; certaines sources ne peuvent plus &ecirc;tre v&eacute;rifi&eacute;es.
                       </p>
                     ) : null}
-                    {message.sources.length ? (
-                      <ul className="category-list" aria-label="Sources">
-                        {message.sources.map((source, index) => (
-                          <li className="category-entry" key={message.id + "-source-" + index}>
-                            {source.status === "available" ? (
-                              <>
-                                <p>
-                                  <Link className="resource-link" href={"/resources/" + source.resourceId}>
-                                    {source.title}
-                                  </Link>
-                                </p>
-                                <p className="resource-excerpt">{source.excerpt}</p>
-                              </>
-                            ) : (
-                              <p role="status">Source non disponible</p>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : null}
+                    <AssistantAnswer answer={message.content} sources={message.sources} />
                   </>
                 )}
               </li>

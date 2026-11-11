@@ -8,6 +8,7 @@ import {
   nextAssistantQuestionId,
   submitSavedAssistantQuestion,
 } from "../src/features/assistant/assistant-conversation-core.ts";
+import { buildConversationHistoryMessages } from "../src/features/assistant/conversations-core.ts";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -220,7 +221,7 @@ test(
         title: `S8 conversation source ${Date.now()}`,
         body: "Contenu source de test.",
       })
-      .select("id, revision")
+      .select("id, title, revision")
       .single();
     assert.ifError(resourceError);
     resourceId = resource.id;
@@ -229,19 +230,23 @@ test(
     const { data: published, error: publishError } = await a.client.rpc("publish_resource_chunks", {
       p_resource_id: resource.id,
       p_revision: resource.revision,
-      p_chunks: [{
-        content: "Contenu du passage source de test.",
+      p_chunks: [
+        "Contenu du premier passage source de test.",
+        "Contenu du second passage source de test.",
+      ].map((content) => ({
+        content,
         embedding: sourceEmbedding,
-      }],
+      })),
     });
     assert.ifError(publishError);
     assert.equal(published, true);
     const { data: chunks, error: chunksError } = await a.client
       .from("resource_chunks")
-      .select("id")
+      .select("id, resource_id, revision, content")
       .eq("resource_id", resource.id)
-      .single();
+      .order("position");
     assert.ifError(chunksError);
+    assert.equal(chunks.length, 2);
 
     await t.test("le RPC refuse les questions uniquement composées d'espaces, tabulations et retours", async () => {
       for (const emptyQuestion of ["   ", "\t", "\n", "\r\n\t "]) {
@@ -395,16 +400,18 @@ test(
       assert.ifError(staleAnswerError);
       assert.equal(staleAnswer, false);
 
+      const citedAnswer =
+        `Premier fait. [[source:${chunks[1].id}]]\nSecond fait. [[source:${chunks[0].id}]]`;
       const finalize = () =>
         a.client.rpc("finalize_conversation_answer", {
           p_question_id: questionId,
           p_generation_token: retry.generation_token,
-          p_answer: "Réponse test enregistrée.",
-          p_sources: [{
+          p_answer: citedAnswer,
+          p_sources: chunks.map((chunk) => ({
             resourceId: resource.id,
-            chunkId: chunks.id,
+            chunkId: chunk.id,
             revision: resource.revision,
-          }],
+          })),
         });
       const results = await Promise.all([finalize(), finalize()]);
       for (const result of results) {
@@ -414,22 +421,34 @@ test(
 
       const { data: answers, error: answerError } = await a.client
         .from("messages")
-        .select("id, content")
+        .select("id, role, content, status, created_at")
         .eq("question_id", questionId);
       assert.ifError(answerError);
       assert.equal(answers.length, 1);
-      assert.equal(answers[0].content, "Réponse test enregistrée.");
+      assert.equal(answers[0].content, citedAnswer);
 
       const { data: sources, error: sourcesError } = await a.client
         .from("message_sources")
         .select("resource_id, chunk_id, resource_revision")
         .eq("answer_message_id", answers[0].id);
       assert.ifError(sourcesError);
-      assert.deepEqual(sources, [{
+      assert.deepEqual([...sources].sort((a, b) => a.chunk_id.localeCompare(b.chunk_id)), chunks.map((chunk) => ({
         resource_id: resource.id,
-        chunk_id: chunks.id,
+        chunk_id: chunk.id,
         resource_revision: resource.revision,
-      }]);
+      })).sort((a, b) => a.chunk_id.localeCompare(b.chunk_id)));
+      const reopened = buildConversationHistoryMessages(
+        answers,
+        sources.map((source) => ({ ...source, answer_message_id: answers[0].id })),
+        [resource],
+        chunks,
+      );
+      assert.equal(reopened[0].content, citedAnswer);
+      assert.equal(reopened[0].hasUnavailableSources, false);
+      assert.deepEqual(
+        reopened[0].sources.map((source) => source.sourceId).sort(),
+        chunks.map((chunk) => chunk.id).sort(),
+      );
 
       for (const client of [b.client, manager.client]) {
         const { data: hiddenSources, error: hiddenSourcesError } = await client
@@ -463,7 +482,7 @@ test(
         const { data: oldChunks, error: oldChunksError } = await a.client
           .from("resource_chunks")
           .select("id")
-          .eq("id", chunks.id);
+          .in("id", chunks.map((chunk) => chunk.id));
         assert.ifError(oldChunksError);
         assert.deepEqual(oldChunks, []);
 
@@ -472,11 +491,11 @@ test(
           .select("resource_id, chunk_id, resource_revision")
           .eq("answer_message_id", answers[0].id);
         assert.ifError(staleError);
-        assert.deepEqual(staleSources, [{
+        assert.deepEqual(staleSources, chunks.map(() => ({
           resource_id: resource.id,
           chunk_id: null,
           resource_revision: resource.revision,
-        }]);
+        })));
       }
 
       const { error: deleteResourceError } = await a.client
@@ -490,11 +509,11 @@ test(
         .select("resource_id, chunk_id, resource_revision")
         .eq("answer_message_id", answers[0].id);
       assert.ifError(detachedError);
-      assert.deepEqual(detachedSources, [{
+      assert.deepEqual(detachedSources, chunks.map(() => ({
         resource_id: null,
         chunk_id: null,
         resource_revision: resource.revision,
-      }]);
+      })));
 
       const { data: retainedAnswer, error: retainedAnswerError } = await a.client
         .from("messages")

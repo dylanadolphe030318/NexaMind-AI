@@ -84,8 +84,8 @@ development_status:
   4-11-rouvrir-une-conversation: done
   4-12-continuer-une-conversation-précédente: done
   4-13-supprimer-une-conversation-de-son-historique: done
-  # Cinq fiches du sprint 9 préparées le 2026-11-11, aucun développement.
-  4-14-relier-les-affirmations-aux-sources: ready-for-dev
+  # Sprint 9 : développement autorisé, une story puis évaluation humaine.
+  4-14-relier-les-affirmations-aux-sources: review
   4-15-empêcher-la-divulgation-de-ressources-non-autorisées: ready-for-dev
   4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: ready-for-dev
   epic-4-retrospective: done
@@ -115,7 +115,7 @@ sprint_9_planned:
   complements:
     s8-2: ready-for-dev
     s8-3: ready-for-dev
-  development_started: false
+  development_started: true
 action_items:
   - id: "cc-2026-11-11-a"
     epic: 2

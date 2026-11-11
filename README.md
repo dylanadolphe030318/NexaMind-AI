@@ -226,6 +226,41 @@ Une fois la migration appliquée, lancez
 Le scénario de suppression ignoré pour migration absente ne constitue pas une validation.
 Contrôle manuel : scénarios S8-H et S8-F de `tests-ia.md`.
 
+### Sources par affirmation de l'assistant (story 4.14)
+
+Aucune nouvelle migration ni nouvelle clé n'est nécessaire sur le projet actuel.
+Chaque fait d'une nouvelle réponse possède un lien « Source N » vers sa ressource.
+Plusieurs passages d'une même ressource restent conservés et apparaissent sous
+la même source, sans perdre leurs extraits. Les références sont construites par
+le serveur, jamais à partir d'une URL choisie par le modèle.
+
+Les associations sont enregistrées dans le texte de la réponse avec des marqueurs
+internes de passage, reliés aux lignes existantes de `message_sources`.
+Elles sont restituées sans nouvel appel IA et retirées du contexte historique
+envoyé au modèle. Une source modifiée, supprimée ou inaccessible devient
+« Source non disponible » sans ancien titre ni extrait ; le texte reste historique.
+Les anciennes réponses sans ces marqueurs restent lisibles sans association
+inventée. Le format IA des sélections de la recherche de ressources reste inchangé.
+
+Vérifications techniques ciblées :
+
+```powershell
+node --test tests\assistant.test.mjs tests\assistant-conversations.test.mjs tests\resource-selection-client.test.mjs tests\resource-passage-selection.test.mjs tests\relevant-search-phrase.test.mjs
+node --env-file=.env.local --test tests\conversations-rls.test.mjs
+```
+
+Le second test utilise les comptes dédiés décrits plus haut et ne doit comporter
+aucun test ignoré. Il vérifie notamment l'enregistrement de deux passages d'une
+même ressource, la réouverture, l'idempotence et le refus de lecture par un tiers.
+Il n'effectue aucun appel au fournisseur IA.
+
+Pour l'évaluation humaine, suivre S9-A dans [tests-ia.md](tests-ia.md) :
+sur **Assistant**, poser Q1–Q6, ouvrir les sources de chaque fait, puis rouvrir
+la conversation. Après Q5, demander « Quel était le numéro de la story concernée ? ».
+Vérifier séparément le numéro 3.1, le passage actuel qui le prouve et le lien.
+La validation structurelle d'une citation ne prouve pas sa justesse sémantique :
+cette évaluation reste nécessaire avant de déclarer 4.14 terminée.
+
 ### Correctif des références de recherche hybride
 
 Après les migrations précédentes, ouvrez

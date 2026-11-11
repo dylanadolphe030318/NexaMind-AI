@@ -3,7 +3,8 @@ story: 4-14-relier-les-affirmations-aux-sources
 title: Relier les affirmations aux sources
 epic: 4
 sprint: 9
-status: ready-for-dev
+status: in-review
+baseline_commit: d9f2c3368767c748c992147d4cf106489687996f
 context:
   - ../SPEC.md
   - ../conventions.md
@@ -15,6 +16,23 @@ context:
 
 Pour chaque information donnée par l'assistant, voir quelle source la justifie
 et ouvrir cette ressource. Une liste générale de sources ne suffit plus.
+
+## Autorisation de réalisation et arrêt
+
+Dylan autorise maintenant le développement de cette fiche ; les mentions
+« préparation uniquement » des documents de contexte décrivent la phase passée.
+Réaliser seulement 4.14, sans commencer 4.15 ni les autres stories.
+
+- Tous les appels LLM et embeddings restent serveur ; clés depuis `.env.local`,
+  jamais dans le navigateur. Recherche sous la session connectée et ses droits.
+- La consigne exige passages actuels uniquement, sources et « je ne sais pas »
+  si l'information manque. Ne changer ni fournisseur ni embeddings ni pgvector.
+- Ne pas appliquer de migration distante, pousser ou créer un commit depuis
+  l'agent d'implémentation. Préparer les étapes précises pour Dylan si une
+  migration est nécessaire ; ne pas présenter une intégration non exécutée comme
+  réussie. Le pilote effectue le commit de livraison après vérification.
+- Arrêter sur blocage ou erreur persistante et les signaler explicitement.
+  Ne jamais marquer la fiche ou le suivi `done` : évaluation humaine requise.
 
 ## Critères d'acceptation
 
@@ -62,28 +80,28 @@ et ouvrir cette ressource. Une liste générale de sources ne suffit plus.
 
 ## Carte du code et tâches de développement
 
-- [ ] `src/features/assistant/assistant-core.ts` : faire évoluer consigne, types,
+- [x] `src/features/assistant/assistant-core.ts` : faire évoluer consigne, types,
   parsing et construction des sources pour l'association par affirmation ;
   contrôler faits sans références, doublons et sources hors contexte.
-- [ ] `src/lib/ai/openai-chat-client.ts` et `chat.ts` : isoler le schéma de
+- [x] `src/lib/ai/openai-chat-client.ts` et `chat.ts` : isoler le schéma de
   l'assistant si nécessaire ; préserver les contrats `answer/sources/missing`
   des sélections de passages et de phrase. Aucun secret client.
-- [ ] `src/features/assistant/assistant-conversation-core.ts`,
+- [x] `src/features/assistant/assistant-conversation-core.ts`,
   `conversations.ts` et `conversations-core.ts` : enregistrer/restituer les
   associations sans perdre l'ordre ou l'idempotence. Les sources actuelles sont
   dédupliquées par ressource : ne pas confondre deux passages d'une même ressource.
-- [ ] `src/features/assistant/assistant-form.tsx` et
+- [x] `src/features/assistant/assistant-form.tsx` et
   `src/app/assistant/conversations/[id]/page.tsx` : affichage et liens cohérents,
   y compris réponses historiques et états inconnus/erreurs.
-- [ ] Si le stockage ou le RPC `finalize_conversation_answer` doit évoluer :
+- [x] Si le stockage ou le RPC `finalize_conversation_answer` doit évoluer :
   nouvelle migration additive dans `supabase/migrations/`, anciennes données
   compatibles, permissions et vérification de révision conservées. Fournir
   application et contrôles première utilisation/réessai/refus de tiers.
-- [ ] `tests/assistant.test.mjs`, `assistant-conversations.test.mjs` et
+- [x] `tests/assistant.test.mjs`, `assistant-conversations.test.mjs` et
   `conversations-rls.test.mjs` : plusieurs faits/sources, même ressource avec
   deux passages, source inexistante, sortie sans preuve, reprise après erreur,
   ancienne conversation et source indisponible.
-- [ ] Préserver `tests/resource-selection-client.test.mjs`,
+- [x] Préserver `tests/resource-selection-client.test.mjs`,
   `resource-passage-selection.test.mjs` et `relevant-search-phrase.test.mjs`.
   Lire les guides Next locaux pertinents avant toute modification.
 
@@ -96,3 +114,51 @@ et ouvrir cette ressource. Une liste générale de sources ne suffit plus.
   Relever séparément numéro 3.1, preuve actuelle et lien.
 - Dépend du sprint 8 et des corrections A/C acceptées. Livrer en revue, un commit,
   puis attendre l'évaluation de Dylan avant de poursuivre 4.15.
+
+## Résultat de réalisation
+
+- Contrat assistant `claims/missing` isolé du contrat des sélections ressources.
+  Chaque affirmation reçoit des marqueurs serveur de passages dans le texte
+  persisté ; les références existantes conservent tous les passages utilisés,
+  puis l'affichage les regroupe par ressource. Aucune migration nécessaire :
+  `message_sources` possède déjà l'unicité `(answer_message_id, chunk_id)` et le
+  RPC accepte jusqu'à cinq références, avec contrôle de session et de révision.
+- Les marqueurs sont retirés de l'historique fourni au modèle. Le rendu commun
+  conserve les anciennes réponses sans inventer leurs associations ; les sources
+  retirées sont signalées sans titre ni extrait.
+- Vérification finale ciblée : 70 tests unitaires réussis, aucun ignoré ;
+  intégration conversations sous sessions Supabase : 7/7 réussis, aucun ignoré,
+  avec deux passages persistés de la même ressource et réouverture vérifiée.
+  TypeScript, lint ciblé et build de production réussis.
+- Un test de libellé a détecté une casse modifiée ; la phrase d'abstention a été
+  corrigée et la suite ciblée relancée avec succès. Un premier build a rencontré
+  `EPERM` dans un ancien sous-dossier généré de `.next/static` sous OneDrive ;
+  seul ce sous-dossier inspecté a été retiré, puis le build a réussi.
+- Guides Next locaux consultés pour composants serveur/client, liens et tests.
+  Le rendu synchronisé est testé avec React DOM serveur et la transpilation
+  TypeScript déjà installée, sans nouveau runner ni dépendance.
+- Aucun test du fournisseur réel ni évaluation sémantique Q1–Q6/S8-D revendiqué.
+  Aucun changement de modèle, budget, embeddings, classement, SQL ou droits.
+  4.15 et les autres stories n'ont pas commencé. Fiche `in-review`, suivi `review`,
+  évaluation de Dylan encore attendue.
+
+## Review Triage Log
+
+| Réf. | Verdict | Preuve et décision |
+|---|---|---|
+| Blind-1 — numéro identique pour deux passages d'une ressource | false | Les renvois demandés visent la ressource affichée, pas une ancre de passage. Chaque marqueur ouvre la bonne ressource ; les deux extraits restent visibles. Le test de rendu couvre cette association sans imposer une ancre hors périmètre. |
+| Blind-2 — texte composé de plusieurs faits | false | La consigne exige des affirmations indépendantes ; le parseur valide la structure, pas le soutien sémantique, limite explicitement acceptée. Découper arbitrairement la prose ne prouverait pas les faits ; l'évaluation humaine reste requise. |
+| Blind-3 — absence de plusieurs affirmations distinctes dans les tests | medium | Patch : test exécutable de trois faits, deux ressources et deux passages d'une ressource, du résultat de génération jusqu'aux liens rendus. Réussi. |
+| Blind-4 — persistance multi-passage non testée en base | medium | Patch : intégration étendue à deux références de la même ressource ; texte, sources et réouverture vérifiés après finalisation concurrente. Le test contrôle aussi modification, suppression et refus de lecture par un tiers. Réussi. |
+| Blind-5 — composant de rendu non testé | medium | Patch : rendu réel du composant commun, liens de chaque fait, source indisponible et ancienne réponse sans association. Réussi. |
+| Blind-6 — schémas comparés seulement sur les champs requis | low | Patch : comparaison intégrale des deux schémas JSON stricts, types inclus ; budgets 500/2048 conservés. Réussi. |
+| Blind-7 — résultats absents de la fiche | low | Suggestion documentaire, pas défaut produit ; les résultats réels de livraison sont consignés ci-dessus, sans déclarer les contrôles humains exécutés. |
+| Blind-8 — nombre de réessais non défini | false | Aucune nouvelle boucle de réessai n'est ajoutée. La règle humaine reste arrêt en cas de blocage ou erreur persistante, sans inventer un nouveau comportement automatique. |
+| Gap-1 — absence de vérification des liens rendus | medium | Même défaut que Blind-5 : patch de rendu réel, y compris sources retirées et historique. Vérification réussie dans les 70 tests. |
+
+Deux revues indépendantes ont produit les constats ci-dessus. La troisième
+revue a échoué avant lecture du diff parce que son chemin d'instructions omettait
+`Workshop 7` ; elle n'est pas comptée comme réussie. Le pilote a repris directement
+le traçage des branches du diff, des suppressions et des appels : aucun défaut
+supplémentaire confirmé. Les limites sémantiques restent explicites, sans report
+technique supplémentaire.

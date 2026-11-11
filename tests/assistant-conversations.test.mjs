@@ -19,7 +19,7 @@ import {
 
 const successfulOutcome = {
   status: "ok",
-  answer: "Réponse fondée.",
+  answer: "Réponse fondée. [[source:passage-1]]",
   sources: [
     {
       chunkId: "passage-1",
@@ -54,6 +54,13 @@ test("le contexte de suivi conserve les dix derniers échanges sans anciens extr
   assert.equal(context.exchanges[0].question, "Question 2");
   assert.equal(context.exchanges.at(-1).answer, "Réponse 11");
   assert.equal(JSON.stringify(context).includes("source"), false);
+
+  const citedContext = buildRecentConversationExchanges(
+    [{ id: "q", role: "user", content: "Question", status: "complete", created_at: "2026-01-01T10:00:00Z" }],
+    [{ id: "a", role: "assistant", content: "Fait. [[source:chunk-id]]", status: "complete", question_id: "q", created_at: "2026-01-01T10:00:01Z" }],
+    "current",
+  );
+  assert.equal(citedContext.exchanges[0].answer, "Fait.");
 });
 
 test("le contexte exclut la question actuelle et les demandes encore en cours", () => {
@@ -160,7 +167,7 @@ test("sauvegarde atomiquement réponse et références seulement après généra
   assert.deepEqual(deps.calls.claimed, [{ id: "question-id", question: "Question ?" }]);
   assert.deepEqual(deps.calls.generated, ["Question ?"]);
   assert.deepEqual(deps.calls.finalized, [
-    ["question-id", "attempt-token", "Réponse fondée.", successfulOutcome.sources],
+    ["question-id", "attempt-token", "Réponse fondée. [[source:passage-1]]", successfulOutcome.sources],
   ]);
   assert.deepEqual(deps.calls.finished, []);
 });
@@ -368,15 +375,64 @@ test("la relecture n'affiche que les sources de la revision enregistree", () => 
   assert.deepEqual(messages[1].sources, [
     {
       status: "available",
+      sourceId: "current-chunk",
       resourceId: "current-resource",
       title: "Current title",
       excerpt: "Currently verifiable passage.",
     },
-    { status: "unavailable" },
+    { status: "unavailable", sourceId: "old-chunk" },
     { status: "unavailable" },
   ]);
   assert.equal(messages[1].hasUnavailableSources, true);
   assert.equal(JSON.stringify(messages).includes("Old private title"), false);
+});
+
+test("les associations à plusieurs passages de la même ressource survivent à la relecture", () => {
+  const answer = "La story concernée est 3.1. [[source:chunk-1]] [[source:chunk-2]]";
+  const messages = buildConversationHistoryMessages(
+    [{
+      id: "answer",
+      role: "assistant",
+      content: answer,
+      status: "complete",
+      created_at: "2026-01-01T10:00:01Z",
+    }],
+    [
+      { answer_message_id: "answer", resource_id: "resource-1", chunk_id: "chunk-1", resource_revision: 4 },
+      { answer_message_id: "answer", resource_id: "resource-1", chunk_id: "chunk-2", resource_revision: 4 },
+    ],
+    [{ id: "resource-1", title: "Story", revision: 4 }],
+    [
+      { id: "chunk-1", resource_id: "resource-1", revision: 4, content: "Preuve numéro 3.1." },
+      { id: "chunk-2", resource_id: "resource-1", revision: 4, content: "Détail complémentaire." },
+    ],
+  );
+
+  assert.equal(messages[0].content, answer);
+  assert.deepEqual(messages[0].sources, [
+    { status: "available", sourceId: "chunk-1", resourceId: "resource-1", title: "Story", excerpt: "Preuve numéro 3.1." },
+    { status: "available", sourceId: "chunk-2", resourceId: "resource-1", title: "Story", excerpt: "Détail complémentaire." },
+  ]);
+  assert.equal(messages[0].hasUnavailableSources, false);
+});
+
+test("une référence sans passage accessible est indiquée comme indisponible sans exposer de titre ancien", () => {
+  const messages = buildConversationHistoryMessages(
+    [{
+      id: "answer",
+      role: "assistant",
+      content: "Fait. [[source:removed-chunk]]",
+      status: "complete",
+      created_at: "2026-01-01T10:00:01Z",
+    }],
+    [],
+    [],
+    [],
+  );
+
+  assert.equal(messages[0].hasUnavailableSources, true);
+  assert.deepEqual(messages[0].sources, []);
+  assert.equal(messages[0].content.includes("Ancien titre"), false);
 });
 
 test("la relecture distingue une conversation indisponible d'une erreur de chargement", async () => {

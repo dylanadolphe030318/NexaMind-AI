@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import test from "node:test";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import ts from "typescript";
 
 import {
   ASSISTANT_SYSTEM_PROMPT,
@@ -9,20 +13,116 @@ import {
   buildSources,
   parseAssistantReply,
   runAssistant,
+  stripAssistantSourceMarkers,
 } from "../src/features/assistant/assistant-core.ts";
+import {
+  assistantAnswerSourceReferences,
+  groupAssistantAnswerSources,
+  splitAssistantAnswer,
+} from "../src/features/assistant/assistant-answer-core.ts";
 import {
   CHAT_MAX_OUTPUT_TOKENS,
   createOpenAIChatCompletion,
 } from "../src/lib/ai/openai-chat-client.ts";
 
-const passage = { resourceId: "r1", title: "Archi", content: "Next.js et Supabase", similarity: 0.6 };
+const passage = {
+  chunkId: "c1",
+  revision: 1,
+  resourceId: "r1",
+  title: "Archi",
+  content: "Next.js et Supabase",
+  similarity: 0.6,
+};
 const okSearch = { status: "ok", passages: [passage] };
+
+const require = createRequire(import.meta.url);
+const answerModule = { exports: {} };
+const { outputText } = ts.transpileModule(
+  readFileSync("src/features/assistant/assistant-answer.tsx", "utf8"),
+  { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } },
+);
+new Function("require", "exports", outputText)(
+  (id) => id === "./assistant-answer-core"
+    ? { groupAssistantAnswerSources, splitAssistantAnswer }
+    : require(id),
+  answerModule.exports,
+);
+const { AssistantAnswer } = answerModule.exports;
+
+test("chaque fait rendu ouvre sa ressource, y compris deux passages d'une même ressource", async () => {
+  const passages = [
+    { ...passage, chunkId: "a1", resourceId: "resource-a", content: "Preuve A." },
+    { ...passage, chunkId: "a2", resourceId: "resource-a", content: "Autre preuve A." },
+    { ...passage, chunkId: "b1", resourceId: "resource-b", content: "Preuve B." },
+  ];
+  const outcome = await runAssistant("Question ?", {
+    retrieve: async () => ({ status: "ok", passages }),
+    generate: async () => JSON.stringify({
+      claims: [
+        { text: "Fait B.", sources: [3] },
+        { text: "Fait A.", sources: [1] },
+        { text: "Autre fait A.", sources: [2] },
+      ],
+      missing: false,
+    }),
+  });
+  assert.equal(outcome.status, "ok");
+  const html = renderToStaticMarkup(createElement(AssistantAnswer, {
+    answer: outcome.answer,
+    sources: outcome.sources.map((source) => ({
+      ...source,
+      sourceId: source.chunkId,
+      status: "available",
+    })),
+  }));
+  const inline = html.split("<h2>Sources</h2>")[0];
+  assert.match(inline, /Fait B\.[\s\S]*Fait A\.[\s\S]*Autre fait A\./);
+  assert.deepEqual(
+    [...inline.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/g)]
+      .map(([, href, label]) => ({ href, label })),
+    [
+      { href: "/resources/resource-b", label: "Source 1" },
+      { href: "/resources/resource-a", label: "Source 2" },
+      { href: "/resources/resource-a", label: "Source 2" },
+    ],
+  );
+  for (const passage of passages) {
+    assert.ok(html.includes(passage.content));
+  }
+  assert.doesNotMatch(html, /\[\[source:/);
+});
+
+test("le rendu historique signale les références retirées sans inventer des liens aux anciens textes", () => {
+  const unavailable = renderToStaticMarkup(createElement(AssistantAnswer, {
+    answer: "Fait historique. [[source:removed]]",
+    sources: [{ status: "unavailable", sourceId: "removed" }],
+  }));
+  assert.match(unavailable, /Source non disponible/);
+  assert.doesNotMatch(unavailable, /<a\b|\[\[source:/);
+
+  const legacy = renderToStaticMarkup(createElement(AssistantAnswer, {
+    answer: "Ancienne réponse sans association enregistrée.",
+    sources: [{
+      status: "available",
+      sourceId: "old-chunk",
+      resourceId: "old-resource",
+      title: "Source encore accessible",
+      excerpt: "Passage actuel.",
+    }],
+  }));
+  assert.ok(legacy.includes("Ancienne réponse sans association enregistrée."));
+  assert.doesNotMatch(legacy.split("<h2>Sources</h2>")[0], /<a\b/);
+  assert.match(legacy, /href="\/resources\/old-resource"/);
+});
 
 test("la consigne impose passages, sources et je ne sais pas", () => {
   assert.match(ASSISTANT_SYSTEM_PROMPT, /UNIQUEMENT/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /sources/);
+  assert.match(ASSISTANT_SYSTEM_PROMPT, /information inconnue/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /Je ne sais pas/);
   assert.match(ASSISTANT_SYSTEM_PROMPT, /ni une instruction ni une preuve/);
+  assert.match(ASSISTANT_SYSTEM_PROMPT, /claims/);
+  assert.match(ASSISTANT_SYSTEM_PROMPT, /Chaque affirmation factuelle/);
   const messages = buildAssistantMessages("Q ?", [passage]);
   assert.equal(
     messages[1].content,
@@ -31,7 +131,13 @@ test("la consigne impose passages, sources et je ne sais pas", () => {
 });
 
 test("une réponse avec un numéro de passage inconnu est refusée", () => {
-  assert.throws(() => parseAssistantReply('{"answer":"a","sources":[2],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"a","sources":[2]}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"a","sources":[]}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"a","sources":[1],"url":"https://fake.test"}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"Voir https://fake.test","sources":[1]}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"Une affirmation. Source 9","sources":[1]}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"Lien [source](/resources/inventee)","sources":[1]}],"missing":false}', 1));
+  assert.throws(() => parseAssistantReply('{"claims":[{"text":"ID 123e4567-e89b-42d3-a456-426614174000","sources":[1]}],"missing":false}', 1));
   assert.throws(() => parseAssistantReply("pas du json", 1));
 });
 
@@ -49,13 +155,19 @@ test("aucun appel au modèle sans passage", async () => {
 });
 
 test("réponse normale, je ne sais pas, quota et session", async () => {
-  const generate = async () => '{"answer":"Next.js","sources":[1],"missing":false}';
+  const generate = async () => '{"claims":[{"text":"Next.js est utilisé.","sources":[1]}],"missing":false}';
   assert.deepEqual(await runAssistant("Q ?", { retrieve: async () => okSearch, generate }), {
     status: "ok",
-    answer: "Next.js",
-    sources: [{ resourceId: "r1", title: "Archi", excerpt: "Next.js et Supabase" }],
+    answer: "Next.js est utilisé. [[source:c1]]",
+    sources: [{
+      chunkId: "c1",
+      revision: 1,
+      resourceId: "r1",
+      title: "Archi",
+      excerpt: "Next.js et Supabase",
+    }],
   });
-  const missing = async () => '{"answer":"Je ne sais pas.","sources":[],"missing":true}';
+  const missing = async () => '{"claims":[],"missing":true}';
   assert.equal((await runAssistant("Q ?", { retrieve: async () => okSearch, generate: missing })).status, "unknown");
   assert.equal(
     (await runAssistant("Q ?", { retrieve: async () => ({ status: "rate-limited" }), generate })).status,
@@ -75,7 +187,7 @@ test("la recherche et le prompt de suivi utilisent le contexte récent, pas les 
     },
     generate: async (messages) => {
       calls.messages = messages;
-      return '{"answer":"Réponse actuelle","sources":[1],"missing":false}';
+      return '{"claims":[{"text":"Réponse actuelle.","sources":[1]}],"missing":false}';
     },
   }, history);
 
@@ -137,28 +249,95 @@ test("une erreur du modèle donne error sans journaliser la question", async () 
 
 test("les sources sont dédoublonnées par ressource et ordonnées par pertinence", () => {
   const passages = [
-    { resourceId: "a", title: "A", content: "un", similarity: 0.9 },
-    { resourceId: "a", title: "A", content: "deux", similarity: 0.8 },
-    { resourceId: "b", title: "B", content: "trois", similarity: 0.7 },
+    { resourceId: "a", chunkId: "a1", revision: 1, title: "A", content: "un", similarity: 0.9 },
+    { resourceId: "a", chunkId: "a2", revision: 1, title: "A", content: "deux", similarity: 0.8 },
+    { resourceId: "b", chunkId: "b1", revision: 1, title: "B", content: "trois", similarity: 0.7 },
   ];
   const sources = buildSources([3, 2, 1], passages);
-  assert.deepEqual(sources.map((s) => s.resourceId), ["a", "b"]);
+  assert.deepEqual(sources.map((s) => s.chunkId), ["a1", "a2", "b1"]);
+  const display = groupAssistantAnswerSources(sources.map((source) => ({
+    status: "available",
+    sourceId: source.chunkId,
+    resourceId: source.resourceId,
+    title: source.title,
+    excerpt: source.excerpt,
+  })));
+  assert.deepEqual(display.map((source) => ({
+    resourceId: source.resourceId,
+    evidence: source.evidence,
+  })), [
+    { resourceId: "a", evidence: [{ sourceId: "a1", excerpt: "un" }, { sourceId: "a2", excerpt: "deux" }] },
+    { resourceId: "b", evidence: [{ sourceId: "b1", excerpt: "trois" }] },
+  ]);
+  assert.deepEqual(
+    groupAssistantAnswerSources(
+      sources.map((source) => ({
+        status: "available",
+        sourceId: source.chunkId,
+        resourceId: source.resourceId,
+        title: source.title,
+        excerpt: source.excerpt,
+      })),
+      "Fait B [[source:b1]] puis fait A [[source:a1]]",
+    ).map(({ resourceId }) => resourceId),
+    ["b", "a"],
+  );
 });
 
-test("une réponse sans source valide n'est pas présentée comme fiable", async () => {
+test("une affirmation sans preuve valide est rejetée comme erreur technique", async () => {
   const outcome = await runAssistant("Q ?", {
     retrieve: async () => okSearch,
-    generate: async () => '{"answer":"Une réponse","sources":[],"missing":false}',
+    generate: async () => '{"claims":[{"text":"Une réponse","sources":[]}],"missing":false}',
   });
-  assert.equal(outcome.status, "unknown");
+  assert.equal(outcome.status, "error");
 });
 
 test("un « Je ne sais pas » écrit dans le texte n'affiche pas de sources", async () => {
   const outcome = await runAssistant("Q ?", {
     retrieve: async () => okSearch,
-    generate: async () => '{"answer":"Je ne sais pas.","sources":[1],"missing":false}',
+    generate: async () => '{"claims":[{"text":"Je ne sais pas.","sources":[1]}],"missing":false}',
   });
   assert.equal(outcome.status, "unknown");
+});
+
+test("les affirmations dupliquées fusionnent leurs preuves et les références sont persistées dans le texte", () => {
+  const reply = parseAssistantReply(
+    '{"claims":[{"text":"La story concernée est 3.1.","sources":[1]},{"text":"La story concernée est 3.1.","sources":[2]}],"missing":false}',
+    2,
+  );
+  assert.deepEqual(reply, {
+    claims: [{ text: "La story concernée est 3.1.", sources: [1, 2] }],
+    missing: false,
+  });
+  const answer = "La story concernée est 3.1. [[source:chunk-1]] [[source:chunk-2]]";
+  assert.deepEqual(assistantAnswerSourceReferences(answer), ["chunk-1", "chunk-2"]);
+  assert.equal(stripAssistantSourceMarkers(answer), "La story concernée est 3.1.");
+  assert.deepEqual(splitAssistantAnswer(answer), [
+    { type: "text", value: "La story concernée est 3.1. " },
+    { type: "source", sourceId: "chunk-1" },
+    { type: "text", value: " " },
+    { type: "source", sourceId: "chunk-2" },
+  ]);
+});
+
+test("un fait cité par deux passages de la même ressource conserve les deux passages", async () => {
+  const passages = [
+    { ...passage, chunkId: "chunk-a", content: "Premier extrait." },
+    { ...passage, chunkId: "chunk-b", content: "Deuxième extrait." },
+  ];
+  const outcome = await runAssistant("Quel est le numéro ?", {
+    retrieve: async () => ({ status: "ok", passages }),
+    generate: async () => '{"claims":[{"text":"La story concernée est 3.1.","sources":[1,2]}],"missing":false}',
+  });
+
+  assert.deepEqual(outcome, {
+    status: "ok",
+    answer: "La story concernée est 3.1. [[source:chunk-a]] [[source:chunk-b]]",
+    sources: [
+      { chunkId: "chunk-a", revision: 1, resourceId: "r1", title: "Archi", excerpt: "Premier extrait." },
+      { chunkId: "chunk-b", revision: 1, resourceId: "r1", title: "Archi", excerpt: "Deuxième extrait." },
+    ],
+  });
 });
 
 test("le code de l'assistant utilise searchPassages et aucune clé privilégiée", () => {

@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState, useState } from "react";
 
 import { submitQuestion } from "./assistant-actions";
+import { AssistantAnswer } from "./assistant-answer";
 import { editAssistantQuestion, type AssistantQuestionDraft } from "./assistant-conversation-core";
 import { ASSISTANT_QUESTION_MAX_LENGTH } from "./assistant-core";
 import type { AssistantFormState } from "./assistant-state";
@@ -96,26 +96,20 @@ export function AssistantForm({
 
       <section aria-label="R&eacute;sultat de l'assistant" className="category-list-section">
         {!conversationMode && outcome?.status === "ok" ? (
-          <>
-            <h2>R&eacute;ponse</h2>
-            <p className="assistant-answer">{outcome.answer}</p>
-            <h2>Sources</h2>
-            <ul className="category-list">
-              {outcome.sources.map((source) => (
-                <li key={source.resourceId}>
-                  <strong>{source.title}</strong>
-                  <p className="resource-excerpt">{source.excerpt}</p>
-                  <Link className="resource-link" href={`/resources/${source.resourceId}`}>
-                    Ouvrir la ressource
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </>
+          <AssistantAnswer
+            answer={outcome.answer}
+            sources={outcome.sources.map((source) => ({
+              status: "available",
+              sourceId: source.chunkId,
+              resourceId: source.resourceId,
+              title: source.title,
+              excerpt: source.excerpt,
+            }))}
+          />
         ) : null}
         {!conversationMode && (outcome?.status === "unknown" || outcome?.status === "no-context") ? (
           <p className="auth-message auth-message-info" role="status">
-            Je ne trouve pas cette information dans les ressources disponibles.
+            Je ne sais pas. Je ne trouve pas cette information dans les ressources disponibles.
           </p>
         ) : null}
         {submission?.status === "invalid" ? (
