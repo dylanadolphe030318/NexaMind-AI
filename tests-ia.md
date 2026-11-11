@@ -271,3 +271,29 @@ Appliquer manuellement `supabase/migrations/20261107100000_search_resource_chunk
 dans Supabase SQL Editor après `20261106120000_create_conversations.sql` et les migrations
 précédentes.
 Ne pas appliquer la migration dans le cadre d'un test automatisé.
+
+## Vérification visuelle du sprint 10 — toutes les pages
+
+La refonte est implémentée, mais les trois stories restent en revue avant votre
+évaluation. Ce contrôle visuel ne remplace ni les questions IA ni les preuves
+de droits du sprint 9. Aucune nouvelle migration n'est nécessaire.
+
+1. Sans connexion, ouvrir l'accueil, la connexion et l'inscription.
+2. Se connecter avec son compte habituel, puis parcourir l'espace membre.
+3. Vérifier les écrans ci-dessous sur ordinateur, puis en fenêtre étroite
+   (320 ou 375 px), au clavier avec Tab et à zoom 200 %.
+
+| Story | Écrans à parcourir | Ce qu'il faut voir |
+|---|---|---|
+| UI10-1 | Accueil, connexion, inscription, espace membre | Fond blanc, cartes mauve pâle, boutons violets, textes et champs lisibles, focus visible. |
+| UI10-2 | Catégories, ressources, recherche, détail, ajout, modification, confirmation de suppression ; historique des recherches et sa confirmation de suppression | Même style, titres longs lisibles, menus utilisables, liens visibles ; suppression rouge, annulation claire. Utiliser uniquement les écrans autorisés à son rôle. |
+| UI10-3 | Assistant, conversations et détail d'une conversation existante | Questions distinctes des réponses ; réponses et sources mauve pâle, liens soulignés et citations conservées. Vérifier aussi la confirmation de suppression et revenir avec Annuler. |
+
+Il n'est pas nécessaire de lancer une recherche, de poser une nouvelle question
+ou de confirmer une suppression pour ce contrôle visuel. Une conversation déjà
+enregistrée suffit pour examiner les sources. Aucun contenu essentiel ne doit
+être coupé et aucun défilement horizontal de la page ne doit être nécessaire.
+
+Les contrôles automatiques passent. Le rendu des pages connectées n'a pas été
+vérifié dans un navigateur authentifié pendant le développement, faute de
+session disponible ; cette vérification reste donc à faire avec votre compte.

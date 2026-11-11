@@ -24,10 +24,12 @@ export default async function AssistantPage() {
 
   return (
     <main className="auth-page category-page">
-      <section aria-labelledby="assistant-title" className="auth-card category-card">
+      <section aria-labelledby="assistant-title" className="auth-card category-card assistant-card">
         <h1 id="assistant-title">Assistant</h1>
         <p>
-          <Link href="/assistant/conversations">Mes conversations</Link>
+          <Link className="resource-link" href="/assistant/conversations">
+            Mes conversations
+          </Link>
         </p>
         <AssistantForm initialQuestionId={randomUUID()} />
       </section>

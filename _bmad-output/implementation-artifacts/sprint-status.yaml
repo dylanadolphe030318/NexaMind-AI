@@ -126,7 +126,7 @@ sprint_10_ui:
   stories:
     ui10-1: review
     ui10-2: review
-    ui10-3: ready-for-dev
+    ui10-3: review
   development_started: true
   direction: "2026-11-11 : Dylan approuve la refonte de toutes les pages et son
     lancement. Fond blanc, cartes mauve pale, aucune fonction ajoutee.

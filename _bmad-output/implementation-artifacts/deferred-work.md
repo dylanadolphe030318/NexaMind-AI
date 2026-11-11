@@ -66,3 +66,6 @@
 - source_spec: `_bmad-output/specs/spec-sprint-10-ui/ui10-1-socle-accueil-acces.md`
   summary: Verifier au navigateur l'espace membre avec des sessions de test autorisees membre et responsable.
   evidence: Le rendu connecte et le role sont couverts par une session simulee et la redirection visiteur est testee, mais aucun compte authentifie n'etait disponible pour une verification navigateur sans acces distant.
+- source_spec: `_bmad-output/specs/spec-sprint-10-ui/ui10-3-assistant-validation.md`
+  summary: Verifier dans un navigateur authentifie les trois routes de l'assistant aux largeurs 320, 375 et 1280 px et au zoom 200%.
+  evidence: Aucune session authentifiee n'etait disponible ; /assistant redirige vers /login et le detail affiche une erreur de chargement sans session. Les assertions SSR/CSS ne remplacent pas la verification des styles calcules ; utiliser une session existante, sans creer de compte ni effectuer d'appel IA.

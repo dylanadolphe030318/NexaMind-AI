@@ -38,10 +38,15 @@ export default async function ConversationsPage({
 
   return (
     <main className="auth-page category-page">
-      <section aria-labelledby="conversations-title" className="auth-card category-card">
+      <section
+        aria-labelledby="conversations-title"
+        className="auth-card category-card assistant-card"
+      >
         <h1 id="conversations-title">Mes conversations</h1>
         <p>
-          <Link href="/assistant">Retour &agrave; l&apos;assistant</Link>
+          <Link className="resource-link" href="/assistant">
+            Retour &agrave; l&apos;assistant
+          </Link>
         </p>
         {deleteError === "1" ? (
           <p className="auth-message auth-message-error" role="alert">
@@ -55,7 +60,9 @@ export default async function ConversationsPage({
         {result.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             Les conversations n&apos;ont pas pu &ecirc;tre charg&eacute;es.{" "}
-            <Link href="/assistant/conversations">R&eacute;essayez.</Link>
+            <Link className="resource-link" href="/assistant/conversations">
+              R&eacute;essayez.
+            </Link>
           </p>
         ) : result.conversations.length === 0 ? (
           <p className="auth-message auth-message-info" role="status">
@@ -64,9 +71,12 @@ export default async function ConversationsPage({
         ) : (
           <ul className="category-list">
             {result.conversations.map((conversation) => (
-              <li key={conversation.id}>
+              <li className="category-entry assistant-conversation-entry" key={conversation.id}>
                 <h2>
-                  <Link href={`/assistant/conversations/${conversation.id}`}>
+                  <Link
+                    className="resource-link"
+                    href={`/assistant/conversations/${conversation.id}`}
+                  >
                     {displayTitle(conversation.firstQuestion)}
                   </Link>
                 </h2>
@@ -76,6 +86,7 @@ export default async function ConversationsPage({
                 </time>
                 <p>
                   <Link
+                    className="resource-link"
                     aria-label={`Supprimer la conversation « ${displayTitle(conversation.firstQuestion)} »`}
                     href={`/assistant/conversations/${conversation.id}?delete=confirm`}
                   >

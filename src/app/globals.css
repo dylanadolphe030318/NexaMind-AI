@@ -780,6 +780,38 @@ a:focus-visible {
   margin: 0;
 }
 
+.assistant-card {
+  background: #fff;
+}
+
+.assistant-card > h1 {
+  margin-top: 0;
+}
+
+.assistant-conversation-entry,
+.assistant-message {
+  background: #fff;
+}
+
+.assistant-question {
+  margin: 0;
+}
+
+.assistant-delete-confirmation {
+  display: grid;
+  gap: 16px;
+}
+
+.assistant-delete-confirmation h2,
+.assistant-delete-confirmation p {
+  margin: 0;
+}
+
+.assistant-delete-actions {
+  align-items: center;
+  margin-bottom: 0;
+}
+
 .assistant-source-card {
   display: grid;
   gap: 14px;
@@ -799,7 +831,7 @@ a:focus-visible {
 }
 
 .resource-link {
-  color: var(--ink);
+  color: var(--purple);
   overflow-wrap: anywhere;
   text-decoration: underline;
   text-underline-offset: 3px;

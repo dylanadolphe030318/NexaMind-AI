@@ -226,8 +226,8 @@ test("les réponses rouvertes sont encadrées sans recolorer les questions", asy
     }),
   );
 
-  assert.match(markup, /<li class="category-entry"><h2>Vous<\/h2><p>Question historique<\/p>/);
-  assert.match(markup, /<li class="category-entry"><h2>Assistant<\/h2><div class="conversation-assistant-content">/);
+  assert.match(markup, /<li class="category-entry assistant-message"><h2>Vous<\/h2><p class="assistant-question">Question historique<\/p>/);
+  assert.match(markup, /<li class="category-entry assistant-message"><h2>Assistant<\/h2><div class="conversation-assistant-content">/);
   assert.match(markup, /class="assistant-answer assistant-answer-card"/);
 });
 

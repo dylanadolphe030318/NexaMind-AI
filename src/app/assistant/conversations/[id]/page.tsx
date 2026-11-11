@@ -32,10 +32,15 @@ export default async function ConversationPage({
 
   return (
     <main className="auth-page category-page">
-      <section aria-labelledby="conversation-title" className="auth-card category-card">
+      <section
+        aria-labelledby="conversation-title"
+        className="auth-card category-card assistant-card"
+      >
         <h1 id="conversation-title">Conversation</h1>
         <p>
-          <Link href="/assistant/conversations">Retour &agrave; mes conversations</Link>
+          <Link className="resource-link" href="/assistant/conversations">
+            Retour &agrave; mes conversations
+          </Link>
         </p>
         {result.status === "unavailable" ? (
           <p className="auth-message auth-message-info" role="status">
@@ -44,11 +49,13 @@ export default async function ConversationPage({
         ) : result.status === "error" ? (
           <p className="auth-message auth-message-error" role="alert">
             La conversation n&apos;a pas pu &ecirc;tre charg&eacute;e.{" "}
-            <Link href={"/assistant/conversations/" + id}>R&eacute;essayez.</Link>
+            <Link className="resource-link" href={"/assistant/conversations/" + id}>
+              R&eacute;essayez.
+            </Link>
           </p>
         ) : deleteMode === "confirm" ? (
-          <>
-            <h2>Supprimer la conversation</h2>
+          <section aria-labelledby="delete-conversation-title" className="assistant-delete-confirmation">
+            <h2 id="delete-conversation-title">Supprimer la conversation</h2>
             <p>
               Supprimer la conversation &laquo;&nbsp;
               {result.messages.find((message) => message.role === "user")?.content ?? "Conversation sans titre"}
@@ -60,16 +67,19 @@ export default async function ConversationPage({
                 La conversation n&apos;a pas pu &ecirc;tre supprim&eacute;e. R&eacute;essayez.
               </p>
             ) : null}
-            <form action={deleteConversationAction} className="resource-delete-actions">
+            <form
+              action={deleteConversationAction}
+              className="resource-delete-actions assistant-delete-actions"
+            >
               <input name="conversationId" type="hidden" value={id} />
-              <button className="button auth-submit" type="submit">
+              <button className="button button-destructive" type="submit">
                 Supprimer
               </button>
               <Link className="button button-secondary" href={`/assistant/conversations/${id}`}>
                 Annuler
               </Link>
             </form>
-          </>
+          </section>
         ) : result.messages.length === 0 ? (
           <p className="auth-message auth-message-info" role="status">
             Aucun message enregistr&eacute;.
@@ -77,11 +87,11 @@ export default async function ConversationPage({
         ) : (
           <ol className="category-list">
             {result.messages.map((message) => (
-              <li className="category-entry" key={message.id}>
+              <li className="category-entry assistant-message" key={message.id}>
                 <h2>{message.role === "user" ? "Vous" : "Assistant"}</h2>
                 {message.role === "user" ? (
                   <>
-                    <p>{message.content}</p>
+                    <p className="assistant-question">{message.content}</p>
                     <p className="resource-meta">
                       {conversationQuestionStatusLabel(message.status)}
                     </p>

@@ -510,8 +510,8 @@ test("la confirmation est un formulaire explicite et Annuler n'appelle aucune mu
 
   assert.ok(list.includes("?delete=confirm"));
   assert.ok(detail.includes("Supprimer la conversation"));
-  assert.ok(detail.includes("<form action={deleteConversationAction}"));
-  assert.ok(detail.includes('<button className="button auth-submit" type="submit">'));
+  assert.match(detail, /<form\s+action=\{deleteConversationAction\}/);
+  assert.ok(detail.includes('<button className="button button-destructive" type="submit">'));
   assert.ok(detail.includes('href={`/assistant/conversations/${id}`}'));
   assert.ok(detail.includes("Annuler"));
   assert.ok(action.includes("processConversationDeletion(formData"));
