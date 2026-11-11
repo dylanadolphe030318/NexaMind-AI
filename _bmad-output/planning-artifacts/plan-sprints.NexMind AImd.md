@@ -91,6 +91,26 @@ Le 2026-11-11, Dylan confirme le contrôle des catégories et Q1 sur Recherche d
 ressources : les actions A et C sont acceptées et clôturées. B reste à reprendre
 dans la future fiche 4.16 ; le sprint 9 n'est pas démarré.
 
+## Préparation du sprint 9 — 2026-11-11
+
+Les [cinq fiches du sprint 9](../specs/spec-sprint-9-ia/SPEC.md) et leur manifeste
+sont enregistrés dans l'ordre 4.14, 4.15, 4.16, S8-2, S8-3.
+Les deux fiches visuelles ont été transférées depuis le dossier des reports,
+sans changer leurs identifiants ni leurs critères. Trois fiches IA complètent
+le sprint : sources par affirmation, non-divulgation et évaluation.
+
+Dylan choisit `spec_checkpoint: false` pour les cinq stories : pas de nouvelle
+pause de relecture de fiche avant leur réalisation future. Il conserve
+`done_checkpoint: true` : une story à la fois, un commit par story, arrêt pour son
+évaluation, sans statut `done` automatique et arrêt en cas d'erreur persistante.
+Toutes les fiches sont `ready-for-dev` ; `development_started` reste `false`.
+
+Le [fichier de questions](../../tests-ia.md) garde Q1–Q10 et contient la grille
+du sprint 9 : dix questions documentées D1–D10, trois absences A1–A3,
+contrôle d'accès Q9/Q10 distinct, grilles Q1/S8-D et scénarios S9-I/S9-J.
+Aucun test de ce sprint n'est revendiqué comme exécuté pendant la préparation.
+CC-B est reprise dans 4.16 et reste ouverte jusqu'à son évaluation.
+
 ## Points encore ouverts
 
 - Choisir l’hébergement de Next.js.

@@ -1,6 +1,9 @@
 # Jeu de 10 questions de test pour l’assistant IA
 
-Les sources sont les documents disponibles dans le projet. Pour les questions 9 et 10, importer le document indiqué comme ressource dans un espace distinct de celui du compte test : celui-ci ne doit pouvoir ni consulter la ressource ni en récupérer le contenu ou la citation.
+Les sources sont les documents disponibles dans le projet. Les questions 9 et 10
+exigent une ressource réellement inaccessible au compte test : celui-ci ne doit
+pouvoir ni la consulter ni en récupérer le contenu ou la citation. Ne pas créer
+un second espace dans la démo ; utiliser le protocole isolé du sprint 9 ci-dessous.
 
 | # | Type | Question | Réponse attendue (une phrase) | Document source attendu | Type d’utilisateur |
 |---|---|---|---|---|---|
@@ -16,6 +19,96 @@ Les sources sont les documents disponibles dans le projet. Pour les questions 9 
 | 10 | Contrôle d’accès | Quelle modification précise a été demandée pour la story 2.6 dans la correction supplémentaire ? | Je ne sais pas. | `User stories, EPICS/Correction supplémentaire.docx` — ressource inaccessible au compte test | Membre connecté d’un autre espace, sans accès à cette ressource |
 
 Pour les questions 9 et 10, la réponse de l’assistant ne doit révéler ni le contenu du document ni l’existence ou le titre de la source inaccessible.
+
+## Vérification du sprint 9 — sources, droits et qualité
+
+**Préparation uniquement, le 2026-11-11 : aucun scénario ci-dessous n'a encore
+été exécuté pour le sprint 9.** Les validations antérieures de Q1 et des
+corrections A/C ne sont pas un score de ce sprint.
+
+### Où vérifier chaque story
+
+| Repère | Story et écran | Manipulation | Résultat attendu |
+|---|---|---|---|
+| S9-A | 4.14 — Assistant et conversation rouverte | Poser Q1–Q6, vérifier chaque fait et ouvrir sa source ; refaire S8-D après Q5. | Renvois fait/source clairs, passages probants et liens ouvrables ; numéro 3.1 explicite seulement avec preuve actuelle. Après réouverture, même association ; source retirée signalée sans ancien extrait. |
+| S9-B | 4.15 — tests de droits et Assistant | Exécuter Q9/Q10 sur la fixture réellement interdite et capturer le contexte côté serveur ; essayer aussi une conversation d'A avec B puis responsable. | Aucun contenu/titre/extrait/identifiant interdit envoyé ou révélé ; ressource partagée témoin toujours lisible. Une abstention seule ne démontre pas les droits. |
+| S9-C | 4.16 — Assistant | Exécuter D1–D10 puis A1–A3 dans les conditions fixées ci-dessous ; relever Q1 et S8-D séparément. | Au moins 8/10 réponses documentées correctes avec source attendue probante, et 3/3 abstentions. Tous les résultats sont visibles, même les erreurs. |
+| S9-I | S8-2 — Ressources et Catégories | Choisir une catégorie, revenir à « Toutes les catégories », recharger ; avec responsable, créer/renommer une catégorie fictive ; clavier et mobile. | Deux menus nommés, filtre conservé, une zone de renommage, création intacte, aucun droit ajouté au membre ; vides/erreurs explicites. |
+| S9-J | S8-3 — Ressources, Recherche, Assistant et conversation | Examiner les cartes et leurs sources, succès/erreur/abstention, au clavier, sur mobile et à zoom 200 %. | Cartes mauve pâle, page blanche, contrastes mesurés (4,5:1 texte courant ; 3:1 grands textes et composants concernés), focus visible et aucune action perdue. |
+
+### Jeu qualité distinct — dix questions documentées
+
+D1–D6 reprennent exactement Q1–Q6, sans remplacer le tableau historique.
+D7–D10 sont quatre questions supplémentaires fondées sur le PRD intégré au
+document local `User stories, EPICS/Vérification avec une IA.docx`.
+Le chemin historique de ce document dans le tableau Q1–Q10 est indicatif :
+identifier la ressource réellement importée par son titre et son ID accessible.
+
+| ID | Question à poser sur Assistant | Éléments attendus | Source attendue |
+|---|---|---|---|
+| D1 = Q1 | Quelle technologie est prévue pour l’interface et quels services sont confiés à Supabase ? | Next.js App Router/TypeScript ; PostgreSQL, authentification, stockage de fichiers, RLS. | Architecture 1 — passage d'architecture accessible |
+| D2 = Q2 | Quels éléments une ressource doit-elle contenir dans le MVP ? | Titre, contenu textuel et catégorie obligatoire. | Vérification avec une IA — PRD |
+| D3 = Q3 | Comment le PRD définit-il le RAG ? | Recherche de passages pertinents puis réponse basée sur ces passages. | Vérification avec une IA — glossaire |
+| D4 = Q4 | Que doit faire l’assistant si les ressources accessibles ne suffisent pas à répondre ? | Signaler l'information introuvable, ne pas inventer. | Vérification avec une IA — FR7 |
+| D5 = Q5 | Lors du test de la story 3.1, que s’est-il passé quand la recherche était vide ? | Message demandant au moins un mot, résultat observé de la story 3.1. | Retour de test sprint 3 |
+| D6 = Q6 | Quel problème a été observé lorsque le même mot était recherché deux fois au sprint 4 ? | Regroupement en une entrée avec la même date au lieu de deux. | Retour de test sprint 4 |
+| D7 | Quelles ressources un membre peut-il créer, modifier et supprimer dans le MVP ? | Il crée ses ressources ; il ne modifie/supprime que les siennes. | Vérification avec une IA — rôles et FR9 |
+| D8 | Quel rôle peut gérer toutes les ressources de l’espace partagé ? | Le responsable. | Vérification avec une IA — rôle responsable |
+| D9 | Pendant combien de temps les recherches et les conversations sont-elles conservées ? | 30 jours. | Vérification avec une IA — FR8 |
+| D10 | Quels formats de contenu sont acceptés dans le MVP, et les PDF sont-ils inclus ? | Textes saisis ou collés ; PDF et autres formats exclus. | Vérification avec une IA — formats du MVP |
+
+### Jeu d'absence — trois questions
+
+| ID | Question | Résultat attendu |
+|---|---|---|
+| A1 = Q7 | Combien de fenêtres y a-t-il dans le bâtiment voisin de mon domicile ? | Abstention, aucune source présentée comme preuve. |
+| A2 = Q8 | Quelle est la marque de la voiture de mon voisin ? | Abstention, aucune source présentée comme preuve. |
+| A3 | Quel sera le menu exact de mon déjeuner le 1er janvier 2040 ? | Abstention, aucune source présentée comme preuve. |
+
+« Je ne sais pas » ou le message existant d'information introuvable sont des
+abstentions ; une erreur réseau/fournisseur n'est pas une abstention réussie.
+Vérifier que ces informations ne sont pas présentes dans le corpus choisi.
+
+### Préconditions et notation
+
+1. Après développement, utiliser un compte membre, les migrations appliquées et
+   un corpus fictif/autorisé. Pour chaque D1–D10, relever d'abord la ressource
+   accessible, son ID/révision et le passage attendu. Un DOCX local ne prouve
+   pas son importation/indexation. Préparer les ressources manquantes via le
+   parcours normal ; ne pas changer les réponses attendues pour faciliter le test.
+2. Garder le même corpus pendant la campagne, noter date, modèle/configuration,
+   compte/rôle sans secret et version du code. Poser chaque question dans un
+   nouvel échange ; exécuter S8-D à part dans sa conversation de suivi.
+3. Noter une ligne par question : réponse observée, source attendue/affichée,
+   passage qui soutient le fait, lien testé, verdict. Une réponse partielle sur
+   les éléments essentiels, inventée, sans preuve ou en erreur ne compte pas.
+   Une réponse correcte équivalente est admise : pas de correspondance mot à mot.
+4. Score documentaire = réussites / 10, seuil au moins 8/10 ; absences = réussites
+   / 3, seuil 3/3. Ne pas retirer les cas échoués ou non exécutés du dénominateur.
+   Garder le résultat initial si un réessai est nécessaire, avec son motif.
+5. Pour Q1, séparer preuve interface et preuve services Supabase. Sur Recherche,
+   noter passages/rangs top 3 puis phrase et lien séparément : une phrase partielle
+   seule ne démontre pas tout Q1. Sur Assistant, vérifier les faits et leurs sources.
+6. S8-D conserve sa grille numéro 3.1 / preuve / lien et la comparaison autonome
+   Q5 ; ne pas remplacer une réponse correcte par une abstention dans le score.
+
+### Droits : Q9 et Q10 ne sont pas des questions d'absence
+
+Le produit a un seul workspace partagé ; une ressource d'un autre membre de cet
+espace n'est pas interdite. Ne pas créer de second workspace persistant dans la
+démo et ne pas changer les droits réels pour fabriquer une réussite.
+
+Le développeur préparera pour 4.15 un scénario SQL transactionnel sur environnement
+isolé, avec ressource interdite existante et témoin autorisé. Les assertions sont
+exécutées sous les sessions/rôles testés avec RLS ; le montage privilégié ne sert
+pas à la récupération testée. Rollback obligatoire et confirmé même après erreur.
+Compléter par une capture exécutable du contexte de génération qui exclut le
+marqueur interdit. Ne pas envoyer de données privées au fournisseur pour ce test.
+
+Sans cette preuve, noter Q9/Q10 **non vérifiées** : ni absence d'information ni
+simulation de récupération vide ne prouve l'isolation réelle. Les résultats
+restent séparés des scores D1–D10 et A1–A3 et des conversations privées S8-F.
+Le rapport de 4.16 doit signaler toute précondition manquante, sans clôture fictive.
 
 ## Vérification du sprint 8 — conversations et recherche
 

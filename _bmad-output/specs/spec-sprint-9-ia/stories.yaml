@@ -1,0 +1,40 @@
+- id: "4-14"
+  title: Relier les affirmations aux sources
+  description: >-
+    Réaliser CAP-1 selon stories/4-14-relier-les-affirmations-aux-sources.md.
+    Couvrir les citations par fait, leur réouverture et la preuve actuelle de S8-D.
+  spec_checkpoint: false
+  done_checkpoint: true
+  invoke_dev_with: "Une story à la fois dans l'ordre, un commit par story. Arrêter en cas de blocage ou d'erreur persistante. Aucun statut done avant mon évaluation. Aucun développement pendant cette préparation."
+- id: "4-15"
+  title: Empêcher la divulgation de ressources non autorisées
+  description: >-
+    Réaliser CAP-2 selon stories/4-15-empecher-la-divulgation-de-ressources-non-autorisees.md.
+    Vérifier RLS et le contexte transmis sans créer un second espace dans la démo.
+  spec_checkpoint: false
+  done_checkpoint: true
+  invoke_dev_with: "Une story à la fois dans l'ordre, un commit par story. Arrêter en cas de blocage ou d'erreur persistante. Aucun statut done avant mon évaluation. Aucun développement pendant cette préparation."
+- id: "4-16"
+  title: Vérifier la qualité et l'abstention de l'assistant
+  description: >-
+    Réaliser CAP-3 selon stories/4-16-verifier-la-qualite-et-l-abstention-de-l-assistant.md.
+    Mesurer dix réponses documentées et trois abstentions, avec grilles Q1 et S8-D.
+  spec_checkpoint: false
+  done_checkpoint: true
+  invoke_dev_with: "Une story à la fois dans l'ordre, un commit par story. Arrêter en cas de blocage ou d'erreur persistante. Aucun statut done avant mon évaluation. Aucun développement pendant cette préparation."
+- id: "s8-2"
+  title: Présenter les catégories en listes déroulantes
+  description: >-
+    Réaliser CAP-4 selon stories/s8-2-categories-en-listes-deroulantes.md.
+    Conserver filtre, création, renommage et droits sur les deux pages.
+  spec_checkpoint: false
+  done_checkpoint: true
+  invoke_dev_with: "Une story à la fois dans l'ordre, un commit par story. Arrêter en cas de blocage ou d'erreur persistante. Aucun statut done avant mon évaluation. Aucun développement pendant cette préparation."
+- id: "s8-3"
+  title: Distinguer les cartes avec un fond mauve pâle
+  description: >-
+    Réaliser CAP-5 selon stories/s8-3-cartes-mauve-pale.md.
+    Vérifier toutes les surfaces, les contrastes, le clavier, le mobile et le zoom.
+  spec_checkpoint: false
+  done_checkpoint: true
+  invoke_dev_with: "Une story à la fois dans l'ordre, un commit par story. Arrêter en cas de blocage ou d'erreur persistante. Aucun statut done avant mon évaluation. Aucun développement pendant cette préparation."

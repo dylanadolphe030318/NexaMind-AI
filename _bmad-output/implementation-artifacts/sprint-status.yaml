@@ -84,9 +84,10 @@ development_status:
   4-11-rouvrir-une-conversation: done
   4-12-continuer-une-conversation-précédente: done
   4-13-supprimer-une-conversation-de-son-historique: done
-  4-14-relier-les-affirmations-aux-sources: backlog
-  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: backlog
-  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: backlog
+  # Cinq fiches du sprint 9 préparées le 2026-11-11, aucun développement.
+  4-14-relier-les-affirmations-aux-sources: ready-for-dev
+  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: ready-for-dev
+  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: ready-for-dev
   epic-4-retrospective: done
 sprint_story_limits:
   min: 3
@@ -107,7 +108,10 @@ sprint_8_preparation:
     le sprint 9 planifié contient les stories 4.14 à 4.16, S8-2 et S8-3."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
-  deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
+  story_folder: "_bmad-output/specs/spec-sprint-9-ia/stories"
+  manifest: "_bmad-output/specs/spec-sprint-9-ia/stories.yaml"
+  spec_checkpoint: false
+  done_checkpoint: true
   complements:
     s8-2: ready-for-dev
     s8-3: ready-for-dev
@@ -124,9 +128,9 @@ action_items:
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "cc-2026-11-11-b"
     epic: 4
-    action: "Dans la verification de 4.16 : reprendre la grille Q1 approuvee
-      dans epics.md et tests-ia.md lors de la preparation de la fiche, puis l'evaluer.
-      Questions et notation inchangees ; le jeu historique ne remplace pas le jeu de 4.16."
+    action: "Grille Q1 reprise dans la fiche 4.16 preparee le 2026-11-11 ;
+      execution et evaluation encore attendues. Questions historiques inchangees,
+      jeu distinct dix documentees et trois absences ; pas de cloture par preparation."
     owner: "Dylan + développeur"
     status: open
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
