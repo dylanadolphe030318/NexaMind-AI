@@ -87,7 +87,7 @@ export default async function ConversationPage({
                     </p>
                   </>
                 ) : (
-                  <>
+                  <div className="conversation-assistant-content">
                     <p className="resource-meta">
                       R&eacute;ponse historique &middot; {conversationQuestionStatusLabel(message.status)}
                     </p>
@@ -97,7 +97,7 @@ export default async function ConversationPage({
                       </p>
                     ) : null}
                     <AssistantAnswer answer={message.content} sources={message.sources} />
-                  </>
+                  </div>
                 )}
               </li>
             ))}

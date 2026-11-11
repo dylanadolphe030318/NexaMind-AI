@@ -74,7 +74,7 @@ components:
     focus: '{colors.focus}'
     radius: '{rounded.sm}'
   resource-card:
-    background: '{colors.surface}'
+    background: '#F3EDF8'
     foreground: '{colors.text-primary}'
     border: '{colors.border}'
     radius: '{rounded.md}'
@@ -125,7 +125,7 @@ Les champs et boutons ont des angles légèrement arrondis ; les cartes et dialo
 - **Bouton secondaire** — fond `{colors.surface}`, texte `{colors.primary}`, bordure `{colors.border}` et rayon `{rounded.md}`.
 - **Formulaire de ressource** — champs sur `{colors.surface}`, texte `{colors.text-primary}`, bordures `{colors.border}` et focus `{colors.focus}` ; l’erreur utilise `{colors.error}` et un message textuel.
 - **Sélecteur de catégorie** — apparence de champ, avec la catégorie choisie affichée en texte ; les catégories ne sont pas distinguées par couleur seule.
-- **Carte de ressource** — surface `{colors.surface}`, bordure `{colors.border}` et rayon `{rounded.md}` ; affiche titre, catégorie et date.
+- **Carte de ressource** — dans la liste Ressources et les résultats de recherche, surface mauve pâle `#F3EDF8`, bordure `{colors.border}` et rayon `{rounded.md}` ; affiche titre, catégorie et date.
 - **Ligne de ressource** — variante compacte de la carte, mêmes couleurs et informations essentielles, adaptée à une liste dense.
 - **Résultat de recherche** — reprend la ligne de ressource, avec un extrait lisible et un lien d’ouverture en violet souligné.
 - **Réponse de l’assistant** — surface `{colors.surface-soft}` ou `{colors.surface}`, texte `{colors.text-primary}` ; les sources sont séparées visuellement et restent lisibles.
@@ -133,6 +133,21 @@ Les champs et boutons ont des angles légèrement arrondis ; les cartes et dialo
 - **Dialogue de confirmation** — surface `{colors.surface}`, texte `{colors.text-primary}`, bouton de confirmation et action d’annulation distincts ; l’action destructive n’est pas signalée par la couleur seule.
 - **Indicateur d’état** — libellé lisible et texte `{colors.text-primary}` ou `{colors.text-secondary}` ; une couleur d’état ne porte jamais seule le sens.
 - **Contour de focus** — contour visible `{colors.focus}` autour du contrôle actif, distinct de la bordure au repos.
+
+### Cartes de ressources et de réponses — sprint 9
+
+Les cartes de la liste Ressources et des résultats de recherche, ainsi que les
+blocs de réponse et de sources de l’assistant (y compris les conversations
+rouvertes), utilisent le mauve pâle `#F3EDF8` sur le fond blanc. Cette règle
+reste ciblée à ces cartes et ne recolore ni les questions historiques, ni les
+confirmations, ni les messages de succès, d’erreur ou d’absence de réponse.
+Le texte courant reste en `#252032` ; les liens et le focus restent identifiables
+par leur texte, soulignement ou contour visible, et les états conservent leur
+libellé.
+
+Les métadonnées des cartes mauves utilisent `#6E6878` : la couleur secondaire
+globale `#716B7C` n'atteint pas 4,5:1 sur ce fond. Cette correction est limitée
+aux métadonnées de ces cartes.
 
 ## Do's and Don'ts
 

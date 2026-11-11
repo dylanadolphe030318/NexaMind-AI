@@ -35,7 +35,7 @@ export function AssistantAnswer({
   return (
     <>
       <h2>R&eacute;ponse</h2>
-      <p className="assistant-answer">
+      <p className="assistant-answer assistant-answer-card">
         {parts.map((part, index) => {
           if (part.type === "text") {
             return part.value.split("\n").map((line, lineIndex) => (
@@ -70,9 +70,9 @@ export function AssistantAnswer({
       {sources.length ? (
         <>
           <h2>Sources</h2>
-          <ul aria-label="Sources" className="category-list">
+          <ul aria-label="Sources" className="category-list assistant-sources-list">
             {groups.map((group, index) => (
-              <li key={group.resourceId}>
+              <li className="assistant-source-card" key={group.resourceId}>
                 <strong>Source {index + 1} — {group.title}</strong>
                 {group.evidence.map((evidence) => (
                   <p className="resource-excerpt" key={evidence.sourceId}>
@@ -90,7 +90,7 @@ export function AssistantAnswer({
             {sources.flatMap((source, index) =>
               source.status === "unavailable"
                 ? [(
-                  <li key={`unavailable-${source.sourceId ?? index}`}>
+                  <li className="assistant-source-card" key={`unavailable-${source.sourceId ?? index}`}>
                     <p role="status">Source non disponible</p>
                   </li>
                 )]

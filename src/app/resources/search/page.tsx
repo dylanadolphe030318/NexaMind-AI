@@ -33,7 +33,7 @@ async function RelevantPhraseSelection({
 
   if (result.status === "selected") {
     return (
-      <article aria-label="Phrase la plus pertinente" className="category-entry">
+      <article aria-label="Phrase la plus pertinente" className="category-entry resource-card">
         <h3>Phrase la plus pertinente</h3>
         <blockquote>{result.phrase}</blockquote>
         <p className="resource-meta">
@@ -132,7 +132,7 @@ export default async function SearchResourcesPage({
               </p>
               <ul className="category-list">
                 {outcome.results.map((result) => (
-                  <li className="category-entry" key={result.id}>
+                  <li className="category-entry resource-card" key={result.id}>
                     <p className="category-name">{result.title}</p>
                     {result.excerpt ? <p className="resource-excerpt">{result.excerpt}</p> : null}
                     <p className="resource-meta">
@@ -172,7 +172,7 @@ export default async function SearchResourcesPage({
             ) : (
               <ul className="category-list">
                 {semantic.passages.map((passage, index) => (
-                  <li className="category-entry" key={`${passage.resourceId}-${index}`}>
+                  <li className="category-entry resource-card" key={`${passage.resourceId}-${index}`}>
                     <p className="category-name">{passage.title}</p>
                     <p className="resource-excerpt">{buildPassageExcerpt(passage.content)}</p>
                     <p className="resource-meta">

@@ -3,7 +3,8 @@ story: s8-3
 title: Distinguer les cartes avec un fond mauve pâle
 sprint: 9
 type: ux
-status: ready-for-dev
+status: in-review
+baseline_commit: 56ab501746d370910bf5a72e2656c48c3c563afa
 context:
   - ../SPEC.md
   - ../conventions.md
@@ -11,9 +12,26 @@ context:
 
 # Complément S8-3 — cartes mauve pâle
 
+## Direction de réalisation du 2026-11-11
+
+Dylan autorise le développement de S8-3 après S8-2 sans attendre ses tests :
+évaluation humaine regroupée à la fin, aucun statut `done`. Les indications
+de préparation et pauses des compagnons sont historiques pour ce lot.
+Réaliser seulement cette fiche ; ne pas commiter, pousser, migrer ni appeler
+réellement l'IA. Préserver contenus, liens, droits, budgets et paramètres IA.
+Lire les guides Next locaux avant de modifier le code. Exécuter tests ciblés
+enregistrés dans le runner, TypeScript, lint et build. Utiliser le navigateur
+pour couleurs calculées et responsive sur les surfaces accessibles, sans
+identifiant exposé, et consigner précisément toute limite de session ;
+ne pas prétendre avoir vérifié des écrans authentifiés sans y accéder.
+Les tests manuels avec comptes membre/responsable et la campagne réelle sont
+différés par Dylan, pas remplacés par des vérifications statiques.
+Laisser fiche et suivi en revue ; le pilote effectue le commit de cette story.
+Arrêter en cas de défaut bloquant ou erreur persistante.
+
 Transféré dans les fiches actives du sprint 9 le 2026-11-11. L'identifiant S8-3,
 les cinq critères et le périmètre validé sont conservés ; aucune copie active
-ne reste dans le sprint 8. Préparation seulement, aucun développement.
+ne reste dans le sprint 8. La préparation initiale n'avait lancé aucun développement.
 
 ## Ce que cela permet
 
@@ -36,15 +54,36 @@ Reconnaître les blocs d'information sur le fond blanc sans changer leur contenu
 
 ## Carte du code et tâches
 
-- `src/app/globals.css` : style de carte ciblé réutilisé sur les surfaces concernées.
-- `src/app/resources/page.tsx`, `src/app/resources/search/page.tsx`, `src/features/assistant/assistant-form.tsx` et affichage des conversations : classes ciblées.
-- Vérifier visuellement chaque surface, contraste calculé, clavier, mobile et zoom ; garder les tests de contenu/liens.
-- Mettre à jour `DESIGN.md` pour consigner le traitement visuel validé lors du développement.
-- `src/app/assistant/conversations/[id]/page.tsx` : traiter séparément cartes de
-  réponse et sources, sans recolorer toutes les questions ni les confirmations.
-- Ajouter un test de non-régression du rendu des cartes concernées, enregistré
-  dans le runner si nouveau fichier. Les vérifications statiques de classe ne
-  remplacent pas le contrôle navigateur des couleurs calculées.
+- [x] `src/app/globals.css` : style mauve pâle ciblé, retour à la ligne et largeur minimale des cartes.
+- [x] `src/app/resources/page.tsx` et `src/app/resources/search/page.tsx` : appliquer le style aux cartes des ressources et résultats.
+- [x] Réponses et sources de l’assistant mauve pâle, sur Assistant et dans les conversations rouvertes ; questions et confirmations inchangées.
+- [x] Mettre à jour `DESIGN.md` pour consigner le traitement visuel.
+- [x] Ajouter et enregistrer dans le runner un test de rendu des cartes, des sources, des liens et des états.
+- [x] Vérifier dans le navigateur les couleurs calculées, le contraste, le focus clavier et un gabarit à 320 px et à largeur CSS équivalente à 200 %.
+- [ ] Revoir les écrans authentifiés réels et exécuter les vérifications manuelles avec les comptes membre/responsable ; Dylan les a différées.
+
+## Résultats de vérification — 2026-11-11
+
+- Tests unitaires enregistrés : 137 réussis, aucun échec ni test ignoré.
+- Lint et `npx tsc --noEmit` réussis.
+- Le build a d'abord échoué deux fois sur `EPERM unlink` dans `.next/static`.
+  Le pilote a inspecté le sous-dossier généré exact, marqué en lecture seule
+  par OneDrive, puis supprimé seulement ce sous-dossier. Le build de production
+  a ensuite réussi, sans arrêter le serveur préexistant ni modifier sa configuration.
+- Sur la page publique `/login`, sans connexion ni identifiant exposé, un gabarit de cartes a été ajouté temporairement dans le navigateur pour lire les styles calculés. Fond `rgb(243, 237, 248)`, texte et liens `rgb(37, 32, 50)`, contraste mesuré `13,73:1`. Le focus clavier est visible, contour solide `rgb(37, 32, 50)`, contraste `13,73:1`.
+- Le gabarit ne déborde pas à 320 px ni à 160 px de largeur CSS (simulation du reflow à 200 %) ; les contenus et liens restent présents. Les états d’erreur, succès et absence gardent leurs fonds distincts et leurs libellés.
+- Les routes authentifiées Ressources, Recherche, Assistant et conversation n’étaient pas accessibles sans session ; leur contrôle visuel réel et la campagne humaine restent différés. Aucune IA n’a été appelée.
+
+## Revue directe
+
+Le rendu partagé couvre les nouvelles réponses et les réponses rouvertes ; les
+questions, confirmations et états ne reçoivent pas les classes mauves. Les tests
+vérifient contenus et liens, pas seulement la présence de classes.
+La revue des couleurs secondaires a détecté un contraste insuffisant des
+métadonnées : `#716B7C` sur `#F3EDF8` donne 4,46:1. Une couleur `#6E6878` ciblée
+aux métadonnées de ces cartes corrige ce cas, avec seuil 4,5:1 testé explicitement.
+Après cette correction, la suite enregistrée complète a été relancée :
+137 tests réussis, aucun échec ni test ignoré ; TypeScript et lint ciblé réussis.
 
 ## Vérification
 

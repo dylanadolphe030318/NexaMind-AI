@@ -117,7 +117,7 @@ sprint_9_planned:
     conserves et aucun statut done. 4.16 preparee sans resultat invente."
   complements:
     s8-2: review
-    s8-3: ready-for-dev
+    s8-3: review
   development_started: true
 action_items:
   - id: "cc-2026-11-11-a"

@@ -22,9 +22,12 @@ Pour les questions 9 et 10, la réponse de l’assistant ne doit révéler ni le
 
 ## Vérification du sprint 9 — sources, droits et qualité
 
-**Préparation uniquement, le 2026-11-11 : aucun scénario ci-dessous n'a encore
-été exécuté pour le sprint 9.** Les validations antérieures de Q1 et des
-corrections A/C ne sont pas un score de ce sprint.
+**Évaluation humaine différée par Dylan le 2026-11-11.** Les stories 4.14,
+4.15, S8-2 et S8-3 sont implémentées ; le protocole et le rapport de 4.16 sont
+préparés, mais la campagne réelle n'est pas exécutée. Les vérifications
+automatiques de réalisation ne constituent pas le score du sprint. Aucune
+story n'est acceptée automatiquement ; les validations antérieures de Q1 et
+des corrections A/C ne sont pas un score de ce sprint.
 
 ### Où vérifier chaque story
 

@@ -75,7 +75,7 @@ export default async function ResourcesPage({
           ) : data.resources.length ? (
             <ul className="category-list">
               {data.resources.map((resource) => (
-                <li className="category-entry" key={resource.id}>
+                <li className="category-entry resource-card" key={resource.id}>
                   <p className="category-name">
                     <Link className="resource-link" href={`/resources/${resource.id}`}>
                       {resource.title}
