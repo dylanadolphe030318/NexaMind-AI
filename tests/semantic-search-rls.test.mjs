@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createClient } from "@supabase/supabase-js";
+import { runWithRlsCleanup } from "./helpers/rls-cleanup.mjs";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -58,6 +59,56 @@ function literal(vector) {
   return `[${vector.join(",")}]`;
 }
 
+async function cleanupResourceIds(client, resourceIds) {
+  const errors = [];
+  for (const id of resourceIds) {
+    try {
+      const { error: deleteError } = await client
+        .from("resources")
+        .delete()
+        .eq("id", id);
+      assert.ifError(deleteError);
+      const { data: remaining, error: verifyError } = await client
+        .from("resources")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      assert.ifError(verifyError);
+      assert.equal(remaining, null, `la ressource exacte ${id} doit être absente`);
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length) {
+    throw new AggregateError(errors, "Échec du nettoyage des ressources sémantiques.");
+  }
+}
+
+async function cleanupRateLimitIds(client, callIds) {
+  const errors = [];
+  for (const id of callIds) {
+    try {
+      const { error: deleteError } = await client
+        .from("semantic_search_calls")
+        .delete()
+        .eq("id", id);
+      assert.ifError(deleteError);
+      const { data: remaining, error: verifyError } = await client
+        .from("semantic_search_calls")
+        .select("id")
+        .eq("id", id)
+        .maybeSingle();
+      assert.ifError(verifyError);
+      assert.equal(remaining, null, `l'appel de quota exact ${id} doit être absent`);
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length) {
+    throw new AggregateError(errors, "Échec du nettoyage des appels de quota.");
+  }
+}
+
 test("recherche sémantique : proximité, limite et droits (RLS active, sans clé de service)", async (t) => {
   const a = await login(accounts.memberA);
   const b = await login(accounts.memberB);
@@ -76,15 +127,18 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       p_limit: limit,
       p_min_similarity: minSimilarity,
     });
-  const candidateSearch = (session, vector, queryText, limit = 20, minSimilarity = 0.3) =>
-    session.client.rpc("search_resource_chunk_candidates", {
+  const candidateSearch = (session, vector, queryText, limit = 20, minSimilarity) => {
+    const args = {
       p_query_embedding: literal(vector),
       p_query_text: queryText,
       p_limit: limit,
-      p_min_similarity: minSimilarity,
-    });
+    };
+    if (minSimilarity !== undefined) args.p_min_similarity = minSimilarity;
+    return session.client.rpc("search_resource_chunk_candidates", args);
+  };
 
-  try {
+  await runWithRlsCleanup({
+    action: async () => {
     const { data: profile, error: profileError } = await a.client
       .from("profiles")
       .select("workspace_id")
@@ -257,6 +311,73 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
         false,
         "le nouveau seuil brut de 0,20 continue d'écarter les passages plus faibles",
       );
+
+      const implicitCandidates = await candidateSearch(
+        a,
+        axis(queryAxisIndex),
+        "termeabsenttest",
+      );
+      assert.ifError(implicitCandidates.error);
+      const implicitRetry = await candidateSearch(
+        a,
+        axis(queryAxisIndex),
+        "termeabsenttest",
+      );
+      assert.ifError(implicitRetry.error);
+      const explicitCandidates = await candidateSearch(
+        a,
+        axis(queryAxisIndex),
+        "termeabsenttest",
+        20,
+        0.2,
+      );
+      assert.ifError(explicitCandidates.error);
+      const historicalThresholdCandidates = await candidateSearch(
+        a,
+        axis(queryAxisIndex),
+        "termeabsenttest",
+        20,
+        0.3,
+      );
+      assert.ifError(historicalThresholdCandidates.error);
+
+      const references = (rows) =>
+        rows
+          .map(({ chunk_id, resource_id, revision }) => ({
+            chunk_id,
+            resource_id,
+            revision,
+          }))
+          .sort((left, right) => left.chunk_id.localeCompare(right.chunk_id));
+      assert.deepEqual(
+        references(implicitCandidates.data),
+        references(explicitCandidates.data),
+        "le seuil implicite et 0,2 renvoient les mêmes références",
+      );
+      assert.deepEqual(
+        references(implicitCandidates.data),
+        references(implicitRetry.data),
+        "le premier appel implicite et son réessai gardent les mêmes références",
+      );
+      const lowThresholdCandidate = implicitCandidates.data.find(
+        (row) => row.resource_id === lowerThresholdHit.id,
+      );
+      assert.ok(lowThresholdCandidate, "le candidat à 0,25 est présent au seuil implicite");
+      assert.equal(
+        historicalThresholdCandidates.data.some(
+          (row) => row.resource_id === lowerThresholdHit.id,
+        ),
+        false,
+        "le candidat à 0,25 disparaît au seuil explicite de 0,3",
+      );
+      const { data: lowThresholdChunk, error: lowThresholdChunkError } = await a.client
+        .from("resource_chunks")
+        .select("id, revision")
+        .eq("resource_id", lowerThresholdHit.id)
+        .single();
+      assert.ifError(lowThresholdChunkError);
+      assert.equal(lowThresholdCandidate.chunk_id, lowThresholdChunk.id);
+      assert.equal(lowThresholdCandidate.revision, lowThresholdChunk.revision);
     });
 
     await t.test("le texte exact départage les passages proches sans dépasser cinq résultats", async () => {
@@ -411,42 +532,121 @@ test("recherche sémantique : proximité, limite et droits (RLS active, sans cl�
       const { data } = await search(a, axis(0));
       assert.equal(data.some((row) => row.resource_id === ready.id), false);
     });
-  } finally {
-    for (const id of createdIds) {
-      await a.client.from("resources").delete().eq("id", id);
-    }
-  }
+    },
+    cleanup: [() => cleanupResourceIds(a.client, createdIds)],
+    disconnect: [
+      async () => {
+        const { error } = await a.client.auth.signOut();
+        assert.ifError(error);
+      },
+      async () => {
+        const { error } = await b.client.auth.signOut();
+        assert.ifError(error);
+      },
+    ],
+  });
 });
 
 test("limite de recherches : refus au-delà du plafond, compteur propre à chaque membre", async () => {
   const b = await login(accounts.memberB);
   const a = await login(accounts.memberA);
+  const anonymousClient = newClient();
   const consume = (session, max) =>
     session.client.rpc("consume_semantic_search_quota", { p_max_per_minute: max });
+  const createdCallIds = { memberA: [], memberB: [] };
 
-  try {
-    await b.client.from("semantic_search_calls").delete().eq("user_id", b.userId);
-    await a.client.from("semantic_search_calls").delete().eq("user_id", a.userId);
+  await runWithRlsCleanup({
+    action: async () => {
+      const activeSince = new Date(Date.now() - 60_000).toISOString();
+      const { data: recentB, error: recentBError } = await b.client
+        .from("semantic_search_calls")
+        .select("id")
+        .eq("user_id", b.userId)
+        .gt("created_at", activeSince);
+      assert.ifError(recentBError);
+      const { data: recentA, error: recentAError } = await a.client
+        .from("semantic_search_calls")
+        .select("id")
+        .eq("user_id", a.userId)
+        .gt("created_at", activeSince);
+      assert.ifError(recentAError);
+      const knownB = new Set((recentB ?? []).map((row) => row.id));
+      const knownA = new Set((recentA ?? []).map((row) => row.id));
+      const memberBLimit = knownB.size + 1;
+      const memberALimit = knownA.size + 1;
+      assert.ok(memberBLimit <= 20 && memberALimit <= 20, "attendre le renouvellement du quota avant de relancer ce test");
 
-    for (let i = 0; i < 3; i += 1) {
-      const { data, error } = await consume(b, 3);
-      assert.ifError(error);
-      assert.equal(data, true);
-    }
-    const { data: refused, error } = await consume(b, 3);
-    assert.ifError(error);
-    assert.equal(refused, false);
+      async function trackedConsume(session, limit, knownIds, createdIds) {
+        const { data, error } = await consume(session, limit);
+        assert.ifError(error);
+        const { data: current, error: currentError } = await session.client
+          .from("semantic_search_calls")
+          .select("id")
+          .eq("user_id", session.userId)
+          .gt("created_at", activeSince);
+        assert.ifError(currentError);
+        const newRows = current.filter((row) => !knownIds.has(row.id));
+        if (data) {
+          assert.equal(newRows.length, 1, "un seul nouvel appel exact est ajouté");
+          knownIds.add(newRows[0].id);
+          createdIds.push(newRows[0].id);
+        } else {
+          assert.equal(newRows.length, 0, "un refus n'ajoute aucun appel");
+        }
+        return data;
+      }
 
-    const { data: other } = await consume(a, 3);
-    assert.equal(other, true, "la limite d'un membre ne bloque pas les autres");
+      const data = await trackedConsume(
+        b,
+        memberBLimit,
+        knownB,
+        createdCallIds.memberB,
+      );
+      assert.equal(data, true, "un appel disponible est accepté");
+      const refused = await trackedConsume(
+        b,
+        memberBLimit,
+        knownB,
+        createdCallIds.memberB,
+      );
+      assert.equal(refused, false, "le plafond atteint refuse l'appel suivant");
 
-    const { data: seen } = await a.client.from("semantic_search_calls").select("user_id");
-    assert.ok(seen.every((row) => row.user_id === a.userId), "un membre ne voit que ses propres appels");
+      const other = await trackedConsume(
+        a,
+        memberALimit,
+        knownA,
+        createdCallIds.memberA,
+      );
+      assert.equal(other, true, "la limite d'un membre ne bloque pas les autres");
 
-    const anonymous = await newClient().rpc("consume_semantic_search_quota", { p_max_per_minute: 3 });
-    assert.ok(anonymous.error, "un visiteur sans session est refusé");
-  } finally {
-    await b.client.from("semantic_search_calls").delete().eq("user_id", b.userId);
-    await a.client.from("semantic_search_calls").delete().eq("user_id", a.userId);
-  }
+      const { data: seen, error: seenError } = await a.client
+        .from("semantic_search_calls")
+        .select("user_id");
+      assert.ifError(seenError);
+      assert.ok(seen.every((row) => row.user_id === a.userId), "un membre ne voit que ses propres appels");
+
+      const anonymous = await anonymousClient.rpc("consume_semantic_search_quota", {
+        p_max_per_minute: 3,
+      });
+      assert.ok(anonymous.error, "un visiteur sans session est refusé");
+    },
+    cleanup: [
+      () => cleanupRateLimitIds(b.client, createdCallIds.memberB),
+      () => cleanupRateLimitIds(a.client, createdCallIds.memberA),
+    ],
+    disconnect: [
+      async () => {
+        const { error } = await b.client.auth.signOut();
+        assert.ifError(error);
+      },
+      async () => {
+        const { error } = await a.client.auth.signOut();
+        assert.ifError(error);
+      },
+      async () => {
+        const { error } = await anonymousClient.auth.signOut();
+        assert.ifError(error);
+      },
+    ],
+  });
 });

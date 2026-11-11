@@ -82,9 +82,9 @@ Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis
 
 **Nettoyage des fixtures RLS :** `tests/supabase-rls.test.mjs` suit les identifiants créés par chaque exécution et nettoie les ressources, recherches et catégories par identifiant exact, avant la déconnexion des sessions. Un échec initial ne saute pas le nettoyage ; toutes les erreurs de nettoyage et de déconnexion sont agrégées. `tests/rls-cleanup.test.mjs` vérifie le succès, l’échec simulé et la conservation des erreurs.
 
-### Correction de trajectoire approuvée le 2026-11-11 — A livré, B et C en attente
+### Correction de trajectoire approuvée le 2026-11-11 — A et C livrés, B en attente
 
-Les points B et C restent des contrôles approuvés à préparer ; ils ne signifient
+Le point B reste un contrôle approuvé à préparer pour la story 4.16 ; il ne signifie
 pas que le code ou les migrations correspondants sont déjà livrés.
 
 - **Nettoyage RLS (A, hors sprint) — implémenté et appliqué, évaluation Dylan en attente :**
@@ -108,11 +108,14 @@ pas que le code ou les migrations correspondants sont déjà livrés.
   Une phrase partielle ne prouve pas toute la réponse. Garder les règles de notation.
   Ce contrôle historique ne remplace pas le jeu requis par 4.16 : dix questions
   documentées et trois questions sans réponse.
-- **Seuil RPC (C, hors sprint) :** après application de la nouvelle migration,
-  comparer l'appel de `search_resource_chunk_candidates` sans seuil à l'appel
-  avec 0,2 sur une fixture contrôlée entre 0,2 et 0,3, admissible dans la fenêtre
-  hybride. Vérifier résultats, références et plafond de vingt, première utilisation,
-  réessai et refus anonyme. L'ancien RPC et l'assistant restent inchangés.
+- **Seuil RPC (C, hors sprint) — implémenté et appliqué, évaluation Dylan en attente :**
+  `20261111110000_align_candidate_similarity_default.sql` conserve le corps, la
+  signature et les droits du RPC ; seul le seuil implicite devient 0,2. Le test
+  d'intégration a réussi sans scénario ignoré (13/13) : sur une fixture à 0,25,
+  les références et résultats sont identiques sans seuil et avec 0,2, un réessai
+  implicite est stable, et le candidat disparaît à 0,3. La limite, les références
+  et les refus RLS/anonymes restent vérifiés. L'ancien RPC et l'assistant restent
+  inchangés. Garder l'action ouverte jusqu'à l'évaluation de Dylan.
 
 ## Vérification après le test 7 — recherche de ressources
 
