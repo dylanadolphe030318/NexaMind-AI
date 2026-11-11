@@ -95,14 +95,14 @@ companions: []
 
 ## Consistency Conventions
 
-### Exception technique de nettoyage planifiée — 2026-11-11
+### Exception technique de nettoyage livrée — 2026-11-11
 
 La correction [CC-2026-11-11-A](../../sprint-change-proposal-2026-11-11.md) est
-approuvée, mais pas implémentée. AD-2/AD-3 continuent de régir toutes les opérations
+approuvée et implémentée. AD-2/AD-3 continuent de régir toutes les opérations
 produit et assertions des tests. Aucun droit général DELETE sur les catégories
 ni action de suppression dans l'interface ne sont ajoutés par cette décision.
 
-Un RPC de nettoyage de fixtures pourra supprimer seulement un identifiant exact
+Le RPC `cleanup_rls_test_category` peut supprimer seulement un identifiant exact
 de catégorie de test reconnu et inutilisé dans le workspace du responsable connecté.
 Si son exécution exige `security definer`, il doit fixer son `search_path`, contrôler
 explicitement identité, rôle et workspace, refuser l'anonyme, une catégorie réelle
@@ -110,9 +110,10 @@ ou utilisée, et ne jamais supprimer une ressource associée. Les assertions res
 sous RLS ; aucune clé `service_role` n'est ajoutée au runner. Le retrait d'anciennes
 lignes demande un inventaire et l'approbation des identifiants par Dylan.
 
-CC-2026-11-11-C prévoit séparément le défaut 0,2 du seul RPC candidats, par une
-nouvelle migration ; ni recherche vectorielle de l'assistant, ni modèles, budgets,
+CC-2026-11-11-C aligne séparément le défaut à 0,2 du seul RPC candidats, par une
+nouvelle migration appliquée ; ni recherche vectorielle de l'assistant, ni modèles, budgets,
 quotas, références de passages ou stratégie d'indexation ne changent.
+Les tests ciblés passent ; l'évaluation de Dylan reste attendue pour A et C.
 
 | Concern | Convention |
 | --- | --- |

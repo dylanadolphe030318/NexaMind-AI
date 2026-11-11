@@ -2,7 +2,7 @@
 title: 'Corrections A et C : nettoyage RLS et seuil des candidats'
 type: 'bugfix'
 created: '2026-11-11'
-status: 'done'
+status: 'in-review'
 route: 'dispatch'
 baseline_commit: 'fc7341b23b991c39ec40811c5a790d942412652f'
 review_loop_iteration: 0
@@ -101,6 +101,9 @@ de cette ressource ni de changement des règles du RPC pour les catégories util
 
 ## Implementation Notes
 
+Livraison technique en attente d'évaluation de Dylan : le statut reste
+`in-review`. Les actions A et C ne sont pas clôturées par les tests automatisés.
+
 Investigation : onze catégories correspondent au format historique ; dix ont
 zéro ressource, une en a une. Après clarification, Dylan approuve le déplacement
 de cette seule ressource et les onze retraits. Le dashboard intégré est désormais
@@ -179,3 +182,10 @@ Les documents approuvés sont déjà commités dans le baseline ; aucun push dem
 - `npm run lint -- tests/helpers/rls-cleanup.mjs tests/rls-cleanup.test.mjs tests/supabase-rls.test.mjs tests/semantic-search-rls.test.mjs` : aucune erreur.
 - `npm run test:unit` : 120 tests réussis.
 - Validation YAML avec `js-yaml` et `git diff --check` : suivi valide, diff propre.
+
+Contrôle final du parent : les trois fichiers de tests ciblés ont été relancés
+ensemble, 33/33 réussis, aucun ignoré ; lint ciblé et validateur de suivi BMAD
+réussis. Lecture distante seule : aucune catégorie RLS restante, ressource
+conservée dans « Documents internes » du même workspace, passages accessibles.
+Comparaison locale des corps SQL de l'ancien et du nouveau RPC : identiques.
+L'intégration complète n'est pas revendiquée ; voir le travail différé d'indexation.

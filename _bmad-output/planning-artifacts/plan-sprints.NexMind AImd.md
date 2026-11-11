@@ -75,6 +75,21 @@ du sprint 9. Développeur : réalisation et tests sur demande, un commit par cor
 Dylan : application SQL, accord sur les données à retirer et évaluation avant clôture.
 Le fournisseur, les embeddings, pgvector, les quotas et le budget restent inchangés.
 
+### Livraison technique A et C — 2026-11-11
+
+Sur demande explicite de Dylan, A et C sont implémentées et leurs deux migrations
+appliquées. Les onze catégories RLS approuvées sont retirées. La ressource liée est
+conservée et déplacée dans « Documents internes », selon son choix explicite.
+La vérification finale confirme zéro catégorie RLS résiduelle, la catégorie cible,
+le même workspace et les passages encore accessibles.
+
+Le nettoyage est désormais exact et vérifié après succès ou échec ; le RPC
+candidats utilise implicitement 0,2. Les 33 tests ciblés relancés ensemble passent,
+sans test ignoré ; lint et suivi YAML valides. L'intégration complète n'a pas été
+relancée : le nettoyage préexistant du test d'indexation reste une action différée.
+Les actions A et C restent ouvertes pour l'évaluation de Dylan. B reste à reprendre
+dans la future fiche 4.16 ; le sprint 9 n'est pas démarré.
+
 ## Points encore ouverts
 
 - Choisir l’hébergement de Next.js.

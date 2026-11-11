@@ -3,8 +3,9 @@
 **Projet :** NexaMind AI
 **Déclencheur :** rétrospective de la story 3.5, acceptée par Dylan le 2026-11-11
 **Mode :** proposition complète en bloc
-**État :** approuvée par Dylan le 2026-11-11 ; plan et suivi documentaire mis à jour,
-aucun développement ni changement de données effectué
+**État :** approuvée par Dylan le 2026-11-11, puis A et C livrées sur demande
+explicite ; migrations appliquées et nettoyage confirmé. Évaluation de Dylan
+en attente ; B reste une précision de la future story 4.16.
 
 ## 1. Résumé du problème
 
@@ -216,3 +217,26 @@ architecturale, rétrospective et suivi synchronisés après accord. A et C sont
 des corrections hors sprint ; B sera reprise dans la fiche 4.16 à sa création.
 Le développeur dispose de l'ordre, des protections et des critères de contrôle.
 Aucune exécution d'agent de développement, migration ou suppression n'a été lancée.
+
+### Suite autorisée et réalisée après la validation documentaire
+
+Dylan a ensuite autorisé le développement, les migrations et les commits. Il a
+confirmé les onze identifiants inventoriés et choisi explicitement de déplacer
+la seule ressource liée dans « Documents internes » avant le retrait de sa catégorie.
+Cette opération ponctuelle ne modifie pas le refus permanent du RPC pour les
+catégories utilisées.
+
+A et C sont implémentées et appliquées ; les catégories approuvées sont absentes,
+la ressource est conservée dans la catégorie cible du même workspace et ses
+passages restent accessibles. Le contrôle final du corps SQL confirme que le
+classement du RPC candidats est inchangé. Les 33 tests ciblés relancés ensemble
+réussissent sans scénario ignoré, ainsi que lint et la validation du suivi YAML.
+Les 120 tests unitaires ont également réussi pendant la réalisation.
+
+Les commits de réalisation sont
+`e39e23dff15d89f57719abe9f2353745f7b4ccf2` (A) et
+`913213dec406db787227a7c43ac52bd47e88237c` (C), suivis de correctifs de tests.
+Aucun push. L'intégration complète n'a pas été relancée ; le nettoyage préexistant
+du test d'indexation est consigné séparément dans le travail différé.
+A et C restent ouvertes pour l'évaluation humaine ; aucune story du sprint 9
+n'est commencée ou terminée.
