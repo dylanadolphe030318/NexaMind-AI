@@ -158,6 +158,16 @@ Les documents approuvés sont déjà commités dans le baseline ; aucun push dem
 - medium / patch — Le test d’échec simulé ne vérifiait en base que la catégorie ; il crée maintenant une catégorie, une ressource et une recherche, déclenche l’échec, les nettoie par ID et vérifie leur absence avant la déconnexion.
 - false — Le test du seuil omet `p_min_similarity` mais fixe `p_limit` à 20 ; le spec demande de vérifier le défaut du seuil de similarité, pas le défaut de la limite, dont la signature et le plafond ne changent pas.
 - false — Les commandes et nombres de tests sont présents dans la documentation ; aucun identifiant de run n’est exigé par le spec et l’absence de cet identifiant ne rend pas les vérifications non reproductibles.
+- false — Le test d’espace non autorisé utilise un UUID distinct quand les comptes partagent le même espace ; il exerce bien le refus du responsable pour un espace non autorisé, sans devoir créer un deuxième espace.
+- false — La migration C ne change que le défaut du seuil et conserve `SECURITY INVOKER`, le corps et les permissions ; un scénario inter-espace du RPC candidats n’est pas requis pour cette correction.
+- false — Le RPC de nettoyage prend volontairement un identifiant exact, comme l’exige la matrice ; les tests ne découvrent pas de fixtures par préfixe et ne lui transmettent que les identifiants créés par leur exécution.
+- medium / patch — Le nettoyage des quotas recensait tous les appels postérieurs à l’instantané, ce qui pouvait supprimer un appel concurrent non créé par le test. Il ne supprime désormais que les identifiants suivis après un appel réussi et une seule nouvelle ligne observée ; une situation ambiguë fait échouer le test sans suppression élargie.
+- false — Le refus d’une catégorie réelle au nom non conforme est déjà testé avec un refus `22023` et une vérification d’existence ; le motif exact est strict dans la migration, sans résultat incorrect constaté.
+- medium / patch — La procédure historique ne consignait pas explicitement la catégorie et l’espace finaux de la ressource déplacée ; le `README.md` précise maintenant que l’identifiant cible et l’appartenance au même espace ont été vérifiés.
+- false — Le README indique que chacune des onze catégories approuvées a été réessayée et vérifiée absente ; un relevé de résultat supplémentaire par identifiant n’est pas nécessaire à la procédure et exposerait encore les identifiants opérationnels.
+- false — `tests/indexing-rls.test.mjs` ne crée pas de catégorie RLS pour ce parcours ; son problème préexistant de nettoyage des ressources reste une tâche différée distincte et ne contredit pas les critères de cette livraison.
+- medium / patch — Le test du RPC ne prouvait pas qu’une autre fixture de même format reste intacte ; il crée maintenant une seconde catégorie et vérifie qu’elle subsiste après le nettoyage de l’identifiant ciblé.
+- medium / patch — Le constat indépendant sur le balayage temporel des appels de quota confirme le risque ci-dessus ; le correctif limite aussi ce chemin aux identifiants explicitement suivis.
 
 ## Verification
 

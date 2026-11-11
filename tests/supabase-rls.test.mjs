@@ -411,6 +411,16 @@ test(
           .single();
         assert.ifError(createError);
         const fixture = trackCategory(category.id, managerProfile.workspace_id);
+        const { data: otherCategory, error: otherCategoryError } = await manager
+          .from("categories")
+          .insert({
+            name: "RLS-" + randomUUID(),
+            workspace_id: managerProfile.workspace_id,
+          })
+          .select("id")
+          .single();
+        assert.ifError(otherCategoryError);
+        trackCategory(otherCategory.id, managerProfile.workspace_id);
 
         const cleanupArgs = {
           p_workspace_id: managerProfile.workspace_id,
@@ -522,6 +532,17 @@ test(
         assert.ifError(deleteError);
         assert.equal(deleted, true);
         fixture.deleted = true;
+        const { data: otherCategoryStillThere, error: otherCategoryReadError } =
+          await manager
+            .from("categories")
+            .select("id")
+            .eq("id", otherCategory.id)
+            .maybeSingle();
+        assert.ifError(otherCategoryReadError);
+        assert.ok(
+          otherCategoryStillThere,
+          "le nettoyage exact ne supprime pas une autre fixture du même espace",
+        );
         const { data: retried, error: retryError } = await manager.rpc(
           "cleanup_rls_test_category",
           cleanupArgs,

@@ -84,28 +84,9 @@ async function cleanupResourceIds(client, resourceIds) {
   }
 }
 
-async function cleanupRateLimitIds(
-  client,
-  callIds,
-  { userId, activeSince, knownIds } = {},
-) {
+async function cleanupRateLimitIds(client, callIds) {
   const errors = [];
   const ids = new Set(callIds);
-  if (userId && activeSince && knownIds) {
-    try {
-      const { data: recent, error } = await client
-        .from("semantic_search_calls")
-        .select("id")
-        .eq("user_id", userId)
-        .gt("created_at", activeSince);
-      assert.ifError(error);
-      for (const row of recent ?? []) {
-        if (!knownIds.has(row.id)) ids.add(row.id);
-      }
-    } catch (error) {
-      errors.push(error);
-    }
-  }
   for (const id of ids) {
     try {
       const { error: deleteError } = await client
@@ -590,11 +571,6 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
   const consume = (session, max) =>
     session.client.rpc("consume_semantic_search_quota", { p_max_per_minute: max });
   const createdCallIds = { memberA: [], memberB: [] };
-  let cleanupContext = {
-    memberA: { knownIds: null, userId: null },
-    memberB: { knownIds: null, userId: null },
-    activeSince: null,
-  };
 
   await runWithRlsCleanup({
     action: async () => {
@@ -615,11 +591,6 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
       assert.ifError(recentAError);
       const knownB = new Set((recentB ?? []).map((row) => row.id));
       const knownA = new Set((recentA ?? []).map((row) => row.id));
-      cleanupContext = {
-        activeSince,
-        memberA: { knownIds: knownA, userId: a.userId },
-        memberB: { knownIds: knownB, userId: b.userId },
-      };
       const memberBLimit = knownB.size + 1;
       const memberALimit = knownA.size + 1;
       assert.ok(memberBLimit <= 20 && memberALimit <= 20, "attendre le renouvellement du quota avant de relancer ce test");
@@ -635,8 +606,8 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
         assert.ifError(currentError);
         const newRows = current.filter((row) => !knownIds.has(row.id));
         if (data) {
-          createdIds.push(...newRows.map((row) => row.id));
           assert.equal(newRows.length, 1, "un seul nouvel appel exact est ajouté");
+          createdIds.push(newRows[0].id);
           knownIds.add(newRows[0].id);
         } else {
           assert.equal(newRows.length, 0, "un refus n'ajoute aucun appel");
@@ -679,20 +650,8 @@ test("limite de recherches : refus au-delà du plafond, compteur propre à chaqu
       assert.ok(anonymous.error, "un visiteur sans session est refusé");
     },
     cleanup: [
-      () =>
-        b
-          ? cleanupRateLimitIds(b.client, createdCallIds.memberB, {
-              ...cleanupContext.memberB,
-              activeSince: cleanupContext.activeSince,
-            })
-          : undefined,
-      () =>
-        a
-          ? cleanupRateLimitIds(a.client, createdCallIds.memberA, {
-              ...cleanupContext.memberA,
-              activeSince: cleanupContext.activeSince,
-            })
-          : undefined,
+      () => (b ? cleanupRateLimitIds(b.client, createdCallIds.memberB) : undefined),
+      () => (a ? cleanupRateLimitIds(a.client, createdCallIds.memberA) : undefined),
     ],
     disconnect: [
       async () => {
