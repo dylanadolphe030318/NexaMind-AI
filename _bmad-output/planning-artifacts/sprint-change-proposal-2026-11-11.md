@@ -4,8 +4,8 @@
 **Déclencheur :** rétrospective de la story 3.5, acceptée par Dylan le 2026-11-11
 **Mode :** proposition complète en bloc
 **État :** approuvée par Dylan le 2026-11-11, puis A et C livrées sur demande
-explicite ; migrations appliquées et nettoyage confirmé. Évaluation de Dylan
-en attente ; B reste une précision de la future story 4.16.
+explicite ; migrations appliquées et nettoyage confirmé. A et C acceptées par
+Dylan le 2026-11-11 ; B reste une précision de la future story 4.16.
 
 ## 1. Résumé du problème
 
@@ -238,5 +238,7 @@ Les commits de réalisation sont
 `913213dec406db787227a7c43ac52bd47e88237c` (C), suivis de correctifs de tests.
 Aucun push. L'intégration complète n'a pas été relancée ; le nettoyage préexistant
 du test d'indexation est consigné séparément dans le travail différé.
-A et C restent ouvertes pour l'évaluation humaine ; aucune story du sprint 9
-n'est commencée ou terminée.
+Le 2026-11-11, Dylan confirme « c'est ok » après la consigne de contrôler les
+catégories et Q1 (top 3 et source ouvrable) sur Recherche de ressources.
+A et C sont acceptées et clôturées dans le suivi. Cette confirmation n'est pas
+un nouvel essai de l'assistant ; aucune story du sprint 9 n'est commencée ou terminée.

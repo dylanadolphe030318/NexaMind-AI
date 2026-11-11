@@ -113,7 +113,8 @@ lignes demande un inventaire et l'approbation des identifiants par Dylan.
 CC-2026-11-11-C aligne séparément le défaut à 0,2 du seul RPC candidats, par une
 nouvelle migration appliquée ; ni recherche vectorielle de l'assistant, ni modèles, budgets,
 quotas, références de passages ou stratégie d'indexation ne changent.
-Les tests ciblés passent ; l'évaluation de Dylan reste attendue pour A et C.
+Les tests ciblés passent ; Dylan accepte A et C le 2026-11-11 après vérification
+des catégories et de Q1 sur Recherche de ressources.
 
 | Concern | Convention |
 | --- | --- |

@@ -2,7 +2,7 @@
 title: 'Corrections A et C : nettoyage RLS et seuil des candidats'
 type: 'bugfix'
 created: '2026-11-11'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: 'fc7341b23b991c39ec40811c5a790d942412652f'
 review_loop_iteration: 0
@@ -101,8 +101,10 @@ de cette ressource ni de changement des règles du RPC pour les catégories util
 
 ## Implementation Notes
 
-Livraison technique en attente d'évaluation de Dylan : le statut reste
-`in-review`. Les actions A et C ne sont pas clôturées par les tests automatisés.
+Après la livraison et les tests automatisés, Dylan confirme « c'est ok »
+le 2026-11-11 pour le contrôle des catégories et Q1 sur Recherche de ressources.
+Cette acceptation humaine clôture A et C ; elle ne valide pas le sprint 9 ni
+un nouvel essai de l'assistant.
 
 Investigation : onze catégories correspondent au format historique ; dix ont
 zéro ressource, une en a une. Après clarification, Dylan approuve le déplacement

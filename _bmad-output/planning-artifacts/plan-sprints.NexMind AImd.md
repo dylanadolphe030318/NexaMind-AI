@@ -87,7 +87,8 @@ Le nettoyage est désormais exact et vérifié après succès ou échec ; le RPC
 candidats utilise implicitement 0,2. Les 33 tests ciblés relancés ensemble passent,
 sans test ignoré ; lint et suivi YAML valides. L'intégration complète n'a pas été
 relancée : le nettoyage préexistant du test d'indexation reste une action différée.
-Les actions A et C restent ouvertes pour l'évaluation de Dylan. B reste à reprendre
+Le 2026-11-11, Dylan confirme le contrôle des catégories et Q1 sur Recherche de
+ressources : les actions A et C sont acceptées et clôturées. B reste à reprendre
 dans la future fiche 4.16 ; le sprint 9 n'est pas démarré.
 
 ## Points encore ouverts

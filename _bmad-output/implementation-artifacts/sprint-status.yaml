@@ -117,10 +117,10 @@ action_items:
     epic: 2
     action: "Hors sprint, avant le sprint 9 : A est implemente et applique ; tests
       RLS 17/17, inventaire approuve retire par IDs exacts et ressource autorisee
-      deplacee sans changement de contenu. Evaluation Dylan en attente ; conserver
-      l'action ouverte. Aucun DELETE general ni cle privilegiee dans les tests."
+      deplacee sans changement de contenu. Dylan valide le controle des categories
+      le 2026-11-11. Aucun DELETE general ni cle privilegiee dans les tests."
     owner: "Dylan + développeur"
-    status: open
+    status: done
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "cc-2026-11-11-b"
     epic: 4
@@ -134,10 +134,10 @@ action_items:
     epic: 3
     action: "Hors sprint, apres A : la migration C est appliquee ; test semantique
       13/13, seuil implicite egal a 0,2 et fixture 0,25 absente a 0,3 ; ancien RPC
-      et assistant inchanges. Evaluation Dylan en attente ; conserver l'action
-      ouverte. Le sprint 9 n'est pas demarre."
+      et assistant inchanges. Dylan valide Q1 sur la recherche de ressources
+      le 2026-11-11. Le sprint 9 n'est pas demarre."
     owner: "Dylan + développeur"
-    status: open
+    status: done
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "epic-1-retro-item-1-pr-parer-un-compte-membre-et-un-compte-r"
     epic: 1

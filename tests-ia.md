@@ -87,7 +87,7 @@ Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis
 Le point B reste un contrôle approuvé à préparer pour la story 4.16 ; il ne signifie
 pas que le code ou les migrations correspondants sont déjà livrés.
 
-- **Nettoyage RLS (A, hors sprint) — implémenté et appliqué, évaluation Dylan en attente :**
+- **Nettoyage RLS (A, hors sprint) — accepté par Dylan le 2026-11-11 :**
   la migration `20261111103000_cleanup_rls_test_category.sql` n’ajoute qu’un RPC
   responsable, borné à l’espace, l’identifiant exact, un nom de fixture strict et
   une catégorie inutilisée. Le test d’intégration a réussi sans scénario ignoré
@@ -97,8 +97,8 @@ pas que le code ou les migrations correspondants sont déjà livrés.
   La ressource autorisée `24f359d7-5869-4eac-beb9-a58ff599f98c` a été déplacée
   conditionnellement vers « Documents internes » ; contenu, passage et références
   accessibles identiques avant/après, sans journalisation de contenu. Ne pas
-  rejouer ce nettoyage ni supprimer des catégories par préfixe. Garder l’action
-  ouverte jusqu’à l’évaluation de Dylan.
+  rejouer ce nettoyage ni supprimer des catégories par préfixe. Dylan confirme
+  le contrôle des catégories ; action clôturée.
 - **Preuve Q1 (B, préparation de 4.16) :** garder la question inchangée. Noter
   séparément Next.js App Router/TypeScript et les services PostgreSQL,
   authentification, stockage de fichiers et RLS de Supabase. Sur Recherche,
@@ -108,14 +108,15 @@ pas que le code ou les migrations correspondants sont déjà livrés.
   Une phrase partielle ne prouve pas toute la réponse. Garder les règles de notation.
   Ce contrôle historique ne remplace pas le jeu requis par 4.16 : dix questions
   documentées et trois questions sans réponse.
-- **Seuil RPC (C, hors sprint) — implémenté et appliqué, évaluation Dylan en attente :**
+- **Seuil RPC (C, hors sprint) — accepté par Dylan le 2026-11-11 :**
   `20261111110000_align_candidate_similarity_default.sql` conserve le corps, la
   signature et les droits du RPC ; seul le seuil implicite devient 0,2. Le test
   d'intégration a réussi sans scénario ignoré (13/13) : sur une fixture à 0,25,
   les références et résultats sont identiques sans seuil et avec 0,2, un réessai
   implicite est stable, et le candidat disparaît à 0,3. La limite, les références
   et les refus RLS/anonymes restent vérifiés. L'ancien RPC et l'assistant restent
-  inchangés. Garder l'action ouverte jusqu'à l'évaluation de Dylan.
+  inchangés. Dylan confirme Q1 sur Recherche de ressources ; action clôturée.
+  Aucun nouveau test manuel de l'assistant n'est revendiqué.
 
 ## Vérification après le test 7 — recherche de ressources
 
