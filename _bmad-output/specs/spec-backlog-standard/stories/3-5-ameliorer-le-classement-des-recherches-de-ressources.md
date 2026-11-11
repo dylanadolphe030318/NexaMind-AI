@@ -2,7 +2,7 @@
 story: 3-5-améliorer-le-classement-des-recherches-de-ressources
 title: Améliorer le classement des recherches de ressources
 epic: 3
-status: in-review
+status: done
 baseline_commit: e01b64ec7636350008f84fbd630fdf7f9d6ee912
 context:
   - ../SPEC.md
@@ -475,3 +475,10 @@ de résultats hors sujet, sans changer l'assistant ni masquer les droits non vé
   validation du périmètre, des limites et de l'information affichée à l'utilisateur.
   L'assistant et les droits restent inchangés. Aucun correctif de classement
   appliqué pendant ce diagnostic.
+
+## Évaluation finale — 2026-11-11
+
+Dylan confirme que les dix réponses de test sont correctes, y compris les
+vérifications des cas Q9/Q10. La story est donc acceptée et terminée (`done`)
+selon son évaluation manuelle. Cette validation ne change ni les politiques
+d'accès ni le périmètre des stories de l'epic 4.

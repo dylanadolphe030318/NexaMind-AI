@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 2026-11-10
+last_updated: 2026-11-11
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -62,14 +62,8 @@ development_status:
   3-3-relancer-une-recherche-enregistrée: done
   3-4-supprimer-une-recherche-de-son-historique: done
   # Ajoutée au backlog le 2026-11-07 (proposition de changement) ; aucun sprint affecté.
-  # Liste hybride, 8 cas conformes sur 10 selon leur type ; hors sprint.
-  # Reprise autorisée Q1–Q8 : présélection 20 puis sélection LLM serveur, 5 affichés maximum.
-  # Migration et RPC vérifiés ; gras Q3 et frontières titres/listes Q1 corrigés et testés.
-  # Test 9 : Q5/Q6/Q8 passent l'essai ciblé après correction des champs/consignes.
-  # Phrase par numéro et budget ressources 2048 ; deux séries Q1–Q8 sans erreur fournisseur.
-  # Dernière série : phrases Q1–Q6 et listes vides Q7/Q8 ; phrase Q1 partielle, à évaluer.
-  # Q9/Q10 non vérifiées ; évaluation humaine requise.
-  3-5-améliorer-le-classement-des-recherches-de-ressources: review
+  # Ajoutée hors sprint ; évaluation finale de Dylan le 2026-11-11 : 10/10 réponses correctes.
+  3-5-améliorer-le-classement-des-recherches-de-ressources: done
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.
@@ -109,9 +103,8 @@ sprint_8_preparation:
     S8-1 et 4.10 à 4.13 acceptées et terminées. Tests de conversations : 7/7 réussis,
     aucun ignoré ; 100/100 tests unitaires réussis lors de la livraison de 4.13."
   blocked_on: null
-  remaining_epic_warning: "Le score qualité chiffré de 8/10 n'a pas été remesuré ;
-    la validation du sprint ne clôture pas l'epic. Échec préexistant du test de recherche
-    hybride sur chunk_id/révision manquants non résolu."
+  remaining_epic_warning: "Le sprint 8 est terminé, mais l'epic 4 reste ouvert :
+    le sprint 9 planifié contient les stories 4.14 à 4.16, S8-2 et S8-3."
 sprint_9_planned:
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   deferred_story_folder: "_bmad-output/specs/spec-sprint-8-ia/deferred-stories"
