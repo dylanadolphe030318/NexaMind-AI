@@ -3,6 +3,7 @@ import test from "node:test";
 import { randomUUID } from "node:crypto";
 
 import { createClient } from "@supabase/supabase-js";
+import { runWithRlsCleanup } from "./helpers/rls-cleanup.mjs";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
@@ -19,10 +20,26 @@ const requiredVariables = [
   ["RLS_TEST_MEMBER_A_PASSWORD", memberAPassword],
   ["RLS_TEST_MEMBER_B_EMAIL", memberBEmail],
   ["RLS_TEST_MEMBER_B_PASSWORD", memberBPassword],
+  ["RLS_TEST_MANAGER_EMAIL", managerEmail],
+  ["RLS_TEST_MANAGER_PASSWORD", managerPassword],
 ];
 const missingVariables = requiredVariables
   .filter(([, value]) => !value)
   .map(([name]) => name);
+
+async function runCleanupSteps(operations, label) {
+  const errors = [];
+  for (const operation of operations) {
+    try {
+      await operation();
+    } catch (error) {
+      errors.push(error);
+    }
+  }
+  if (errors.length) {
+    throw new AggregateError(errors, `Échec du nettoyage ${label}.`);
+  }
+}
 
 if (missingVariables.length) {
   throw new Error(
@@ -71,9 +88,81 @@ test(
     );
     const memberA = createClient(supabaseUrl, publishableKey, clientOptions);
     const memberB = createClient(supabaseUrl, publishableKey, clientOptions);
-    let manager = null;
+    const manager = createClient(supabaseUrl, publishableKey, clientOptions);
+    const resourceCleanup = [];
+    const searchCleanup = [];
+    const categoryCleanup = [];
+    let managerProfile;
 
-    try {
+    function trackResource(id, client = memberA) {
+      resourceCleanup.push(async () => {
+        const { error: deleteError } = await client
+          .from("resources")
+          .delete()
+          .eq("id", id);
+        assert.ifError(deleteError);
+        const { data: remaining, error: verifyError } = await client
+          .from("resources")
+          .select("id")
+          .eq("id", id)
+          .maybeSingle();
+        assert.ifError(verifyError);
+        assert.equal(remaining, null, `la ressource exacte ${id} doit être absente`);
+      });
+    }
+
+    function trackSearch(id, client = memberA) {
+      searchCleanup.push(async () => {
+        const { error: deleteError } = await client
+          .from("searches")
+          .delete()
+          .eq("id", id);
+        assert.ifError(deleteError);
+        const { data: remaining, error: verifyError } = await client
+          .from("searches")
+          .select("id")
+          .eq("id", id)
+          .maybeSingle();
+        assert.ifError(verifyError);
+        assert.equal(remaining, null, `la recherche exacte ${id} doit être absente`);
+      });
+    }
+
+    function trackCategory(id, workspaceId) {
+      const fixture = { id, workspaceId, deleted: false, verified: false };
+      categoryCleanup.push(async () => {
+        if (fixture.verified) return;
+        const { data: deleted, error: deleteError } = await manager.rpc(
+          "cleanup_rls_test_category",
+          { p_workspace_id: workspaceId, p_category_id: id },
+        );
+        assert.ifError(deleteError);
+        assert.equal(
+          deleted,
+          !fixture.deleted,
+          "le nettoyage confirme l'état attendu de la catégorie exacte",
+        );
+        fixture.deleted = true;
+        const { data: retried, error: retryError } = await manager.rpc(
+          "cleanup_rls_test_category",
+          { p_workspace_id: workspaceId, p_category_id: id },
+        );
+        assert.ifError(retryError);
+        assert.equal(retried, false, "le réessai confirme l’absence");
+        const { data: remaining, error: verifyError } = await manager
+          .from("categories")
+          .select("id")
+          .eq("id", id)
+          .maybeSingle();
+        assert.ifError(verifyError);
+        assert.equal(remaining, null, "la catégorie supprimée est absente");
+        fixture.verified = true;
+      });
+      return fixture;
+    }
+
+    await runWithRlsCleanup({
+      action: async () => {
       const { data: sessionA, error: loginErrorA } =
         await memberA.auth.signInWithPassword({
           email: memberAEmail,
@@ -95,6 +184,22 @@ test(
         sessionB.user.id,
         "les deux comptes de test doivent être distincts",
       );
+      const { data: managerSession, error: managerLoginError } =
+        await manager.auth.signInWithPassword({
+          email: managerEmail,
+          password: managerPassword,
+        });
+      assert.ifError(managerLoginError);
+      assert.ok(managerSession.user, "le responsable doit avoir une session réelle");
+      const { data: managerProfileData, error: managerProfileError } = await manager
+        .from("profiles")
+        .select("id, workspace_id, role")
+        .eq("id", managerSession.user.id)
+        .maybeSingle();
+      assert.ifError(managerProfileError);
+      assert.ok(managerProfileData, "le profil du responsable doit exister");
+      assert.equal(managerProfileData.role, "responsable");
+      managerProfile = managerProfileData;
 
       await t.test("un visiteur anonyme ne lit pas les tables protégées", async () => {
         for (const table of ["profiles", "workspaces", "categories"]) {
@@ -148,30 +253,7 @@ test(
         assert.ifError(categoriesError);
       });
 
-      await t.test("le responsable cree et renomme une categorie visible par les membres", async (managerTest) => {
-        if (!managerEmail || !managerPassword) {
-          managerTest.skip("RLS_TEST_MANAGER_EMAIL et RLS_TEST_MANAGER_PASSWORD absents : test AC4 responsable ignore.");
-          return;
-        }
-
-        manager = createClient(supabaseUrl, publishableKey, clientOptions);
-        const { data: managerSession, error: managerLoginError } =
-          await manager.auth.signInWithPassword({
-            email: managerEmail,
-            password: managerPassword,
-          });
-        assert.ifError(managerLoginError);
-        assert.ok(managerSession.user, "le responsable doit avoir une session");
-        const { data: managerProfile, error: managerProfileError } = await manager
-          .from("profiles")
-          .select("id, workspace_id, role")
-          .eq("id", managerSession.user.id)
-          .maybeSingle();
-
-        assert.ifError(managerProfileError);
-        assert.ok(managerProfile, "le profil du responsable doit exister");
-        assert.equal(managerProfile?.role, "responsable");
-
+      await t.test("le responsable cree et renomme une categorie visible par les membres", async () => {
         const { error: whitespaceNameError } = await manager.from("categories").insert({
           name: "\t\n ",
           workspace_id: managerProfile.workspace_id,
@@ -197,10 +279,12 @@ test(
           })
           .select("id, name")
           .single();
-
         assert.ifError(createError);
-        assert.ok(createdCategory, "le responsable doit creer la categorie");
-        assert.equal(createdCategory?.name, categoryName);
+          if (createdCategory?.id) {
+            trackCategory(createdCategory.id, managerProfile.workspace_id);
+          }
+          assert.ok(createdCategory, "le responsable doit creer la categorie");
+          assert.equal(createdCategory?.name, categoryName);
 
         const { data: visibleCategory, error: memberReadError } = await memberA
           .from("categories")
@@ -246,6 +330,145 @@ test(
 
         assert.ifError(renamedReadError);
         assert.equal(renamedCategory?.name, renamedCategoryName);
+      });
+
+      await t.test("le RPC de nettoyage est borné, refuse les catégories interdites et permet le réessai", async () => {
+        const categoryName = "RLS-" + randomUUID();
+        const { data: category, error: createError } = await manager
+          .from("categories")
+          .insert({
+            name: categoryName,
+            workspace_id: managerProfile.workspace_id,
+          })
+          .select("id")
+          .single();
+        assert.ifError(createError);
+        const fixture = trackCategory(category.id, managerProfile.workspace_id);
+
+        const cleanupArgs = {
+          p_workspace_id: managerProfile.workspace_id,
+          p_category_id: category.id,
+        };
+        const anonymousRefusal = await anonymousClient.rpc(
+          "cleanup_rls_test_category",
+          cleanupArgs,
+        );
+        assert.equal(anonymousRefusal.error?.code, "42501");
+
+        const memberRefusal = await memberA.rpc(
+          "cleanup_rls_test_category",
+          cleanupArgs,
+        );
+        assert.equal(memberRefusal.error?.code, "42501");
+
+        const { data: memberBProfile, error: memberBProfileError } = await memberB
+          .from("profiles")
+          .select("workspace_id")
+          .eq("id", sessionB.user.id)
+          .single();
+        assert.ifError(memberBProfileError);
+        const foreignWorkspaceId =
+          memberBProfile.workspace_id !== managerProfile.workspace_id
+            ? memberBProfile.workspace_id
+            : randomUUID();
+        assert.notEqual(foreignWorkspaceId, managerProfile.workspace_id);
+        const foreignWorkspaceRefusal = await manager.rpc(
+          "cleanup_rls_test_category",
+          {
+            p_workspace_id: foreignWorkspaceId,
+            p_category_id: category.id,
+          },
+        );
+        assert.equal(foreignWorkspaceRefusal.error?.code, "42501");
+
+        const { data: workspaceCategories, error: realCategoryError } = await manager
+          .from("categories")
+          .select("id, name")
+          .eq("workspace_id", managerProfile.workspace_id);
+        assert.ifError(realCategoryError);
+        const realCategory = workspaceCategories.find(
+          (entry) => !/^RLS-[0-9a-f-]{36}(-renommée)?$/.test(entry.name),
+        );
+        assert.ok(realCategory, "une catégorie réelle est disponible");
+        const realCategoryRefusal = await manager.rpc(
+          "cleanup_rls_test_category",
+          {
+            p_workspace_id: managerProfile.workspace_id,
+            p_category_id: realCategory.id,
+          },
+        );
+        assert.equal(realCategoryRefusal.error?.code, "22023");
+        const { data: realCategoryStillThere, error: realCategoryReadError } =
+          await manager
+            .from("categories")
+            .select("id")
+            .eq("id", realCategory.id)
+            .maybeSingle();
+        assert.ifError(realCategoryReadError);
+        assert.ok(realCategoryStillThere, "une catégorie réelle reste intacte");
+
+        const { data: resource, error: resourceCreateError } = await memberA
+          .from("resources")
+          .insert({
+            workspace_id: managerProfile.workspace_id,
+            category_id: category.id,
+            owner_id: sessionA.user.id,
+            title: "RLS-TEST-cleanup-" + randomUUID(),
+            body: "fixture utilisée pour vérifier la protection de la catégorie",
+          })
+          .select("id")
+          .single();
+        assert.ifError(resourceCreateError);
+        trackResource(resource.id);
+        const usedCategoryRefusal = await manager.rpc(
+          "cleanup_rls_test_category",
+          cleanupArgs,
+        );
+        assert.equal(usedCategoryRefusal.error?.code, "23503");
+        const { data: usedCategoryStillThere, error: usedCategoryReadError } =
+          await manager
+            .from("categories")
+            .select("id")
+            .eq("id", category.id)
+            .maybeSingle();
+        assert.ifError(usedCategoryReadError);
+        assert.ok(usedCategoryStillThere, "une catégorie utilisée reste intacte");
+        const { data: usedResourceStillThere, error: usedResourceReadError } =
+          await memberA
+            .from("resources")
+            .select("id")
+            .eq("id", resource.id)
+            .maybeSingle();
+        assert.ifError(usedResourceReadError);
+        assert.ok(usedResourceStillThere, "la ressource liée reste intacte");
+
+        const { error: resourceDeleteError } = await memberA
+          .from("resources")
+          .delete()
+          .eq("id", resource.id);
+        assert.ifError(resourceDeleteError);
+
+        const { data: deleted, error: deleteError } = await manager.rpc(
+          "cleanup_rls_test_category",
+          cleanupArgs,
+        );
+        assert.ifError(deleteError);
+        assert.equal(deleted, true);
+        fixture.deleted = true;
+        const { data: retried, error: retryError } = await manager.rpc(
+          "cleanup_rls_test_category",
+          cleanupArgs,
+        );
+        assert.ifError(retryError);
+        assert.equal(retried, false);
+        const { data: remainingCategory, error: verifyError } = await manager
+          .from("categories")
+          .select("id")
+          .eq("id", category.id)
+          .maybeSingle();
+        assert.ifError(verifyError);
+        assert.equal(remainingCategory, null);
+        fixture.verified = true;
       });
 
       await t.test("resources : lecture anonyme refusee, lecture membre possible, aucune ecriture", async () => {
@@ -322,6 +545,7 @@ test(
         assert.ifError(createError);
         assert.equal(created.owner_id, sessionA.user.id);
         assert.equal(created.title, marker);
+        trackResource(created.id);
 
         const { error: otherOwnerError } = await memberA.from("resources").insert({
           workspace_id: profileA.workspace_id,
@@ -371,6 +595,7 @@ test(
           .select("id, title, body, owner_id, updated_at")
           .single();
         assert.ifError(error);
+        trackResource(created.id, client);
         return created;
       }
 
@@ -492,31 +717,15 @@ test(
         assert.equal(after?.title, created.title);
       });
 
-      await t.test("resources : le responsable supprime la ressource d'un membre", async (managerTest) => {
-        if (!managerEmail || !managerPassword) {
-          managerTest.skip("RLS_TEST_MANAGER_EMAIL et RLS_TEST_MANAGER_PASSWORD absents : test responsable 2.6 ignore.");
-          return;
-        }
-
+      await t.test("resources : le responsable supprime la ressource d'un membre", async () => {
         const created = await createTestResource(memberA, sessionA.user.id, "suppression-responsable");
-        const managerClient = createClient(supabaseUrl, publishableKey, clientOptions);
-        try {
-          const { error: loginError } = await managerClient.auth.signInWithPassword({
-            email: managerEmail,
-            password: managerPassword,
-          });
-          assert.ifError(loginError);
-
-          const { data: deleted, error } = await managerClient
-            .from("resources")
-            .delete()
-            .eq("id", created.id)
-            .select("id");
-          assert.ifError(error);
-          assert.equal(deleted?.length, 1);
-        } finally {
-          await managerClient.auth.signOut();
-        }
+        const { data: deleted, error } = await manager
+          .from("resources")
+          .delete()
+          .eq("id", created.id)
+          .select("id");
+        assert.ifError(error);
+        assert.equal(deleted?.length, 1);
       });
 
       await t.test("searches : l'historique est privé à son propriétaire", async () => {
@@ -527,6 +736,7 @@ test(
           .select("id");
         assert.ifError(insertError);
         assert.equal(created?.length, 1);
+        trackSearch(created[0].id);
 
         const { data: ownRows, error: ownError } = await memberA
           .from("searches")
@@ -560,6 +770,7 @@ test(
         assert.ifError(insertError);
         const searchId = created?.[0]?.id;
         assert.ok(searchId);
+        trackSearch(searchId);
 
         const { data: foreignDelete, error: foreignError } = await memberB
           .from("searches")
@@ -572,13 +783,6 @@ test(
         const { data: stillThere } = await memberA.from("searches").select("id").eq("id", searchId);
         assert.equal(stillThere?.length, 1);
 
-        const { data: ownDelete, error: ownError } = await memberA
-          .from("searches")
-          .delete()
-          .eq("id", searchId)
-          .select("id");
-        assert.ifError(ownError);
-        assert.equal(ownDelete?.length, 1);
       });
 
       await t.test("un membre ne lit pas le profil d'un autre membre", async () => {
@@ -622,19 +826,30 @@ test(
         assert.ifError(otherProfileFromBError);
         assert.equal(otherProfileFromB, null);
       });
-    } finally {
-      // Nettoyage : le membre A supprime les ressources de test qu'il possède.
-      await memberA.from("resources").delete().like("title", "RLS-TEST-%");
-      await memberA.from("searches").delete().like("query", "RLS-TEST-%");
-      await memberB.from("searches").delete().like("query", "RLS-TEST-%");
-      await Promise.all([
-        anonymousClient.auth.signOut(),
-        memberA.auth.signOut(),
-        memberB.auth.signOut(),
-      ]);
-      if (manager) {
-        await manager.auth.signOut();
-      }
-    }
+      },
+      cleanup: [
+        () => runCleanupSteps(resourceCleanup, "des ressources"),
+        () => runCleanupSteps(searchCleanup, "des recherches"),
+        () => runCleanupSteps(categoryCleanup, "des catégories"),
+      ],
+      disconnect: [
+        async () => {
+          const { error } = await anonymousClient.auth.signOut();
+          assert.ifError(error);
+        },
+        async () => {
+          const { error } = await memberA.auth.signOut();
+          assert.ifError(error);
+        },
+        async () => {
+          const { error } = await memberB.auth.signOut();
+          assert.ifError(error);
+        },
+        async () => {
+          const { error } = await manager.auth.signOut();
+          assert.ifError(error);
+        },
+      ],
+    });
   },
 );

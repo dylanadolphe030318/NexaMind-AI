@@ -80,21 +80,25 @@ la sélection par le LLM, sous le seuil actuel.
 
 Noter « réussi / à corriger » pour chaque scénario du sprint évalué, puis le résultat des dix questions. Aucune story ne sera marquée terminée avant l'évaluation de Dylan.
 
-**Nettoyage des tests RLS (proposition de changement du 2026-11-07) :** à la fin de chaque test d’intégration RLS, qu’il réussisse ou échoue, supprimer toutes les données créées par le test (conversations, messages, catégories et ressources temporaires). Vérifier que le nettoyage s’exécute aussi après une erreur et qu’il ne supprime aucune donnée réelle.
+**Nettoyage des fixtures RLS :** `tests/supabase-rls.test.mjs` suit les identifiants créés par chaque exécution et nettoie les ressources, recherches et catégories par identifiant exact, avant la déconnexion des sessions. Un échec initial ne saute pas le nettoyage ; toutes les erreurs de nettoyage et de déconnexion sont agrégées. `tests/rls-cleanup.test.mjs` vérifie le succès, l’échec simulé et la conservation des erreurs.
 
-### Correction de trajectoire approuvée le 2026-11-11 — contrôles à préparer
+### Correction de trajectoire approuvée le 2026-11-11 — A livré, B et C en attente
 
-Ces contrôles sont approuvés pour les futures corrections et la story 4.16 ;
-ils ne signifient pas que le code ou les migrations correspondants sont livrés.
+Les points B et C restent des contrôles approuvés à préparer ; ils ne signifient
+pas que le code ou les migrations correspondants sont déjà livrés.
 
-- **Nettoyage RLS (A, hors sprint) :** le runner ne dispose actuellement d'aucun
-  DELETE sur les catégories. Après livraison du chemin technique borné, suivre
-  l'identifiant exact de la fixture et vérifier son retrait après succès et après
-  échec simulé, avant déconnexion du responsable. Contrôler les erreurs et le
-  réessai ; vérifier les refus membre/anonyme, autre workspace, catégorie réelle
-  ou utilisée. Les assertions restent sous RLS, sans clé de service.
-  Ne pas supprimer les anciennes catégories « RLS... » par préfixe : dresser un
-  inventaire et faire confirmer les identifiants inutilisés par Dylan.
+- **Nettoyage RLS (A, hors sprint) — implémenté et appliqué, évaluation Dylan en attente :**
+  la migration `20261111103000_cleanup_rls_test_category.sql` n’ajoute qu’un RPC
+  responsable, borné à l’espace, l’identifiant exact, un nom de fixture strict et
+  une catégorie inutilisée. Le test d’intégration a réussi sans scénario ignoré
+  (16/16) avec des sessions réelles et la clé publishable. Les onze identifiants
+  approuvés ont été inventoriés, vérifiés inutilisés, puis retirés individuellement
+  via ce RPC ; chaque réessai et lecture d’absence a été confirmé.
+  La ressource autorisée `24f359d7-5869-4eac-beb9-a58ff599f98c` a été déplacée
+  conditionnellement vers « Documents internes » ; contenu, passage et références
+  accessibles identiques avant/après, sans journalisation de contenu. Ne pas
+  rejouer ce nettoyage ni supprimer des catégories par préfixe. Garder l’action
+  ouverte jusqu’à l’évaluation de Dylan.
 - **Preuve Q1 (B, préparation de 4.16) :** garder la question inchangée. Noter
   séparément Next.js App Router/TypeScript et les services PostgreSQL,
   authentification, stockage de fichiers et RLS de Supabase. Sur Recherche,

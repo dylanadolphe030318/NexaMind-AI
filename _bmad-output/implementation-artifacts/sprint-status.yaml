@@ -115,9 +115,10 @@ sprint_9_planned:
 action_items:
   - id: "cc-2026-11-11-a"
     epic: 2
-    action: "Hors sprint, avant le sprint 9 : nettoyage borne des fixtures categories
-      RLS apres succes ou echec. Inventaire et accord sur les anciennes lignes
-      avant suppression ; aucun droit general DELETE ni cle de service dans les tests."
+    action: "Hors sprint, avant le sprint 9 : A est implemente et applique ; tests
+      RLS 16/16, inventaire approuve retire par IDs exacts et ressource autorisee
+      deplacee sans changement de contenu. Evaluation Dylan en attente ; conserver
+      l'action ouverte. Aucun DELETE general ni cle privilegiee dans les tests."
     owner: "Dylan + développeur"
     status: open
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
