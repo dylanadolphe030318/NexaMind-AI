@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 export class SupabaseConfigurationError extends Error {
   constructor(message: string) {
@@ -25,6 +26,8 @@ export async function createClient() {
     );
   }
 
+  // L'authentification Supabase peut lire l'heure avant son premier acces aux cookies.
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient(supabaseUrl, publishableKey, {
