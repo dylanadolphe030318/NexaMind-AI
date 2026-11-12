@@ -3,7 +3,7 @@ story: 4-15-empecher-la-divulgation-de-ressources-non-autorisees
 title: Empêcher la divulgation de ressources non autorisées
 epic: 4
 sprint: 9
-status: in-review
+status: done
 baseline_commit: bf495c245ffd1661275675abadf98089c9467456
 context:
   - ../SPEC.md
@@ -11,6 +11,15 @@ context:
 ---
 
 # Story 4.15 — ne pas révéler une ressource interdite
+
+## Validation finale — 2026-11-12
+
+Dylan confirme : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande la cloture des stories. Story acceptee et terminee sur cette declaration.
+Le projet secondaire a ete initialise pendant l'accompagnement du test SQL.
+La capture `set_config` seule ne prouve pas l'execution complete des assertions :
+aucun journal SQL complet ni resultat technique supplementaire n'est invente.
+Les mentions de non-execution ci-dessous decrivent la livraison du 2026-11-11.
 
 ## Direction de réalisation du 2026-11-11
 

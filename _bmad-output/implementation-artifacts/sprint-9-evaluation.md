@@ -1,6 +1,24 @@
 # Évaluation du sprint 9 — story 4.16
 
-## État de la campagne
+## Bilan final — validation humaine du 2026-11-12
+
+Dylan declare : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande de marquer les stories terminees. Les stories 4.14, 4.15, 4.16,
+S8-2 et S8-3 sont donc acceptees et cloturees ; l'epic IA est termine.
+
+Dylan a choisi de transmettre uniquement les cas necessitant une correction.
+Aucun releve individuel D1–D10/A1–A3, score chiffre, version exacte du corpus
+evalue ou journal SQL complet n'a ete transmis. La validation globale est
+enregistree sans inventer un score 10/10, 3/3 ou une execution SQL certifiee.
+Le projet secondaire a ete initialise et une capture `set_config` recue ;
+cette capture seule n'est pas une preuve d'execution jusqu'au rollback.
+
+Les tableaux et les preconditions ci-dessous constituent le **journal historique
+de preparation du 2026-11-11**, pas les resultats de l'evaluation finale.
+Leurs mentions « non execute » et leurs compteurs a zero ne decrivent pas
+l'etat courant du sprint accepte.
+
+## État de la campagne lors de sa préparation — historique
 
 | Champ | Relevé |
 |---|---|
@@ -110,7 +128,7 @@ suivi et les sources persistées. Ils ne constituent pas une évaluation
 sémantique du fournisseur, un contrôle manuel de lien ou une preuve de RLS pour
 Q9/Q10. Node a affiché son avertissement existant `MODULE_TYPELESS_PACKAGE_JSON`.
 
-## Préconditions restantes
+## Préconditions relevées lors de la préparation — historique
 
 - Préparer et geler le corpus au moyen des parcours habituels ; relever les
   ressources, IDs/révisions et passages accessibles D1–D10.

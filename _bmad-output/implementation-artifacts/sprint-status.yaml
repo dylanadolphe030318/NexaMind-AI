@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-29-2026 12:17
-last_updated: 2026-11-11
+last_updated: 2026-11-12
 project: projet-IA
 project_key: NOKEY
 tracking_system: file-system
@@ -67,8 +67,8 @@ development_status:
   epic-3-retrospective: done
 
   # Sprint 7 validé par Dylan le 2026-11-05 : 10/10 réponses correctes.
-  # Stories 4.7 à 4.10 terminées ; sprint IA 8 en cours, prochaine story : 4.11.
-  epic-4: in-progress
+  # Sprint IA 9 valide par Dylan le 2026-11-12 ; toutes les stories IA sont terminees.
+  epic-4: done
   4-1-découper-une-ressource-en-passages: done
   4-2-créer-et-enregistrer-les-embeddings: done
   4-3-suivre-l-état-de-préparation-d-une-ressource: done
@@ -84,10 +84,10 @@ development_status:
   4-11-rouvrir-une-conversation: done
   4-12-continuer-une-conversation-précédente: done
   4-13-supprimer-une-conversation-de-son-historique: done
-  # Sprint 9 : lot restant autorisé, évaluation humaine regroupée à la fin.
-  4-14-relier-les-affirmations-aux-sources: review
-  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: review
-  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: review
+  # Sprint 9 : evaluation globale satisfaisante et cloture demandee par Dylan.
+  4-14-relier-les-affirmations-aux-sources: done
+  4-15-empêcher-la-divulgation-de-ressources-non-autorisées: done
+  4-16-vérifier-la-qualité-et-l-abstention-de-l-assistant: done
   epic-4-retrospective: done
 sprint_story_limits:
   min: 3
@@ -104,9 +104,9 @@ sprint_8_preparation:
     S8-1 et 4.10 à 4.13 acceptées et terminées. Tests de conversations : 7/7 réussis,
     aucun ignoré ; 100/100 tests unitaires réussis lors de la livraison de 4.13."
   blocked_on: null
-  remaining_epic_warning: "Le sprint 8 est terminé, mais l'epic 4 reste ouvert :
-    le sprint 9 planifié contient les stories 4.14 à 4.16, S8-2 et S8-3."
+  remaining_epic_warning: null
 sprint_9_planned:
+  status: done
   execution_order: ["4-14", "4-15", "4-16", "s8-2", "s8-3"]
   story_folder: "_bmad-output/specs/spec-sprint-9-ia/stories"
   manifest: "_bmad-output/specs/spec-sprint-9-ia/stories.yaml"
@@ -116,9 +116,15 @@ sprint_9_planned:
     cet ordre sans pause humaine ; tests manuels a la fin, controles automatiques
     conserves et aucun statut done. 4.16 preparee sans resultat invente."
   complements:
-    s8-2: review
-    s8-3: review
+    s8-2: done
+    s8-3: done
   development_started: true
+  evaluation: "2026-11-12 : Dylan declare l'evaluation du sprint IA satisfaisante,
+    tout correct, et demande la cloture. Les cinq stories sont acceptees.
+    Aucun score chiffre ni releve detaille par question n'a ete transmis ;
+    aucun resultat SQL complet supplementaire n'est invente."
+  next_ia_sprint: null
+  epic_4_complete: true
 correction_trajectoire_ui:
   status: done
   classification: "Correction de trajectoire hors sprint ; anciens reperes UI10 conserves."
@@ -135,7 +141,8 @@ correction_trajectoire_ui:
   development_started: true
   direction: "2026-11-12 : Dylan valide toute la refonte visuelle et le correctif
     Date.now(), et precise qu'il s'agit simplement d'une correction de trajectoire.
-    Aucun sprint supplementaire ni nouvelle fonctionnalite. Sprint IA 9 reste ouvert."
+    Aucun sprint supplementaire ni nouvelle fonctionnalite. Sprint IA 9 valide
+    separement par Dylan le meme jour."
 action_items:
   - id: "cc-2026-11-11-a"
     epic: 2
@@ -148,11 +155,11 @@ action_items:
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "cc-2026-11-11-b"
     epic: 4
-    action: "Grille Q1 reprise dans la fiche 4.16 preparee le 2026-11-11 ;
-      execution et evaluation encore attendues. Questions historiques inchangees,
-      jeu distinct dix documentees et trois absences ; pas de cloture par preparation."
+    action: "Grille Q1 reprise dans la fiche 4.16 et protocole de campagne livres.
+      Dylan valide globalement le sprint IA le 2026-11-12 et demande sa cloture.
+      Aucun score ni resultat par question invente en l'absence de releve transmis."
     owner: "Dylan + développeur"
-    status: open
+    status: done
     ref: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11.md"
   - id: "cc-2026-11-11-c"
     epic: 3

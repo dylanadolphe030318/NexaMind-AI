@@ -18,6 +18,9 @@ Ce plan présente les sprints et leurs résultats démontrables en termes simple
 
 ## Récapitulatif
 
+- **État IA au 2026-11-12 :** sprint 9 validé par Dylan ; 4.14, 4.15, 4.16,
+  S8-2 et S8-3 terminées. Toutes les stories de l'epic IA sont terminées ;
+  aucun prochain sprint IA n'est planifié.
 - **Nombre total de sprints :** 9.
 - **Nombre total de stories :** 30.
 - **Compléments de rétrospective :** 3, soit 33 stories et compléments avant refonte ; cinq au sprint 8 et cinq au sprint 9.
@@ -119,8 +122,10 @@ et le correctif `Date.now()`. Il précise qu'il s'agit simplement d'une correcti
 de trajectoire, pas d'un nouveau sprint. Les [trois fiches techniques](../specs/spec-sprint-10-ui/)
 gardent leurs noms historiques UI10 pour préserver les liens et les commits.
 Leurs lots sont terminés ; fonctions, permissions et contrats IA restent inchangés.
-Le sprint 9 n'est ni redécoupé ni clôturé : essais humains, campagne 4.16 et
-preuve SQL isolée restent ouverts et devront être évalués sur l'interface finale.
+Cette correction n'a pas redécoupé le sprint 9. Dylan valide ensuite séparément
+l'évaluation globale du sprint IA le 2026-11-12 et demande sa clôture.
+Le [bilan final](../implementation-artifacts/sprint-9-evaluation.md) distingue
+cette acceptation humaine des résultats détaillés et journaux non transmis.
 
 ## Points encore ouverts
 

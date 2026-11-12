@@ -3,7 +3,7 @@ story: s8-2
 title: Présenter les catégories en listes déroulantes
 sprint: 9
 type: ux
-status: in-review
+status: done
 baseline_commit: f8e0788fb7e7cc15cafa1d4ea53a852e90689052
 context:
   - ../SPEC.md
@@ -11,6 +11,12 @@ context:
 ---
 
 # Complément S8-2 — catégories déroulantes
+
+## Validation finale — 2026-11-12
+
+Dylan confirme : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande la cloture des stories. Complement accepte et termine.
+Les consignes de pause et de maintien en revue ci-dessous sont historiques.
 
 ## Direction de réalisation du 2026-11-11
 

@@ -3,7 +3,7 @@ story: s8-3
 title: Distinguer les cartes avec un fond mauve pâle
 sprint: 9
 type: ux
-status: in-review
+status: done
 baseline_commit: 56ab501746d370910bf5a72e2656c48c3c563afa
 context:
   - ../SPEC.md
@@ -11,6 +11,13 @@ context:
 ---
 
 # Complément S8-3 — cartes mauve pâle
+
+## Validation finale — 2026-11-12
+
+Dylan confirme : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande la cloture des stories. Complement accepte et termine.
+La refonte globale a ete validee separement comme correction de trajectoire.
+Les consignes de pause et de maintien en revue ci-dessous sont historiques.
 
 ## Direction de réalisation du 2026-11-11
 

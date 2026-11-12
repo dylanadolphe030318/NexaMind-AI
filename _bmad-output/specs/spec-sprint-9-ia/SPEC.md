@@ -11,6 +11,15 @@ sources: []
 
 # Sprint IA 9 — sources fiables et interface plus claire
 
+## Cloture — 2026-11-12
+
+Dylan valide globalement l'evaluation du sprint et demande sa cloture.
+Les cinq fiches sont `done`, ainsi que l'epic IA ; aucun sprint IA suivant
+n'est planifie. Les mentions de preparation et de travail futur ci-dessous
+decrivent la specification initiale, pas l'etat actuel.
+Le bilan humain, sans score chiffre invente, est consigne dans
+[sprint-9-evaluation.md](../../implementation-artifacts/sprint-9-evaluation.md).
+
 ## Why
 
 Le sprint termine les contrôles de fiabilité de l'assistant déjà opérationnel :

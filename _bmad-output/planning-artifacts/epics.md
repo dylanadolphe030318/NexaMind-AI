@@ -403,6 +403,10 @@ afin de trouver plus facilement l’information utile.
 
 ## Epic 4 : Questionner les connaissances avec une IA et des sources
 
+**État final — 2026-11-12 : terminé.** Dylan valide l'évaluation du sprint IA 9
+et demande la clôture de ses cinq stories. Les stories 4.1 à 4.16 sont terminées ;
+aucun sprint IA supplémentaire n'est planifié.
+
 Les membres peuvent interroger les ressources autorisées ; l’application prépare les textes, retrouve les passages utiles et fournit une réponse vérifiable avec ses sources, ou indique que les ressources ne suffisent pas. Les conversations restent privées et peuvent être reprises.
 
 ### Story 4.1 : Découper une ressource en passages
@@ -651,10 +655,11 @@ La story 3.5 reste terminée ; les epics et le sprint 9 ne sont pas redécoupés
 
 ## Plan des sprints
 
-### Extension transversale approuvée — sprint UI 10
+### Correction de trajectoire transversale validée — hors sprint
 
 [CC-2026-11-11-UI](sprint-change-proposal-2026-11-11-refonte-visuelle.md)
-ajoute trois compléments sans nouvel epic ni réouverture des stories terminées :
+est réalisée et validée le 2026-11-12. Dylan précise qu'il ne s'agit pas d'un
+nouveau sprint ; les trois repères UI10 restent historiques :
 
 - **UI10-1** (Epic 1, socle transversal) : harmoniser les styles communs,
   l'accueil, l'inscription, la connexion et le tableau de bord.
@@ -665,7 +670,7 @@ ajoute trois compléments sans nouvel epic ni réouverture des stories terminée
 
 Les critères détaillés et l'inventaire des seize pages sont dans la proposition
 et les [fiches UI 10](../specs/spec-sprint-10-ui/).
-Le sprint IA 9 conserve cinq stories en revue et ses évaluations ouvertes.
+Le sprint IA 9 est validé séparément le 2026-11-12 ; ses cinq stories sont terminées.
 
 ### Sprint 1 — Une première version protégée et visible
 
@@ -726,6 +731,7 @@ Le sprint IA 9 conserve cinq stories en revue et ses évaluations ouvertes.
 ### Sprint 9 — Vérifier la qualité et les garde-fous
 
 **Objectif :** vérifier que les réponses restent reliées aux sources et que l’assistant protège les contenus et s’abstient lorsque nécessaire.
-**Stories :** 4.14, 4.15, 4.16 (3 stories).
+**Stories :** 4.14, 4.15, 4.16, S8-2, S8-3 (5 stories, compléments compris).
+**État :** terminé, sur validation globale de Dylan le 2026-11-12.
 **Résultat démontrable :** les affirmations non étayées sont retirées ou signalées, les ressources non autorisées ne sont pas divulguées, au moins 8 réponses sur 10 citent une source attendue, et l’assistant s’abstient pour les 3 questions sans réponse.
 **Type :** IA.

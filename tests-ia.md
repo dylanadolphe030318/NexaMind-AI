@@ -22,12 +22,14 @@ Pour les questions 9 et 10, la réponse de l’assistant ne doit révéler ni le
 
 ## Vérification du sprint 9 — sources, droits et qualité
 
-**Évaluation humaine différée par Dylan le 2026-11-11.** Les stories 4.14,
-4.15, S8-2 et S8-3 sont implémentées ; le protocole et le rapport de 4.16 sont
-préparés, mais la campagne réelle n'est pas exécutée. Les vérifications
-automatiques de réalisation ne constituent pas le score du sprint. Aucune
-story n'est acceptée automatiquement ; les validations antérieures de Q1 et
-des corrections A/C ne sont pas un score de ce sprint.
+**Évaluation globale validée par Dylan le 2026-11-12 : « tout est correct ».**
+Les cinq stories sont terminées et l'epic IA est clôturé. Le protocole ci-dessous
+reste disponible pour de futurs contrôles. Dylan a choisi de ne transmettre que
+les cas nécessitant une correction : aucun score chiffré, relevé individuel ni
+journal SQL complet n'est inventé. Le
+[bilan final](_bmad-output/implementation-artifacts/sprint-9-evaluation.md)
+distingue l'acceptation humaine des preuves détaillées non transmises.
+Les anciennes mentions de non-exécution datées du 2026-11-11 restent historiques.
 
 ### Où vérifier chaque story
 
@@ -125,7 +127,7 @@ simulation de récupération vide ne prouve l'isolation réelle. Les résultats
 restent séparés des scores D1–D10 et A1–A3 et des conversations privées S8-F.
 Le rapport de 4.16 doit signaler toute précondition manquante, sans clôture fictive.
 
-#### État de la preuve S9-B (story 4.15)
+#### État de la preuve S9-B à la livraison du 2026-11-11 — historique
 
 - Exécution SQL : **non exécutée** ; aucune base de test isolée n'a été désignée
   pour cette réalisation. Ne pas traiter une simulation ou un résultat vide

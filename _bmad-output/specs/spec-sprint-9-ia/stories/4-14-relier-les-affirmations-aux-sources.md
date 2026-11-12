@@ -3,7 +3,7 @@ story: 4-14-relier-les-affirmations-aux-sources
 title: Relier les affirmations aux sources
 epic: 4
 sprint: 9
-status: in-review
+status: done
 baseline_commit: d9f2c3368767c748c992147d4cf106489687996f
 context:
   - ../SPEC.md
@@ -11,6 +11,13 @@ context:
 ---
 
 # Story 4.14 — vérifier les faits grâce aux sources
+
+## Validation finale — 2026-11-12
+
+Dylan confirme : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande la cloture des stories. Story acceptee et terminee.
+Les autorisations, pauses et etats de livraison ci-dessous sont historiques ;
+cette validation finale les remplace pour le statut. Aucun score detaille invente.
 
 ## Ce que cela permet
 

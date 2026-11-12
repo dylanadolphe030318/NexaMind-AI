@@ -3,7 +3,7 @@ story: 4-16-verifier-la-qualite-et-l-abstention-de-l-assistant
 title: Vérifier la qualité et l'abstention de l'assistant
 epic: 4
 sprint: 9
-status: in-review
+status: done
 baseline_commit: ce716e74dfb01101e3cef1b50d614b60387d2384
 context:
   - ../SPEC.md
@@ -11,6 +11,15 @@ context:
 ---
 
 # Story 4.16 — mesurer les réponses et les « je ne sais pas »
+
+## Validation finale — 2026-11-12
+
+Dylan confirme : « L'évaluation du sprint IA est satisfaisante : tout est correct »
+et demande la cloture des stories. Story acceptee et terminee.
+Son choix de ne transmettre que les cas necessitant une correction est respecte.
+Le bilan humain global est consigne dans `sprint-9-evaluation.md` ; aucun score
+chiffre, detail par question ou preuve technique non transmis n'est invente.
+Les indications de preparation et de non-execution ci-dessous sont historiques.
 
 ## Direction de réalisation du 2026-11-11
 
