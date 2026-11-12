@@ -272,11 +272,14 @@ dans Supabase SQL Editor après `20261106120000_create_conversations.sql` et les
 précédentes.
 Ne pas appliquer la migration dans le cadre d'un test automatisé.
 
-## Vérification visuelle du sprint 10 — toutes les pages
+## Vérification visuelle de la correction de trajectoire — toutes les pages
 
-La refonte est implémentée, mais les trois stories restent en revue avant votre
-évaluation. Ce contrôle visuel ne remplace ni les questions IA ni les preuves
-de droits du sprint 9. Aucune nouvelle migration n'est nécessaire.
+**Validée par Dylan le 2026-11-12, correctif `Date.now()` inclus.** Il s'agit
+d'une correction de trajectoire, pas d'un nouveau sprint. Les repères historiques
+UI10 désignent ses trois lots techniques terminés. Le parcours ci-dessous reste
+disponible pour les vérifications futures ; cette acceptation ne remplace ni
+les questions IA ni les preuves de droits du sprint 9. Aucune nouvelle migration
+n'est nécessaire.
 
 1. Sans connexion, ouvrir l'accueil, la connexion et l'inscription.
 2. Se connecter avec son compte habituel, puis parcourir l'espace membre.
@@ -294,6 +297,10 @@ ou de confirmer une suppression pour ce contrôle visuel. Une conversation déj�
 enregistrée suffit pour examiner les sources. Aucun contenu essentiel ne doit
 être coupé et aucun défilement horizontal de la page ne doit être nécessaire.
 
-Les contrôles automatiques passent. Le rendu des pages connectées n'a pas été
-vérifié dans un navigateur authentifié pendant le développement, faute de
-session disponible ; cette vérification reste donc à faire avec votre compte.
+Les contrôles automatiques passent. Le 2026-11-12, les douze routes connectées
+et les confirmations recherche/conversation ont été vérifiées avec une session
+membre aux largeurs 320, 375 et 1280 px sans débordement horizontal mesuré.
+Le focus de l'assistant et les sources indisponibles d'une conversation existante
+ont été contrôlés. Le zoom réel à 200 %, le rôle responsable et les sources
+disponibles n'ont pas été vérifiés par l'agent ; la validation humaine ne
+constitue pas une preuve d'exécution de ces contrôles.

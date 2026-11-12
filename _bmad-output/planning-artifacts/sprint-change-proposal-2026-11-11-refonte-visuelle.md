@@ -4,7 +4,14 @@
 **Date :** 2026-11-11  
 **Identifiant :** CC-2026-11-11-UI  
 **Mode :** proposition groupee  
-**Etat :** approuvee par Dylan le 2026-11-11 avec lancement de la mise en oeuvre.
+**Etat :** realisee et validee par Dylan le 2026-11-12, correctif `Date.now()` inclus.
+
+**Qualification finale (2026-11-12) :** Dylan precise qu'il s'agit simplement
+d'une correction de trajectoire, pas d'un nouveau sprint. La proposition
+historique de « sprint 10 UI » ci-dessous est remplacee sur ce point :
+les trois lots et leurs noms UI10 sont conserves pour la tracabilite, mais
+le plan reste a neuf sprints. Cette validation ne cloture pas le sprint IA 9
+et ne constitue pas un resultat de campagne IA ou de test SQL RLS.
 
 Cette proposition est distincte de
 [la correction A/B/C du meme jour](sprint-change-proposal-2026-11-11.md),

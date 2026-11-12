@@ -119,18 +119,23 @@ sprint_9_planned:
     s8-2: review
     s8-3: review
   development_started: true
-sprint_10_ui:
+correction_trajectoire_ui:
+  status: done
+  classification: "Correction de trajectoire hors sprint ; anciens reperes UI10 conserves."
   proposal: "_bmad-output/planning-artifacts/sprint-change-proposal-2026-11-11-refonte-visuelle.md"
   story_folder: "_bmad-output/specs/spec-sprint-10-ui"
   execution_order: ["ui10-1", "ui10-2", "ui10-3"]
   stories:
-    ui10-1: review
-    ui10-2: review
-    ui10-3: review
+    ui10-1: done
+    ui10-2: done
+    ui10-3: done
+  technical_fix:
+    date_now: done
+    spec: "_bmad-output/implementation-artifacts/spec-corriger-date-now-prerendu.md"
   development_started: true
-  direction: "2026-11-11 : Dylan approuve la refonte de toutes les pages et son
-    lancement. Fond blanc, cartes mauve pale, aucune fonction ajoutee.
-    Un commit par story, evaluation humaine avant done. Sprint IA 9 reste ouvert."
+  direction: "2026-11-12 : Dylan valide toute la refonte visuelle et le correctif
+    Date.now(), et precise qu'il s'agit simplement d'une correction de trajectoire.
+    Aucun sprint supplementaire ni nouvelle fonctionnalite. Sprint IA 9 reste ouvert."
 action_items:
   - id: "cc-2026-11-11-a"
     epic: 2

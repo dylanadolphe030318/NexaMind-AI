@@ -2,7 +2,7 @@
 title: Corriger la lecture de l'heure pendant le prerendu
 type: bugfix
 created: 2026-11-12
-status: in-review
+status: done
 route: oneshot
 ---
 
@@ -50,3 +50,6 @@ Ne pas desactiver Cache Components, modifier les dependances ou masquer l'erreur
 - Relecture directe du petit diff ; pas de revue multiagent. Aucune anomalie
   supplementaire identifiee. Aucun changement de fonctionnalite ni de cache
   partage ; Cache Components et Partial Prefetching restent actifs.
+- 2026-11-12 : Dylan valide explicitement toute la refonte visuelle et ce
+  correctif. Classement : complement technique de la correction de trajectoire
+  CC-2026-11-11-UI hors sprint, pas une nouvelle story IA ni un nouveau sprint.

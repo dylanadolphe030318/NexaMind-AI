@@ -3,7 +3,7 @@ title: Harmoniser les ressources, categories et recherches
 story: ui10-2
 type: feature
 created: 2026-11-11
-status: in-review
+status: done
 route: dispatch
 baseline_commit: 4f19a335fd8cf7f3417e3eeb25c7b0e80eab444b
 context:
@@ -70,6 +70,13 @@ commit, push ou done par l'agent. Le pilote commitera chaque lot apres controles
 Tests rendus/categories/cartes et tests de validation des ressources ;
 TypeScript et lint cibles. Pas de mutations distantes ni appel IA reel.
 Le pilote verifie navigateur, revue et commit.
+
+## Validation humaine — 2026-11-12
+
+Dylan valide toute la refonte visuelle et le correctif `Date.now()`.
+Ce lot est termine au titre de la correction de trajectoire CC-2026-11-11-UI,
+hors sprint. Le repere historique UI10-2 et le dossier restent inchanges.
+Cette acceptation ne vaut pas execution des controles non observes ni validation IA9.
 
 ## Implementation Notes
 

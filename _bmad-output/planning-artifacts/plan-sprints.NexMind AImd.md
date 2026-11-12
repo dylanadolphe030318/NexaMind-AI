@@ -15,14 +15,13 @@ Ce plan présente les sprints et leurs résultats démontrables en termes simple
 | 7 | Répondre aux questions à partir des passages retrouvés, montrer les sources ou signaler que l’information manque. | 4.7 Générer une réponse à partir des passages retrouvés<br>4.8 Afficher les sources de la réponse<br>4.9 Signaler l’absence de réponse et les erreurs | Une question reçoit une réponse liée aux passages avec des sources ouvrables ; si le contexte ne suffit pas, l’assistant le dit et permet de réessayer après une erreur. | IA |
 | 8 | Fiabiliser la recherche et permettre à chaque membre de retrouver et gérer ses conversations privées. | S8-1 Fiabiliser le classement de la recherche<br>4.10 Consulter la liste de ses conversations<br>4.11 Rouvrir une conversation<br>4.12 Continuer une conversation précédente<br>4.13 Supprimer une conversation de son historique | La priorité des passages est conservée ; un membre retrouve, poursuit et supprime ses échanges privés sans accès aux conversations d'autrui. | IA |
 | 9 | Vérifier les sources, les droits et l’abstention, puis rendre l’interface plus claire. | 4.14 Relier les affirmations aux sources<br>4.15 Empêcher la divulgation de ressources non autorisées<br>4.16 Vérifier la qualité et l’abstention de l’assistant<br>S8-2 Catégories en listes déroulantes<br>S8-3 Cartes mauve pâle | Les affirmations sont étayées, les contenus non autorisés restent cachés, au moins 8 réponses sur 10 citent une source attendue et l’assistant s’abstient pour les 3 questions sans réponse ; catégories et cartes sont distinctes. | IA |
-| 10 | Harmoniser toutes les pages avec une identité violette, sur fond blanc et cartes mauve pâle. | UI10-1 Socle, accueil et accès<br>UI10-2 Ressources, catégories et recherches<br>UI10-3 Assistant, conversations et validation globale | Toutes les pages gardent leurs fonctions et permissions dans une interface cohérente, lisible au clavier et sur mobile. | UI transversal |
 
 ## Récapitulatif
 
-- **Nombre total de sprints :** 10.
+- **Nombre total de sprints :** 9.
 - **Nombre total de stories :** 30.
 - **Compléments de rétrospective :** 3, soit 33 stories et compléments avant refonte ; cinq au sprint 8 et cinq au sprint 9.
-- **Compléments UI 10 :** 3, soit 36 stories et compléments planifiés au total, sans compter les corrections techniques suivies séparément.
+- **Correction de trajectoire visuelle hors sprint :** trois lots techniques UI10-1 à UI10-3, validés le 2026-11-12, plus le correctif `Date.now()`. Ces repères historiques ne créent pas un sprint supplémentaire.
 
 ## Compléments validés pour les sprints 8 et 9
 
@@ -113,16 +112,17 @@ contrôle d'accès Q9/Q10 distinct, grilles Q1/S8-D et scénarios S9-I/S9-J.
 Aucun test de ce sprint n'est revendiqué comme exécuté pendant la préparation.
 CC-B est reprise dans 4.16 et reste ouverte jusqu'à son évaluation.
 
-## Points encore ouverts
+## Correction de trajectoire visuelle validée le 2026-11-12
 
-### Extension UI 10 approuvée le 2026-11-11
-
-Dylan approuve [CC-2026-11-11-UI](sprint-change-proposal-2026-11-11-refonte-visuelle.md)
-et demande la réalisation immédiate des trois lots dans l'ordre, un commit par
-story, sans prototype limité à une page. Les [fiches UI 10](../specs/spec-sprint-10-ui/)
-gardent les fonctions, permissions et contrats IA inchangés.
+Dylan valide toute la refonte de [CC-2026-11-11-UI](sprint-change-proposal-2026-11-11-refonte-visuelle.md)
+et le correctif `Date.now()`. Il précise qu'il s'agit simplement d'une correction
+de trajectoire, pas d'un nouveau sprint. Les [trois fiches techniques](../specs/spec-sprint-10-ui/)
+gardent leurs noms historiques UI10 pour préserver les liens et les commits.
+Leurs lots sont terminés ; fonctions, permissions et contrats IA restent inchangés.
 Le sprint 9 n'est ni redécoupé ni clôturé : essais humains, campagne 4.16 et
 preuve SQL isolée restent ouverts et devront être évalués sur l'interface finale.
+
+## Points encore ouverts
 
 - Choisir l’hébergement de Next.js.
 - Choisir le fournisseur IA et préciser le budget ou les limites d’utilisation ; le fournisseur d’embeddings reste aussi à choisir.

@@ -3,7 +3,7 @@ title: Harmoniser le socle, l'accueil et l'acces
 story: ui10-1
 type: feature
 created: 2026-11-11
-status: in-review
+status: done
 route: dispatch
 baseline_commit: 0c35f351f09e175282eb82b398cb038893123fb9
 context:
@@ -76,6 +76,13 @@ Tests unitaires pertinents, `npx tsc --noEmit`, lint des fichiers modifies.
 Inspecter les vraies pages dans le navigateur si disponible, sans saisir
 d'identifiants ni appeler l'IA. Rapporter honnetement les routes inaccessibles.
 Le pilote fera la revue et les controles finaux avant commit.
+
+## Validation humaine — 2026-11-12
+
+Dylan valide toute la refonte visuelle et le correctif `Date.now()`.
+Ce lot est termine au titre de la correction de trajectoire CC-2026-11-11-UI,
+hors sprint. Le repere historique UI10-1 et le dossier restent inchanges.
+Cette acceptation ne vaut pas execution des controles non observes ni validation IA9.
 
 ## Implementation Notes
 

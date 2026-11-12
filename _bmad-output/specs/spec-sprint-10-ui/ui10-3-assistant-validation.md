@@ -3,7 +3,7 @@ title: Harmoniser l'assistant et verifier l'ensemble
 story: ui10-3
 type: feature
 created: 2026-11-11
-status: in-review
+status: done
 route: dispatch
 baseline_commit: f2eaa0c278c7f60c955e34eedd1db3096db05acf
 context:
@@ -72,6 +72,21 @@ Tests assistant/conversations/cartes/selection, TypeScript, lint, puis build.
 Verifications navigateur sur vraies routes seulement, pas de gabarit injecte
 presente comme test authentifie. Pas d'appel IA reel. Le pilote effectue revue,
 controle transversal final et commit ; evaluation humaine garde les stories en revue.
+
+## Validation humaine — 2026-11-12
+
+Dylan valide toute la refonte visuelle et le correctif `Date.now()`.
+Ce lot est termine au titre de la correction de trajectoire CC-2026-11-11-UI,
+hors sprint. Le repere historique UI10-3 et le dossier restent inchanges.
+Cette acceptation ne vaut pas execution des controles non observes ni validation IA9.
+Les mentions « en revue » des journaux ci-dessous decrivent la livraison initiale.
+
+Le navigateur authentifie membre a depuis permis de verifier les douze routes
+connectees et les confirmations de suppression recherche/conversation aux
+largeurs 320, 375 et 1280 px, sans debordement horizontal mesure. Focus clavier
+de l'assistant visible ; conversation rouverte et sources indisponibles affichees.
+Le zoom reel 200 %, le role responsable et les sources disponibles n'ont pas ete
+verifies par l'agent ; aucun resultat supplementaire n'est revendique.
 
 ## Implementation Notes
 
